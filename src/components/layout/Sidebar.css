@@ -1,0 +1,182 @@
+/* src/components/layout/Sidebar.css */
+
+/* --- Contenedor Principal --- */
+.sidebar {
+    background-color: #FFFFFF;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05); /* Sombra a la derecha */
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 250px; /* Ancho de la barra */
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* Fuente moderna y legible */
+}
+
+/* --- Encabezado / Logo --- */
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    height: 60px;
+}
+
+.sidebar-header .logo-icon-box {
+    background-color: #FF7B00; /* Naranja del logo */
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-right: 10px;
+}
+
+.sidebar-header .app-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333333;
+    margin: 0;
+    flex-grow: 1; /* Ocupa el espacio restante */
+}
+
+.sidebar-collapse-icon {
+    color: #666;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* --- Menú de Navegación --- */
+.sidebar-menu {
+    list-style: none;
+    padding: 20px 10px; /* Padding ajustado a la imagen */
+    margin: 0;
+    flex-grow: 1; /* Ocupa el espacio central */
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    margin-bottom: 5px;
+    border-radius: 8px; /* Bordes redondeados */
+    cursor: pointer;
+    color: #333333; /* Texto oscuro para ítems normales */
+    font-size: 15px;
+    font-weight: 500;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.menu-item i {
+    font-size: 18px;
+    margin-right: 12px;
+    color: #666666; /* Color de icono normal */
+}
+
+/* Estado al pasar el ratón (Hover) */
+.menu-item:not(.active):hover {
+    background-color: #F5F5F5; /* Gris muy claro */
+    color: #000;
+}
+
+/* 🎯 ESTADO ACTIVO (Naranja - Producto) */
+.menu-item.active {
+    background-color: #FF7B00; /* Fondo naranja */
+    color: #FFFFFF;             /* Texto blanco */
+}
+
+.menu-item.active i {
+    color: #FFFFFF; /* Icono blanco */
+}
+
+
+/* --- Footer de Usuario y Logout --- */
+.sidebar-footer {
+    padding: 15px; /* Padding del contenedor del footer */
+    /* La imagen no tiene un borde en el footer, pero sí está visualmente separado */
+}
+
+/* --- Panel de Usuario (JP Juan Pérez Administrador) --- */
+.user-profile-panel {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.user-profile-panel:hover {
+    background-color: #F5F5F5;
+}
+
+.user-avatar {
+    background-color: #FF7B00; /* Naranja para el avatar */
+    color: #FFFFFF;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.user-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #333333;
+    line-height: 1.2;
+}
+
+.user-role {
+    font-size: 11px;
+    color: #888888;
+    line-height: 1.2;
+}
+
+/* --- Botón Cerrar Sesión --- */
+.logout-button-container {
+    padding: 0 10px 10px 10px; /* Espacio superior para separarlo */
+}
+
+.logout-button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Centrado como en la imagen */
+    background-color: transparent;
+    border: 1px solid #E0E0E0; /* Borde gris sutil */
+    color: #333333;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 8px; /* Bordes redondeados */
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.logout-button i {
+    margin-right: 8px;
+    font-size: 16px;
+}
+
+.logout-button:hover {
+    background-color: #FFF0E6; /* Fondo naranja muy claro al pasar el ratón */
+    border-color: #FF7B00; /* Borde naranja al pasar el ratón */
+    color: #FF7B00; /* Texto naranja al pasar el ratón */
+}
+

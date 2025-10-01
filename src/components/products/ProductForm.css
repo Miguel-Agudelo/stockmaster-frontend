@@ -1,0 +1,161 @@
+/* src/components/products/ProductForm.css (Copia de los estilos del modal de Usuario) */
+
+/* --- CONTENEDOR PRINCIPAL DEL MODAL --- */
+.form-modal-container {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    max-width: 550px;
+    width: 90%;
+    overflow: hidden;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.form-modal-content {
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- ENCABEZADO Y TÍTULOS --- */
+.modal-header-edit {
+    padding: 25px 30px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    position: relative;
+}
+
+.modal-header-edit h3 {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+.modal-header-edit p {
+    font-size: 0.95em;
+    color: #64748b;
+    margin: 5px 0 0;
+}
+
+/* Botón de cerrar 'x' */
+.close-x-button {
+    position: absolute;
+    top: 25px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 1.8em;
+    cursor: pointer;
+    color: #94a3b8;
+    line-height: 1;
+    padding: 0;
+    transition: color 0.2s;
+}
+
+.close-x-button:hover {
+    color: #1e293b;
+}
+
+/* --- CUERPO DEL FORMULARIO (CAMPOS) --- */
+.modal-body-form {
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.modal-body-form label {
+    font-size: 0.9em;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 5px;
+    display: block;
+}
+
+/* Estilo para inputs y select */
+.form-input,
+.form-select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 1em;
+    color: #1e293b;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: #f8fafc;
+}
+
+.form-input:focus,
+.form-select:focus {
+    border-color: #ff7b00;
+    box-shadow: 0 0 0 3px rgba(255, 123, 0, 0.2);
+    outline: none;
+    background-color: white;
+}
+
+/* Mensajes y Errores (Mantenidos) */
+.form-message {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    color: #fff;
+    background-color: #3B82F6;
+    text-align: center;
+}
+
+.error-message {
+    color: #ef4444;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
+/* --- FOOTER DE ACCIONES (BOTONES) --- */
+.modal-footer-actions {
+    padding: 20px 30px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-footer-actions button {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s, opacity 0.2s;
+}
+
+/* Botón CANCELAR (Blanco/Gris) */
+.cancel-button-white {
+    background-color: white;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+}
+
+.cancel-button-white:hover {
+    background-color: #f1f5f9;
+}
+
+/* Botón CREAR/GUARDAR CAMBIOS (Naranja) */
+.save-button-orange {
+    background-color: #FF7B00;
+    color: white;
+    border: 1px solid #FF7B00;
+}
+
+.save-button-orange:hover {
+    background-color: #E66A00;
+}
+
+.save-button-orange:disabled,
+.cancel-button-white:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

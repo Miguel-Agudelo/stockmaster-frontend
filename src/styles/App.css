@@ -1,0 +1,25 @@
+/* src/styles/App.css */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Estilos para el contenedor principal de la aplicación */
+.app-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Estilos para el contenedor del contenido */
+.main-content {
+    flex: 1;
+    padding: 20px;
+    background-color: #f0f2f5;
+}
+
+h2 {
+    color: #333;
+    margin-bottom: 20px;
+}

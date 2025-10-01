@@ -1,0 +1,139 @@
+/* src/pages/auth/LoginPage.css - Código Corregido */
+
+.login-page-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #F0F2F5; /* Color de fondo del mockup */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+    /* CORRECCIÓN 2: Separa la tarjeta del borde inferior */
+    padding-bottom: 40px;
+}
+
+/* * ESTILOS DEL LOGO:
+ * Se corrigen para centrado y posicionamiento vertical.
+ * Usamos 120px para el tamaño según tu última definición.
+ */
+.login-logo {
+    display: block; /* Necesario para usar margin: auto */
+    width: 130px;
+    height: 130px; /* Aseguramos que sea cuadrado */
+
+    /* CORRECCIÓN 1: Centrado horizontal (0 auto) */
+    margin: 0 auto;
+
+    /* Posicionamiento vertical */
+    margin-top: 50px; /* Para bajarlo de la parte superior */
+    margin-bottom: -80px; /* Espacio para acercarlo al título */
+}
+
+/* ESTILO para que la imagen (o SVG) se adapte al contenedor */
+.login-logo img, .login-logo svg {
+    width: 100%;
+    height: 100%;
+}
+
+.login-logo svg {
+    /* Color principal para el SVG (el naranja) */
+    fill: #FF7B00;
+}
+
+.login-title {
+    font-size: 2.2em;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.login-subtitle {
+    font-size: 1em;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.login-card {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 420px;
+    box-sizing: border-box;
+}
+
+.card-title {
+    font-size: 1.5em;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.card-subtitle {
+    font-size: 0.9em;
+    color: #999;
+    margin-bottom: 25px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+}
+
+.input-container {
+    position: relative;
+}
+
+.input-container input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 1em;
+    background-color: #f9f9f9;
+    box-sizing: border-box;
+}
+
+.input-container .password-toggle {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #999;
+}
+
+button.login-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #FF7B00; /* Color naranja del mockup */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button.login-button:hover {
+    background-color: #E66A00;
+}
+
+.error-message {
+    color: #E74C3C;
+    background-color: #FEEEEE;
+    border: 1px solid #E74C3C;
+    padding: 10px;
+    margin-top: 15px;
+    border-radius: 4px;
+    text-align: center;
+}

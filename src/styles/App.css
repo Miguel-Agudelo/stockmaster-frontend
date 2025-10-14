@@ -23,3 +23,15 @@ h2 {
     color: #333;
     margin-bottom: 20px;
 }
+.main-content-wrapper {
+    /* Mueve el contenido 250px a la derecha (igual al ancho del Sidebar) */
+    margin-left: 250px;
+
+    /* Asegura que ocupe el espacio restante */
+    width: calc(100% - 250px);
+
+    /* Opcional: Permite el scroll principal si el contenido es muy largo */
+    min-height: 100vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+}

@@ -1,4 +1,3 @@
-// src/services/authService.js
 import api from './api';
 
 const login = async (email, password) => {
@@ -12,6 +11,7 @@ const login = async (email, password) => {
         localStorage.setItem('token', token);
 
         // Guarda los datos del usuario (id y rol) para usarlos en el frontend
+        // IMPORTANTE: Aquí se guarda el objeto tal como lo envía el backend: { role: "...", id_user: 1 }
         localStorage.setItem('user', JSON.stringify(user));
 
         // Retorna la respuesta completa en caso de que necesites más información en el componente
@@ -29,8 +29,22 @@ const logout = () => {
 };
 
 const getCurrentUser = () => {
-    const user = localStorage.getItem('user');
-    return user ? JSON.parse(user) : null;
+    const userJson = localStorage.getItem('user');
+
+    if (!userJson) {
+        return null;
+    }
+
+    let user = JSON.parse(userJson);
+
+    // 🎯 CORRECCIÓN CLAVE: Normalizar la ID de 'id_user' a 'id'
+    // El backend envía 'id_user', pero el frontend espera 'id'
+    if (user.id_user && !user.id) {
+        user.id = user.id_user;
+        delete user.id_user; // Opcional, pero limpia el objeto
+    }
+
+    return user;
 };
 
 const isUserAuthenticated = () => {

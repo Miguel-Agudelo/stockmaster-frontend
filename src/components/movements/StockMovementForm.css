@@ -1,0 +1,240 @@
+/* src/components/stock/StockMovementForm.css (Estandarizado y con Colores de Diseño Objetivo) */
+
+/* --- 1. Fondo (Backdrop) --- */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 15px;
+    font-family: Arial, sans-serif;
+}
+
+/* --- 2. Contenedor Principal (Modal) --- */
+.movement-form-container {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    max-width: 480px; /* Ancho ajustado */
+    width: 90%;
+
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    /* ✅ Mantiene el scroll interno y evita el desbordamiento externo */
+    overflow: hidden;
+}
+
+/* 🎯 FIX CLAVE: EL ELEMENTO <FORM> */
+.movement-form-container > form {
+    display: flex;
+    flex-direction: column;
+    /* Usamos flex-grow: 1 para que ocupe el espacio flexible restante */
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+}
+
+/* Animación (copiada de ProductForm.css) */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Estilos para el estado de carga */
+.loading-state {
+    padding: 40px;
+    text-align: center;
+    font-size: 1.1rem;
+    color: #6c757d;
+}
+
+
+/* --- 3. Encabezado del Modal --- */
+.form-header {
+    padding: 25px 30px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    position: relative;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-shrink: 0; /* Altura fija */
+}
+
+.form-header h2 {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+.form-header p {
+    font-size: 0.95em;
+    color: #64748b;
+    margin: 5px 0 0;
+}
+
+/* Botón de cerrar 'x' */
+.close-button {
+    position: absolute;
+    top: 25px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 1.8em;
+    cursor: pointer;
+    color: #94a3b8;
+    line-height: 1;
+    padding: 0;
+    transition: color 0.2s;
+}
+.close-button:hover {
+    color: #1e293b;
+}
+
+/* --- Mensajes de Feedback (CORRECCIÓN DE CLASES Y COLORES) --- */
+/* Tu componente usa 'form-message' para el contenedor de mensajes, y 'message.type' (success/error) */
+.form-message {
+    padding: 10px;
+    /* Ajuste el margin para coincidir con el padding del modal */
+    margin: 10px 30px 0 30px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    border: 1px solid transparent;
+    text-align: center;
+    flex-shrink: 0; /* Altura fija */
+}
+
+/* 🚨 CORRECCIÓN DE COLOR: Mensaje de Éxito (Success) */
+.form-message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
+}
+
+/* 🚨 CORRECCIÓN DE COLOR: Mensaje de Error (Error) */
+.form-message.error {
+    /* Fondo rojo claro de la imagen */
+    background-color: #fcebeb;
+    /* Borde rojo de la imagen */
+    border: 1px solid #f09595;
+    /* Texto rojo oscuro */
+    color: #9c2e2e;
+}
+
+
+/* --- 4. Cuerpo del Formulario --- */
+.form-body {
+    padding: 25px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 0.9em;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 2px;
+    display: block;
+}
+
+/* Estilos de Inputs y Selects */
+.form-group select,
+.form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    /* Borde más suave */
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 1em;
+    color: #1e293b;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: #f9fafb; /* Fondo blanco-gris muy claro */
+}
+
+/* 🚨 CORRECCIÓN DE COLOR: Foco (El naranja primario) */
+.form-group select:focus,
+.form-group input:focus {
+    border-color: #FF8C2B; /* Naranja más brillante del diseño */
+    box-shadow: 0 0 0 3px rgba(255, 140, 43, 0.25);
+    outline: none;
+    background-color: white;
+}
+
+/* Mensajes auxiliares y errores */
+.current-stock-info {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+.error-message {
+    color: #ef4444; /* Rojo estándar para errores de campo */
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
+/* --- 5. Pie de Página y Botones - Estilos de .modal-footer-actions --- */
+.modal-footer-actions {
+    padding: 20px 30px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-shrink: 0; /* Altura fija */
+    background-color: white; /* Asegura que el footer tape el scroll */
+    /* Las propiedades sticky/bottom ya no son necesarias gracias a flex-grow: 1 en el <form> */
+}
+
+.modal-footer-actions button {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s, opacity 0.2s;
+    border: 1px solid transparent;
+}
+
+/* Botón CANCELAR - Estilos de .cancel-button-white */
+.btn-cancel {
+    background-color: white;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+}
+.btn-cancel:hover {
+    background-color: #f1f5f9;
+}
+
+/* 🚨 CORRECCIÓN DE COLOR: Botón GUARDAR - Estilos de .save-button-orange */
+.btn-save {
+    background-color: #FF8C2B; /* Naranja brillante del diseño */
+    color: white;
+    border: 1px solid #FF8C2B;
+    box-shadow: 0 4px 6px rgba(255, 140, 43, 0.3); /* Sombra para el botón principal */
+}
+.btn-save:hover:not(:disabled) {
+    background-color: #E07A25; /* Tono de hover ligeramente más oscuro */
+}
+
+.modal-footer-actions button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

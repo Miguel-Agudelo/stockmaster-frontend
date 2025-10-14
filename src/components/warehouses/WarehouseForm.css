@@ -1,0 +1,217 @@
+
+.form-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 15px;
+    font-family: Inter, Arial, sans-serif; /* Fuente base */
+}
+
+/* El contenido principal del modal */
+.form-modal-content {
+    background-color: #ffffff;
+    border-radius: 8px; /* Bordes redondeados */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px; /* Ancho máximo del modal */
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ------------------------------------------- */
+/* 2. Encabezado del Modal (Header) */
+/* ------------------------------------------- */
+
+.modal-header-edit {
+    padding: 20px 25px;
+    border-bottom: 1px solid #e9ecef; /* Separador sutil */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header-edit h3 {
+    font-size: 1.25rem;
+    font-weight: 600; /* Semi-bold */
+    color: #343a40; /* Color oscuro para el texto */
+    margin: 0;
+}
+
+.close-x-button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: #adb5bd; /* Gris claro */
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 0;
+}
+
+.close-x-button:hover {
+    color: #495057; /* Gris más oscuro al pasar el mouse */
+}
+
+/* ------------------------------------------- */
+/* 3. Cuerpo del Formulario (Body) */
+/* ------------------------------------------- */
+
+.modal-body-form {
+    padding: 20px 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* Espacio entre label e input */
+}
+
+.form-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #495057; /* Gris para el label */
+    margin-top: 15px; /* Espacio antes del label */
+    margin-bottom: 5px;
+}
+
+/* Reset del margen superior para el primer label */
+.modal-body-form .form-label:first-of-type {
+    margin-top: 0;
+}
+
+/* Estilo de los inputs de texto y textarea */
+.form-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ced4da; /* Borde gris claro */
+    border-radius: 6px;
+    font-size: 1rem;
+    color: #495057;
+    background-color: #ffffff; /* Fondo blanco */
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus {
+    border-color: #5d92ff; /* Azul claro al enfocar */
+    box-shadow: 0 0 0 0.2rem rgba(93, 146, 255, 0.25); /* Sombra de enfoque azul */
+    background-color: #ffffff;
+    outline: none;
+}
+
+.form-input:disabled {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+}
+
+.textarea-input {
+    resize: vertical; /* Permitir solo redimensionamiento vertical */
+    min-height: 80px;
+}
+
+
+/* ------------------------------------------- */
+/* 4. Pie de página del Modal (Footer - Botones) */
+/* ------------------------------------------- */
+
+.modal-footer-actions {
+    padding: 15px 25px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-footer-actions button {
+    padding: 10px 20px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    border: 1px solid transparent;
+}
+
+/* Botón Secundario (Cancelar) */
+.cancel-button {
+    background-color: #ffffff;
+    color: #495057;
+    border-color: #ced4da;
+}
+
+.cancel-button:hover:not(:disabled) {
+    background-color: #f1f1f1;
+}
+
+/* Botón Primario (Guardar Cambios/Crear Almacén) */
+.save-button {
+    /* Color de fondo: NARANJA, para coincidir con tus otras vistas */
+    background-color: #ff8c00;
+    color: white;
+    border-color: #ff8c00;
+    box-shadow: 0 2px 4px rgba(255, 140, 0, 0.4);
+}
+
+.save-button:hover:not(:disabled) {
+    /* Naranja más oscuro al pasar el mouse */
+    background-color: #cc7000;
+    border-color: #cc7000;
+    box-shadow: 0 4px 8px rgba(255, 140, 0, 0.5);
+}
+
+/* Estilo para botones deshabilitados */
+.modal-footer-actions button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* ------------------------------------------- */
+/* 5. Mensajes de Error y Éxito */
+/* ------------------------------------------- */
+
+.error-message {
+    color: #dc3545;
+    font-size: 0.85rem;
+    margin-top: -5px;
+    margin-bottom: 5px;
+}
+
+.general-error {
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.form-message.success {
+    padding: 10px;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    border-radius: 6px;
+    margin: 10px 25px 0 25px; /* Margen dentro del modal, arriba de los campos */
+    font-size: 0.9rem;
+}
+
+/* ------------------------------------------- */
+/* 6. Media Queries (Responsividad) */
+/* ------------------------------------------- */
+@media (max-width: 550px) {
+    .form-modal-content {
+        max-width: 95%;
+    }
+    .modal-footer-actions {
+        flex-direction: column-reverse;
+    }
+    .modal-footer-actions button {
+        width: 100%;
+    }
+}

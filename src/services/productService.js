@@ -1,7 +1,7 @@
 // src/services/productService.js
 import api from './api';
 
-const getProducts = () => {
+const getAllProducts = () => {
     return api.get('/products');
 };
 
@@ -17,4 +17,4 @@ const deleteProduct = (productId) => {
     return api.delete(`/products/${productId}`);
 };
 
-export default { getProducts, createProduct, updateProduct, deleteProduct };
+export default { getAllProducts, createProduct, updateProduct, deleteProduct };

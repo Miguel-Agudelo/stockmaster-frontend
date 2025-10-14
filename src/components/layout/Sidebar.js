@@ -2,16 +2,18 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 // Asegúrate de que este servicio exista y funcione correctamente
+// 💡 CORRECCIÓN DE RUTA: Solo un nivel de subida para acceder a la carpeta services (../../services -> ../services)
 import authService from '../../services/authService';
 import './Sidebar.css';
 
 // --- Configuración del Menú de Navegación ---
 const menuItems = [
-    //{ name: 'Dashboard', path: '/', iconClass: 'fas fa-home', role: ['ADMINISTRADOR', 'USUARIO'] },
-    { name: 'Usuarios', path: '/users', iconClass: 'fas fa-users', role: ['ADMINISTRADOR', 'USUARIO'] },
-    { name: 'Productos', path: '/products', iconClass: 'fas fa-box', role: ['ADMINISTRADOR'] },
-    { name: 'Almacenes', path: '/warehouses', iconClass: 'fas fa-warehouse', role: ['ADMINISTRADOR', 'USUARIO'] },
-    { name: 'Movimientos', path: '/movements', iconClass: 'fas fa-exchange-alt', role: ['ADMINISTRADOR', 'USUARIO'] },
+    //{ name: 'Dashboard', path: '/', iconClass: 'fas fa-home', role: ['ADMINISTRADOR', 'OPERADOR'] },
+    { name: 'Usuarios', path: '/users', iconClass: 'fas fa-users', role: ['ADMINISTRADOR'] },
+    { name: 'Productos', path: '/products', iconClass: 'fas fa-box', role: ['ADMINISTRADOR', 'OPERADOR'] },
+    // 💡 RUTAS DEL SPRINT 2
+    { name: 'Almacenes', path: '/warehouses', iconClass: 'fas fa-warehouse', role: ['ADMINISTRADOR', 'OPERADOR'] },
+    { name: 'Movimientos', path: '/movements', iconClass: 'fas fa-exchange-alt', role: ['ADMINISTRADOR', 'OPERADOR'] },
     { name: 'Reportes', path: '/reports', iconClass: 'fas fa-chart-bar', role: ['ADMINISTRADOR'] },
 ];
 
@@ -22,6 +24,7 @@ const Sidebar = () => {
 
     // Simulación de datos de usuario (asegúrate de que authService funcione)
     const currentUser = authService.getCurrentUser() || {
+        // Ajuste: El rol de Almacenes/Movimientos es 'OPERADOR' o 'ADMINISTRADOR'
         role: 'ADMINISTRADOR',
         name: 'Juan Pérez',
         initials: 'JP'
@@ -53,24 +56,32 @@ const Sidebar = () => {
             {/* --- Menú de navegación principal --- */}
             <ul className="sidebar-menu">
                 {menuItems.map((item) => {
-                    // Condición de renderizado por rol
-                    const shouldRender = item.role.includes(userRole) &&
-                        (item.name === 'Usuarios' || item.name === 'Productos' || item.name !== 'Productos');
+                    // 1. Condición de renderizado por rol
+                    const hasRequiredRole = item.role.includes(userRole);
 
-                    if (!shouldRender) return null;
+                    if (!hasRequiredRole) return null;
+
+                    // 2. 💡 CORRECCIÓN CRUCIAL: Solo mostramos las rutas que tenemos implementadas
+                    // Hay que incluir /warehouses y /movements en la lista de rutas a renderizar.
+                    const isImplementedPath = item.path === '/users' ||
+                        item.path === '/products' ||
+                        item.path === '/warehouses' || // Agregado
+                        item.path === '/movements' ||  // Agregado
+                        item.path === '/';
+
+                    if (!isImplementedPath) return null;
+
 
                     // Determina si el ítem está activo
-                    const isActive = location.pathname === item.path ||
-                        (item.path === '/' && location.pathname === '/'); // Caso especial para Dashboard
-
-                    // Solo para las vistas implementadas (Usuarios, Productos)
-                    if (item.path !== '/users' && item.path !== '/products' && item.path !== '/') return null;
+                    const isActive = location.pathname.startsWith(item.path) && item.path !== '/';
+                    // Usar startsWith permite que rutas como /warehouses/edit/1 sigan marcando /warehouses como activo.
+                    const isDashboardActive = item.path === '/' && location.pathname === '/';
 
 
                     return (
                         <li
                             key={item.name}
-                            className={`menu-item ${isActive ? 'active' : ''}`}
+                            className={`menu-item ${isActive || isDashboardActive ? 'active' : ''}`}
                             onClick={() => navigate(item.path)}
                         >
                             <i className={item.iconClass}></i>
@@ -96,8 +107,6 @@ const Sidebar = () => {
                 <div
                     className="user-profile-panel"
                     onClick={toggleUserPanel}
-                    // Aplica la clase 'open' si el menú de logout está abierto (simulando el resaltado)
-                    // En la imagen, 'Cerrar Sesión' está resaltado, no el panel, por eso lo ajustamos
                 >
                     <div className="user-avatar">{userInitials}</div>
                     <div className="user-details">

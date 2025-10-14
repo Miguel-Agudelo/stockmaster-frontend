@@ -20,7 +20,7 @@ const MetricCard = ({ title, value, icon, color }) => (
 );
 
 
-const ProductList = () => {
+const ProductList = ({userRole}) => {
     // 1. ESTADOS CLAVE
     const [products, setProducts] = useState([]); // Inicializa a vacío, se llenará con la API
     const [isLoading, setIsLoading] = useState(true); // Inicializa a true para mostrar el loading
@@ -32,6 +32,7 @@ const ProductList = () => {
     // Estado para el modal de eliminación
     const [productToDelete, setProductToDelete] = useState(null);
 
+    const isAdmin = userRole === 'ADMINISTRADOR';
 
     // 🎯 2. Lógica de carga de datos real
     const fetchProducts = async () => {
@@ -39,7 +40,7 @@ const ProductList = () => {
         setError(null); // Limpiar errores antes de una nueva petición
         try {
             // productService.getProducts() debe devolver una respuesta con .data
-            const response = await productService.getProducts();
+            const response = await productService.getAllProducts();
             // 💡 Asumimos que response.data es la lista de productos
             setProducts(response.data);
         } catch (err) {
@@ -219,9 +220,12 @@ const ProductList = () => {
                                     <button className="icon-button edit-button" onClick={() => handleEdit(product)}>
                                         <FontAwesomeIcon icon={faPencilAlt} />
                                     </button>
-                                    <button className="icon-button delete-button-red" onClick={() => handleDelete(product)}>
-                                        <FontAwesomeIcon icon={faTrashAlt} />
-                                    </button>
+                                    {isAdmin && (
+                                        <button className="icon-button delete-button-red" onClick={() => handleDelete(product)}>
+                                            <FontAwesomeIcon icon={faTrashAlt} />
+                                        </button>
+                                    )}
+
                                 </td>
                             </tr>
                         ))}

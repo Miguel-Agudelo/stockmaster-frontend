@@ -2,6 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import warehouseService from '../../services/warehouseService';
 import WarehouseForm from '../../components/warehouses/WarehouseForm';
 import './WarehousesView.css';
+import {
+    faBuilding,       // 🏢 Para Almacenes
+    faBoxesStacked,   // 📦📦 Para Productos Almacenados
+    faClipboardCheck  // ✅📝 Para Stock Total
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const ADMIN_ROLE = 'ADMINISTRADOR';
 
@@ -26,11 +32,14 @@ const Toast = ({ message, type, isVisible, onClose }) => {
 };
 
 // 💡 Componente Tarjeta de Métrica (Mantenido)
-const MetricCard = ({ title, value, iconPlaceholder, color }) => (
+const MetricCard = ({ title, value, icon, color }) => (
     <div className="metric-card">
         <div className="card-header">
             <span className="card-title">{title}</span>
-            <span style={{ color: color, opacity: 0.8, fontSize: '1.2em' }}>{iconPlaceholder}</span>
+            <span style={{ color: color, opacity: 0.8, fontSize: '1.2em' }}>
+                {/* 2. Renderiza el componente FontAwesomeIcon */}
+                <FontAwesomeIcon icon={icon} />
+            </span>
         </div>
         <div className="card-value">{value}</div>
     </div>
@@ -105,9 +114,9 @@ const WarehousesView = ({ userRole }) => {
     const totalStock = warehouses.reduce((acc, wh) => acc + (wh.totalStock || 0), 0);
 
     const WAREHOUSE_METRICS = [
-        { title: "Total Almacenes", value: totalWarehouses, iconPlaceholder: "🏠", color: "#FF7B00" },
-        { title: "Productos Almacenados", value: totalProductsCount, iconPlaceholder: "📦", color: "#10B981" },
-        { title: "Stock Total (Unidades)", value: totalStock, iconPlaceholder: "✅", color: "#3B82F6" },
+        { title: "Total Almacenes", value: totalWarehouses, icon: faBuilding, color: "#FF7B00" },
+        { title: "Productos Almacenados", value: totalProductsCount, icon: faBoxesStacked, color: "#10B981" },
+        { title: "Stock Total (Unidades)", value: totalStock, icon: faClipboardCheck, color: "#3B82F6" },
     ];
 
 

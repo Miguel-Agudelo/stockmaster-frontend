@@ -6,6 +6,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import authService from '../../services/authService';
 import './Sidebar.css';
 
+import LogoImage from '../../assets/LogoStockMaster.png';
+
 // --- Configuración del Menú de Navegación ---
 const menuItems = [
     //{ name: 'Dashboard', path: '/', iconClass: 'fas fa-home', role: ['ADMINISTRADOR', 'OPERADOR'] },
@@ -47,8 +49,14 @@ const Sidebar = () => {
         <div className="sidebar">
             {/* --- Encabezado / Logo --- */}
             <div className="sidebar-header">
-                {/* Asumiendo que 'StockMaster' es un texto con un ícono (como en la imagen) */}
-                <span className="logo-icon-box">📦</span>
+                {/* Se reemplaza el 📦 por la etiqueta <img> */}
+                <span className="logo-icon-box">
+                <img
+                    src={LogoImage}
+                    alt="StockMaster Logo"
+                    className="logo-img"
+                />
+            </span>
                 <h3 className="app-title">StockMaster</h3>
                 <i className="fas fa-chevron-left sidebar-collapse-icon"></i> {/* Ícono < de la esquina */}
             </div>

@@ -180,3 +180,9 @@
     color: #FF7B00; /* Texto naranja al pasar el ratón */
 }
 
+.logo-icon-box .logo-img {
+    width: 90px;  /* Ajusta este valor al tamaño que tenía el emoji */
+    height: 90npmpx;
+    /* Otras propiedades que pueden ser útiles */
+    display: block;
+}

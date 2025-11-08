@@ -1,0 +1,108 @@
+/* ---------------------------------- */
+/* 1. OVERLAY Y CONTENEDOR PRINCIPAL  */
+/* ---------------------------------- */
+.modal-overlay {
+    /* Fija el modal en el centro de la pantalla */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* Fondo semi-transparente */
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Asegura que esté por encima de todo */
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Animación de desvanecimiento suave */
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Fuerza la opacidad a 1 cuando el componente está montado */
+.modal-overlay {
+    opacity: 1;
+}
+
+.modal-container {
+    background: white;
+    border-radius: 8px;
+    /* Sombras suaves */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-width: 450px; /* Ancho similar al de tu mockup */
+    width: 90%;
+    /* Animación de entrada: ligera elevación */
+    transform: translateY(-20px);
+    transition: transform 0.3s ease-in-out;
+}
+.modal-overlay .modal-container {
+    transform: translateY(0);
+}
+
+/* ---------------------------------- */
+/* 2. ESTRUCTURA INTERNA              */
+/* ---------------------------------- */
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 1.3rem;
+    color: #333;
+}
+
+.modal-body {
+    padding: 20px;
+    line-height: 1.5;
+    color: #555;
+}
+
+.modal-footer {
+    padding: 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end; /* Alinear botones a la derecha */
+    gap: 10px; /* Espacio entre botones */
+}
+
+/* ---------------------------------- */
+/* 3. BOTONES (Adaptados a tu estilo) */
+/* ---------------------------------- */
+.modal-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.modal-button-cancel {
+    background-color: transparent;
+    color: #555;
+}
+.modal-button-cancel:hover {
+    background-color: #f0f0f0;
+}
+
+/* Botón de ELIMINAR (Estilo de tu mockup: Rojo/Naranja) */
+.modal-button-delete {
+    background-color: #f3624c; /* Naranja/Rojo del mockup */
+    color: white;
+}
+.modal-button-delete:hover {
+    background-color: #e55a46;
+}
+
+/* Botón de RESTAURAR/CONFIRMAR (Usaremos el color principal/verde para restauración) */
+.modal-button-confirm {
+    /* Aquí puedes usar un color verde (#28a745) o tu color principal (Naranja/Azul) */
+    background-color: #4caf50; /* Verde típico de confirmación/restauración */
+    color: white;
+}
+.modal-button-confirm:hover {
+    background-color: #43a047;
+}

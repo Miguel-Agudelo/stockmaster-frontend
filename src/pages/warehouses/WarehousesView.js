@@ -1,17 +1,20 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom'; // Importado para la navegación
 import warehouseService from '../../services/warehouseService';
 import WarehouseForm from '../../components/warehouses/WarehouseForm';
 import './WarehousesView.css';
 import {
     faBuilding,       // 🏢 Para Almacenes
     faBoxesStacked,   // 📦📦 Para Productos Almacenados
-    faClipboardCheck  // ✅📝 Para Stock Total
+    faClipboardCheck, // ✅📝 Para Stock Total
+    faTrashRestore,   // 🟢 Ícono para la Papelera (Recuperación)
+    faPlus            // Ícono para Nuevo Almacén
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const ADMIN_ROLE = 'ADMINISTRADOR';
 
-// 💡 Componente Toast para la notificación de error
+// Componente Toast para la notificación de error
 const Toast = ({ message, type, isVisible, onClose }) => {
     useEffect(() => {
         if (isVisible) {
@@ -31,13 +34,12 @@ const Toast = ({ message, type, isVisible, onClose }) => {
     );
 };
 
-// 💡 Componente Tarjeta de Métrica (Mantenido)
+// Componente Tarjeta de Métrica (Mantenido)
 const MetricCard = ({ title, value, icon, color }) => (
     <div className="metric-card">
         <div className="card-header">
             <span className="card-title">{title}</span>
             <span style={{ color: color, opacity: 0.8, fontSize: '1.2em' }}>
-                {/* 2. Renderiza el componente FontAwesomeIcon */}
                 <FontAwesomeIcon icon={icon} />
             </span>
         </div>
@@ -47,6 +49,8 @@ const MetricCard = ({ title, value, icon, color }) => (
 
 
 const WarehousesView = ({ userRole }) => {
+    const navigate = useNavigate(); // 🟢 Inicializar useNavigate
+
     const [warehouses, setWarehouses] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -108,6 +112,11 @@ const WarehousesView = ({ userRole }) => {
         }
     };
 
+    // Lógica de Navegación a Recuperación (Papelera)
+    const handleGoToRecovery = () => {
+        navigate('/warehouses/recovery');
+    };
+
     // --- Cálculo de Métricas (Se mantiene igual) ---
     const totalWarehouses = warehouses.length;
     const totalProductsCount = warehouses.reduce((acc, wh) => acc + (wh.products?.length || 0), 0);
@@ -120,7 +129,7 @@ const WarehousesView = ({ userRole }) => {
     ];
 
 
-    // --- Renderizado de la Tabla (Añadiendo la Fecha de Creación) ---
+    // --- Renderizado de la Tabla (Se mantiene igual) ---
     const renderWarehouseTable = () => {
         if (isLoading) return <p className="loading-message">Cargando almacenes...</p>;
         if (error) return <p className="error-display">{error}</p>;
@@ -182,7 +191,7 @@ const WarehousesView = ({ userRole }) => {
         );
     };
 
-    // 🟢 Renderizado del Resumen de Stock por Producto (IMPLEMENTANDO CAMBIOS)
+    // Renderizado del Resumen de Stock por Producto (Se mantiene igual)
     const renderStockSummary = () => {
         const warehousesWithStock = warehouses.filter(wh => wh.products && wh.products.length > 0);
 
@@ -210,15 +219,12 @@ const WarehousesView = ({ userRole }) => {
                         <div key={warehouse.id} className="warehouse-stock-card">
                             <h4>{warehouse.name}</h4>
 
-                            {/* 1. CAMBIO DE SUBTÍTULO: Mostrar mensaje estático */}
                             <p className="subtitle">Stock actual por producto</p>
 
                             <ul className="product-list">
                                 {warehouse.products
                                     .filter(p => p.currentStock > 0)
                                     .map((product) => {
-                                        // 3. LÓGICA DE COLOR CONDICIONAL
-                                        // Asumimos 'minimumStock' existe en el objeto 'product'
                                         const minStock = product.minStock || 0;
                                         const isLowStock = product.currentStock <= minStock;
                                         const badgeClass = isLowStock ? 'low-stock-badge' : 'product-stock-badge';
@@ -226,17 +232,14 @@ const WarehousesView = ({ userRole }) => {
                                         return (
                                             <li key={product.productId} className="product-item">
 
-                                                {/* Contenedor para Nombre y Mínimo */}
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                                                     <span className="product-name">{product.productName}</span>
 
-                                                    {/* 2. MOSTRAR STOCK MÍNIMO */}
                                                     <span className="product-min-stock">
                                                         Mínimo: {minStock}
                                                     </span>
                                                 </div>
 
-                                                {/* Stock actual con color condicional */}
                                                 <span className={badgeClass}>
                                                     {product.currentStock} unidades
                                                 </span>
@@ -265,9 +268,18 @@ const WarehousesView = ({ userRole }) => {
                     <p className="page-subtitle">Administrar ubicaciones de almacenamiento y stock</p>
                 </div>
                 {isAdmin && (
-                    <button className="add-new-button" onClick={handleCreateClick}>
-                        + Nuevo Almacén
-                    </button>
+                    <div className="action-buttons-group"> {/* 🟢 Agrupamiento de botones */}
+                        {/* BOTÓN PAPELERA */}
+                        <button className="delete-recovery-button" onClick={handleGoToRecovery}>
+                            <FontAwesomeIcon icon={faTrashRestore} />
+                            Papelera
+                        </button>
+                        {/* Botón Nuevo Almacén */}
+                        <button className="add-new-button" onClick={handleCreateClick}>
+                            <FontAwesomeIcon icon={faPlus} />
+                            Nuevo Almacén
+                        </button>
+                    </div>
                 )}
             </div>
 

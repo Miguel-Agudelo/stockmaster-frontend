@@ -1,4 +1,17 @@
-import api from './api';
+import api from './api'; // Asumo que este es tu cliente Axios configurado
+
+// Obtiene el token JWT del localStorage y lo formatea para el header 'Authorization'.
+const getAuthHeader = () => {
+    const token = localStorage.getItem('token');
+
+    if (token) {
+        // Devuelve el objeto de headers que Axios espera para peticiones autenticadas
+        return { Authorization: 'Bearer ' + token };
+    }
+    // Si no hay token, devuelve un objeto vacío.
+    return {};
+};
+
 
 const login = async (email, password) => {
     try {
@@ -10,14 +23,11 @@ const login = async (email, password) => {
         // Guarda el token JWT en el almacenamiento local del navegador
         localStorage.setItem('token', token);
 
-        // Guarda los datos del usuario (id y rol) para usarlos en el frontend
-        // IMPORTANTE: Aquí se guarda el objeto tal como lo envía el backend: { role: "...", id_user: 1 }
+        // Guarda los datos del usuario (id y rol)
         localStorage.setItem('user', JSON.stringify(user));
 
-        // Retorna la respuesta completa en caso de que necesites más información en el componente
         return response.data;
     } catch (error) {
-        // Si la respuesta es un error (ej. 401 Unauthorized), captúralo
         console.error("Login failed:", error.response ? error.response.data : error.message);
         throw error;
     }
@@ -37,11 +47,11 @@ const getCurrentUser = () => {
 
     let user = JSON.parse(userJson);
 
-    // 🎯 CORRECCIÓN CLAVE: Normalizar la ID de 'id_user' a 'id'
-    // El backend envía 'id_user', pero el frontend espera 'id'
+    // Normalizar la ID de 'id_user' a 'id'
+    // Esto asegura que el frontend siempre use 'user.id'
     if (user.id_user && !user.id) {
         user.id = user.id_user;
-        delete user.id_user; // Opcional, pero limpia el objeto
+        delete user.id_user;
     }
 
     return user;
@@ -51,4 +61,11 @@ const isUserAuthenticated = () => {
     return !!localStorage.getItem('token');
 };
 
-export default { login, logout, getCurrentUser, isUserAuthenticated };
+// EXPORTAR la nueva función getAuthHeader para que otros servicios puedan usarla
+export default {
+    login,
+    logout,
+    getCurrentUser,
+    isUserAuthenticated,
+    getAuthHeader // ⬅️ ¡Agregado!
+};

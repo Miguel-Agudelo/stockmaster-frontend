@@ -1,8 +1,10 @@
-// src/pages/users/UserList.js (VERSIÓN FINAL CORREGIDA)
+// src/pages/users/UserList.js (VERSIÓN FINAL CON BOTÓN PAPELERA)
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // 🟢 1. Importar useNavigate
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faUser, faUserTie, faPencilAlt, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+// 2. Importar faTrashRestore
+import { faPlus, faUser, faUserTie, faPencilAlt, faTrashAlt, faTrashRestore } from '@fortawesome/free-solid-svg-icons';
 import UserForm from '../../components/users/UserForm';
 import userService from '../../services/userService';
 import './UserList.css';
@@ -18,7 +20,7 @@ const MetricCard = ({ title, value, icon, color }) => (
     </div>
 );
 
-// 💡 FUNCIÓN CLAVE: Formatea la cadena de fecha (Mantenido)
+// FUNCIÓN CLAVE: Formatea la cadena de fecha (Mantenido)
 const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     try {
@@ -32,7 +34,11 @@ const formatDate = (dateString) => {
 };
 
 
-const UserList = () => {
+// UserList ahora recibe 'userRole' de PrivateRoute
+const UserList = ({ userRole }) => {
+    // 3. Inicializar useNavigate para la navegación
+    const navigate = useNavigate();
+
     // 1. ESTADOS CLAVE (Mantenido)
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
@@ -40,6 +46,9 @@ const UserList = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [userToDelete, setUserToDelete] = useState(null);
+
+    // Variable de control para visibilidad del botón de recuperación
+    const isAdmin = userRole === 'ADMINISTRADOR';
 
     // 2. LÓGICA DE CARGA DE DATOS (Mantenido)
     const fetchUsers = async () => {
@@ -63,7 +72,7 @@ const UserList = () => {
 
     // LÓGICA DE BOTONES (Mantenido)
     const handleNewUser = () => {
-        setCurrentUser(null); // CLAVE: Resetea el usuario para entrar en modo CREACIÓN
+        setCurrentUser(null);
         setIsFormOpen(true);
     };
 
@@ -71,8 +80,6 @@ const UserList = () => {
         setCurrentUser(user);
         setIsFormOpen(true);
     };
-
-    // ... (Lógica de eliminación confirmDeletion, handleDelete, cancelDeletion y handleCloseForm) ...
 
     const handleDelete = (user) => {
         setUserToDelete(user);
@@ -105,6 +112,11 @@ const UserList = () => {
         fetchUsers();
     };
 
+    // 4. Función de navegación a la papelera
+    const handleGoToRecovery = () => {
+        navigate('/users/recovery');
+    };
+
     // CÁLCULO DE MÉTRICAS (Mantenido)
     const totalUsers = users.length;
     const totalAdmins = users.filter(u => u.role === 'ADMINISTRADOR').length;
@@ -120,19 +132,30 @@ const UserList = () => {
     return (
         <div className="main-content">
 
-            {/* Header y botón "Nuevo Usuario" siempre visibles (Mantenido) */}
+            {/* Header y botón "Nuevo Usuario" */}
             <div className="page-header">
                 <div className="title-group">
                     <h1>Gestión de Usuarios</h1>
                     <p className="page-subtitle">Administrar usuarios y permisos del sistema</p>
                 </div>
-                <button className="add-new-button" onClick={handleNewUser}>
-                    <FontAwesomeIcon icon={faPlus} />
-                    Nuevo Usuario
-                </button>
+                {/* Contenedor de botones de acción */}
+                <div className="action-buttons-group">
+                    {/* BOTÓN PAPELERA (Solo Admin) */}
+                    {isAdmin && (
+                        <button className="delete-recovery-button" onClick={handleGoToRecovery}>
+                            <FontAwesomeIcon icon={faTrashRestore} />
+                            Papelera
+                        </button>
+                    )}
+                    {/* Botón Nuevo Usuario */}
+                    <button className="add-new-button" onClick={handleNewUser}>
+                        <FontAwesomeIcon icon={faPlus} />
+                        Nuevo Usuario
+                    </button>
+                </div>
             </div>
 
-            {/* Métricas siempre visibles (Mantenido) */}
+            {/* Métricas (Mantenido) */}
             <div className="metrics-grid">
                 {DYNAMIC_METRICS.map((metric, index) => (
                     <MetricCard key={index} {...metric} />
@@ -192,18 +215,17 @@ const UserList = () => {
                 )}
             </div>
 
-            {/* 🎯 MODAL DE FORMULARIO (REINSERTADO) */}
+            {/* MODALES (Mantenido) */}
             {isFormOpen && (
                 <div className="modal-backdrop">
                     <UserForm
-                        onSave={handleCloseForm} // Esto recargará la lista
+                        onSave={handleCloseForm}
                         onCancel={handleCloseForm}
-                        currentUser={currentUser} // Si es null, el form debe entrar en modo CREACIÓN
+                        currentUser={currentUser}
                     />
                 </div>
             )}
 
-            {/* MODAL DE ELIMINACIÓN (Mantenido) */}
             {userToDelete && (
                 <div className="modal-backdrop">
                     <div className="custom-modal delete-modal">

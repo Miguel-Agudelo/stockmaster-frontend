@@ -1,16 +1,23 @@
-//App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
-// 🎯 Rutas Corregidas: Se asume que pages/ y components/ están directamente bajo src/
 // Vistas de Autenticación, Productos y Usuarios
 import LoginPage from './pages/auth/LoginPage';
 import ProductList from './pages/products/ProductList';
 import UserList from './pages/users/UserList';
 
-// 🎯 Importar las nuevas vistas del Sprint 2
+// Importar las vistas de Gestión (Sprint 2)
 import WarehousesView from './pages/warehouses/WarehousesView';
 import StockMovementList from './pages/movements/StockMovementList';
+
+// Página de Reportes (HU14, HU15, HU16)
+import ReportsDashboard from './pages/reports/ReportsDashboard';
+
+// Vistas de Recuperación (HU17, HU18, HU19)
+// Asumo que estos componentes están en la carpeta 'components/admin' como definimos
+import ProductRecovery from './components/admin/ProductRecovery';
+import WarehouseRecovery from './components/admin/WarehouseRecovery';
+import UserRecovery from './components/admin/UserRecovery';
 
 // Componentes de Layout
 import Sidebar from './components/layout/Sidebar';
@@ -18,6 +25,10 @@ import authService from './services/authService';
 
 import './App.css';
 
+/**
+ * Componente que verifica la autenticación y la autorización (roles).
+ * También inyecta el rol y el ID del usuario en los componentes hijos.
+ */
 const PrivateRoute = ({ children, roles }) => {
     // Obtener los datos del usuario logueado
     const isAuthenticated = authService.isUserAuthenticated();
@@ -52,19 +63,10 @@ const PrivateRoute = ({ children, roles }) => {
     });
 
 
-    // 🟢 CORRECCIÓN DE LAYOUT IMPLEMENTADA AQUÍ
+    // Configuración del Layout
     return (
-        // El Fragment permite devolver múltiples elementos sin un div contenedor,
-        // lo cual es necesario cuando el Sidebar es Fixed.
         <React.Fragment>
             <Sidebar userRole={currentUser.role} />
-
-            {/* La clase .main-content-wrapper (definida en App.css) hace el trabajo:
-            margin-left: 250px;
-            width: calc(100% - 250px);
-
-            Quitamos los estilos inline 'display: flex' del padre y 'flex: 1' del hijo.
-            */}
             <div className="main-content-wrapper">
                 {childWithProps}
             </div>
@@ -88,6 +90,15 @@ function App() {
                         </PrivateRoute>
                     }
                 />
+                {/* Recuperación de Usuarios (ADMINISTRADOR) - HU19 */}
+                <Route
+                    path="/users/recovery"
+                    element={
+                        <PrivateRoute roles={['ADMINISTRADOR']}>
+                            <UserRecovery />
+                        </PrivateRoute>
+                    }
+                />
 
                 {/* Ruta de Productos (ADMIN, OPERADOR) */}
                 <Route
@@ -98,8 +109,17 @@ function App() {
                         </PrivateRoute>
                     }
                 />
+                {/* Recuperación de Productos (ADMINISTRADOR) - HU17 */}
+                <Route
+                    path="/products/recovery"
+                    element={
+                        <PrivateRoute roles={['ADMINISTRADOR']}>
+                            <ProductRecovery />
+                        </PrivateRoute>
+                    }
+                />
 
-                {/* NUEVA RUTA: Almacenes (Todos) */}
+                {/* RUTA: Almacenes (ADMIN, OPERADOR) */}
                 <Route
                     path="/warehouses"
                     element={
@@ -108,8 +128,17 @@ function App() {
                         </PrivateRoute>
                     }
                 />
+                {/* Recuperación de Almacenes (ADMINISTRADOR) - HU18 */}
+                <Route
+                    path="/warehouses/recovery"
+                    element={
+                        <PrivateRoute roles={['ADMINISTRADOR']}>
+                            <WarehouseRecovery />
+                        </PrivateRoute>
+                    }
+                />
 
-                {/* NUEVA RUTA: Movimientos (OPERADOR) */}
+                {/* RUTA: Movimientos (ADMIN, OPERADOR) */}
                 <Route
                     path="/movements"
                     element={
@@ -119,9 +148,18 @@ function App() {
                     }
                 />
 
+                {/* RUTA: Reportes (ADMIN) - HU14, HU15, HU16 */}
+                <Route
+                    path="/reports"
+                    element={
+                        <PrivateRoute roles={['ADMINISTRADOR']}>
+                            <ReportsDashboard />
+                        </PrivateRoute>
+                    }
+                />
+
                 {/* Manejo de rutas no encontradas */}
                 <Route path="*" element={<Navigate to="/" replace />} />
-
             </Routes>
         </Router>
     );

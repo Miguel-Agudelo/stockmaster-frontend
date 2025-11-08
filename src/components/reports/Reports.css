@@ -1,0 +1,369 @@
+/* ------------------------------------------- */
+/* --- ESTILOS GENERALES DEL DASHBOARD (ReportsDashboard.js) --- */
+/* ------------------------------------------- */
+.reports-dashboard {
+    padding: 20px;
+    background-color: #f8f9fa; /* Fondo gris claro */
+    min-height: 85vh;
+}
+
+.reports-dashboard h2 {
+    font-size: 2rem;
+    color: #343a40;
+    margin-bottom: 5px;
+}
+
+.reports-dashboard .subtitle {
+    color: #6c757d;
+    margin-bottom: 25px;
+    font-size: 1.05rem;
+}
+
+/* ------------------------------------------- */
+/* --- TARJETAS DE RESUMEN (SummaryCard) --- */
+/* ------------------------------------------- */
+.summary-cards-container {
+    /* 🟢 CORRECCIÓN: Usar Grid para asegurar 4 columnas iguales */
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+/* RESPONSIVE DESIGN para tarjetas */
+@media (max-width: 1200px) {
+    .summary-cards-container {
+        /* En pantallas medianas, 2 columnas */
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 600px) {
+    .summary-cards-container {
+        /* En pantallas pequeñas, 1 columna */
+        grid-template-columns: 1fr;
+    }
+}
+
+
+.summary-card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-width: 200px;
+    transition: transform 0.3s;
+}
+
+.summary-card:hover {
+    transform: translateY(-3px);
+}
+
+.summary-card .card-title {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.summary-card .card-value {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.summary-card .card-icon {
+    font-size: 3rem;
+    opacity: 0.6;
+}
+
+/* Paleta de Colores para Tarjetas */
+.summary-card.alert .card-value, .summary-card.alert .card-icon { color: #dc3545; } /* Rojo */
+.summary-card.info .card-value, .summary-card.info .card-icon { color: #007bff; } /* Azul */
+.summary-card.success .card-value, .summary-card.success .card-icon { color: #28a745; } /* Verde */
+.summary-card.success-money .card-value, .summary-card.success-money .card-icon { color: #17a2b8; } /* Turquesa/Moneda */
+
+
+/* ------------------------------------------- */
+/* --- NAVEGACIÓN POR PESTAÑAS (TABS) --- */
+/* ------------------------------------------- */
+.tabs-container {
+    /* 🟢 CORRECCIÓN: Padding ajustado (5px) para hacerlo compacto */
+    display: flex;
+    border-bottom: none;
+    margin-bottom: 30px;
+    padding: 5px; /* Padding vertical reducido */
+    background-color: #e6e6e8;
+    border-radius: 50px;
+    width: 100%;
+}
+
+.tab-button {
+    flex-grow: 1;
+    background-color: transparent;
+    border: none;
+    padding: 10px 15px; /* Padding del botón ajustado */
+    cursor: pointer;
+    font-size: 1.05rem;
+    color: #495057;
+    transition: all 0.3s;
+    font-weight: 500;
+    text-align: center;
+    border-radius: 50px;
+    border-bottom: none;
+}
+
+.tab-button:hover:not(.active) {
+    background-color: #dcdcdc;
+    color: #343a40;
+}
+
+.tab-button.active {
+    background-color: #ffffff;
+    color: #333;
+    font-weight: 600;
+    border: 1px solid #c9c9c9;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+    z-index: 2;
+}
+
+/* ------------------------------------------- */
+/* --- PANELES DE REPORTE INDIVIDUAL (LowStockReport, etc) --- */
+/* ------------------------------------------- */
+.report-content-area {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    padding: 25px;
+    margin-top: -1px;
+}
+
+/* 🟢 Contenedor para alinear título y botón de exportar */
+.report-header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.report-header-section .report-title-container {
+    flex-grow: 1;
+}
+
+.report-title-section {
+    font-size: 1.5rem;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 5px;
+    border-bottom: none;
+}
+
+.report-title-section .fas {
+    margin-right: 10px;
+}
+
+.report-subtitle {
+    color: #888;
+    margin-bottom: 20px;
+}
+
+/* Botón de exportar */
+.report-header-actions {
+    display: flex;
+    align-items: center;
+    padding-top: 15px;
+}
+
+.btn-export {
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    color: #495057;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 0.9rem;
+}
+
+.btn-export:hover {
+    background-color: #e2e6ea;
+}
+
+/* Mensajes de No Data/Error */
+.no-data-message, .loading-message {
+    text-align: center;
+    color: #6c757d;
+    padding: 50px 0;
+    font-style: italic;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+/* ------------------------------------------- */
+/* --- ESTILOS ESPECÍFICOS DE MOVIMIENTOS Y RANKING --- */
+/* ------------------------------------------- */
+
+/* Filtros de Movimientos (MovementReport) */
+.date-filter-form .filter-controls {
+    display: flex;
+    gap: 15px;
+    align-items: flex-end; /* Alineación crucial para que los botones estén a la misma altura que los inputs */
+    margin-bottom: 20px;
+}
+
+/* 🟢 Asegura que la etiqueta esté encima del Input */
+.date-filter-form .filter-controls .input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Etiqueta de "Desde"/"Hasta" */
+.date-filter-form .filter-controls .input-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 3px;
+    font-weight: 500;
+}
+
+/* ------------------------------------------- */
+/* --- AJUSTE VISUAL DE INPUTS Y BOTONES DE FILTRO --- */
+/* ------------------------------------------- */
+
+/* Estilo moderno y unificado para Input de fecha */
+.date-filter-form input[type="date"] {
+    padding: 8px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    background-color: #fff;
+    font-size: 1rem;
+    color: #495057;
+    height: 22px;
+    width: 140px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.2s;
+}
+
+.date-filter-form input[type="date"]:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Ocultar el ícono de calendario nativo para uniformidad */
+.date-filter-form input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0.7;
+    cursor: pointer;
+}
+
+/* 🟢 Estilo Final de los Botones del Filtro (Unificado para Aplicar y Limpiar) */
+.filter-button {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+    height: 40px;
+
+    /* Estilo de la imagen (fondo blanco, borde sutil) */
+    background-color: #fff !important;
+    border: 1px solid #ced4da !important;
+    color: #495057 !important;
+    font-weight: 500;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.filter-button:hover {
+    background-color: #f8f9fa !important;
+    border-color: #a0a0a0 !important;
+    color: #343a40 !important;
+}
+
+
+/* --- ESTILOS DE INSIGNIAS DE MOVIMIENTO (BADGES) --- */
+
+/* CLASE BASE: badge-movement */
+.badge-movement {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    font-weight: 600;
+    text-transform: capitalize;
+    display: inline-block;
+    min-width: 60px;
+    text-align: center;
+}
+
+/* Color para Entrada (Éxito/Verde) */
+.badge-movement-success {
+    background-color: #e6f7ea;
+    color: #38a169;
+}
+
+/* Color para Salida (Peligro/Rojo) */
+.badge-movement-danger {
+    background-color: #fcebeb;
+    color: #e53e3e;
+}
+
+/* Estilo para el ícono de calendario en el header de movimientos */
+.report-movement .report-title-section .icon-info {
+    color: #fd7e14;
+    margin-right: 8px;
+}
+
+
+/* 🟢 ESTILOS PARA LA CANTIDAD (texto con signo y color) */
+.text-success {
+    color: #28a745 !important;
+    font-weight: 600;
+}
+
+.text-danger {
+    color: #dc3545 !important;
+    font-weight: 600;
+}
+
+
+/* Insignias de Ranking (Pastillas Redondas) */
+.badge-ranking {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #fff;
+    margin-right: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.badge-ranking-1 {
+    background-color: #ffc107; /* Dorado */
+}
+
+.badge-ranking-2 {
+    background-color: #6c757d; /* Plateado (gris oscuro) */
+}
+
+.badge-ranking-3 {
+    background-color: #fd7e14; /* Bronce (naranja) */
+}
+
+/* Para posiciones 4 en adelante */
+.badge-ranking-4,
+.badge-ranking-5,
+.badge-ranking-6,
+.badge-ranking-7,
+.badge-ranking-8,
+.badge-ranking-9,
+.badge-ranking-10 {
+    background-color: #e0e0e0; /* Gris claro */
+    color: #333; /* Texto oscuro */
+}
+
+/* ------------------------------------------- */
+/* --- FIN DE ESTILOS PERSONALIZADOS --- */
+/* ------------------------------------------- */

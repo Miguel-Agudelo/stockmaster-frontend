@@ -1,41 +1,41 @@
 /* CSS específico del componente (App.css)*/
 .App {
-  text-align: center;
+    text-align: center;
 }
 
 .App-logo {
-  height: 40vmin;
-  pointer-events: none;
+    height: 40vmin;
+    pointer-events: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+    .App-logo {
+        animation: App-logo-spin infinite 20s linear;
+    }
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+    background-color: #282c34;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(10px + 2vmin);
+    color: white;
 }
 
 .App-link {
-  color: #61dafb;
+    color: #61dafb;
 }
 
 @keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* CSS global (App.css o index.css) */
@@ -47,4 +47,30 @@ html, body, #root {
     padding: 0;
 }
 
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
 
+
+/* ---------------------------------------------------- */
+/* --- NUEVOS ESTILOS PARA EL LAYOUT DE LA APLICACIÓN (CORRECCIÓN SIDEBAR) --- */
+/* ---------------------------------------------------- */
+
+/* 1. Definición del Sidebar (Ajusta si tu Sidebar tiene otra clase o ancho) */
+.sidebar-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px; /* 🚨 ASUMIDO: Ancho del Sidebar. AJUSTAR SI ES NECESARIO. */
+    height: 100vh;
+    z-index: 1000; /* Asegura que esté por encima del contenido */
+    /* Aquí irían el background-color, box-shadow, etc. de tu Sidebar */
+}
+
+/* 2. Contenedor del Contenido Principal (Usado en PrivateRoute de App.js) */
+.main-content-wrapper {
+    /* 🟢 CLAVE: El margen izquierdo debe coincidir con el ancho del Sidebar */
+    margin-left: 2px;
+    transition: margin-left 0.3s ease; /* Transición suave opcional */
+    min-height: 100vh;
+}

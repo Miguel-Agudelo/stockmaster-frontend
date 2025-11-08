@@ -1,0 +1,94 @@
+/* ------------------------------------------- */
+/* --- CONTENEDOR DE LA TABLA --- */
+/* ------------------------------------------- */
+.table-responsive {
+    overflow-x: auto; /* Permite scroll horizontal en pantallas pequeñas */
+    width: 100%;
+    margin-top: 20px;
+}
+
+.table-title {
+    font-size: 1.25rem;
+    color: #343a40;
+    margin-bottom: 15px;
+}
+
+/* ------------------------------------------- */
+/* --- ESTILO BASE DE LA TABLA --- */
+/* ------------------------------------------- */
+.custom-table {
+    width: 100%;
+    border-collapse: collapse; /* Elimina el espacio entre bordes de celdas */
+    font-size: 0.95rem;
+    color: #333;
+    background-color: #fff;
+    border-radius: 8px; /* Bordes redondeados en la tabla */
+    overflow: hidden; /* Asegura que los bordes redondeados sean visibles */
+}
+
+/* ------------------------------------------- */
+/* --- ENCABEZADOS (Header) --- */
+/* ------------------------------------------- */
+.custom-table thead tr {
+    background-color: #f8f9fa; /* Fondo gris muy claro para el encabezado */
+    color: #6c757d; /* Color de texto sutil */
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #e9ecef; /* Línea separadora */
+}
+
+.custom-table th {
+    padding: 12px 15px;
+    text-transform: uppercase; /* MAYÚSCULAS para mayor jerarquía */
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
+/* ------------------------------------------- */
+/* --- CUERPO DE LA TABLA (Body) --- */
+/* ------------------------------------------- */
+.custom-table tbody tr {
+    /* Zebra Stripes: Fondo alternado para mejorar la lectura */
+    background-color: #fff;
+    border-bottom: 1px solid #f0f0f0; /* Borde sutil entre filas */
+    transition: background-color 0.2s ease;
+}
+
+/* Aplicar fondo gris claro a las filas impares */
+.custom-table tbody tr:nth-of-type(odd) {
+    background-color: #fcfcfc;
+}
+
+/* Hover: Efecto al pasar el mouse */
+.custom-table tbody tr:hover {
+    background-color: #e9ecef; /* Resalta la fila al pasar el mouse */
+    cursor: default;
+}
+
+.custom-table td {
+    padding: 12px 15px;
+    /* Ajusta la alineación si es necesario, por defecto es izquierda */
+}
+
+/* Última fila: Quitamos el borde inferior */
+.custom-table tbody tr:last-of-type {
+    border-bottom: none;
+}
+
+/* ------------------------------------------- */
+/* --- MENSAJE DE TABLA VACÍA --- */
+/* ------------------------------------------- */
+.empty-table-message {
+    padding: 30px;
+    text-align: center;
+    color: #6c757d;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    margin-top: 20px;
+}
+
+.empty-table-message h4 {
+    color: #343a40;
+    margin-bottom: 10px;
+}

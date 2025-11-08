@@ -1,8 +1,6 @@
 // src/components/layout/Sidebar.js
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-// Asegúrate de que este servicio exista y funcione correctamente
-// 💡 CORRECCIÓN DE RUTA: Solo un nivel de subida para acceder a la carpeta services (../../services -> ../services)
 import authService from '../../services/authService';
 import './Sidebar.css';
 
@@ -10,10 +8,9 @@ import LogoImage from '../../assets/LogoStockMaster.png';
 
 // --- Configuración del Menú de Navegación ---
 const menuItems = [
-    //{ name: 'Dashboard', path: '/', iconClass: 'fas fa-home', role: ['ADMINISTRADOR', 'OPERADOR'] },
+    { name: 'Dashboard', path: '/dashboard', iconClass: 'fas fa-home', role: ['ADMINISTRADOR', 'OPERADOR'] },
     { name: 'Usuarios', path: '/users', iconClass: 'fas fa-users', role: ['ADMINISTRADOR'] },
     { name: 'Productos', path: '/products', iconClass: 'fas fa-box', role: ['ADMINISTRADOR', 'OPERADOR'] },
-    // 💡 RUTAS DEL SPRINT 2
     { name: 'Almacenes', path: '/warehouses', iconClass: 'fas fa-warehouse', role: ['ADMINISTRADOR', 'OPERADOR'] },
     { name: 'Movimientos', path: '/movements', iconClass: 'fas fa-exchange-alt', role: ['ADMINISTRADOR', 'OPERADOR'] },
     { name: 'Reportes', path: '/reports', iconClass: 'fas fa-chart-bar', role: ['ADMINISTRADOR'] },
@@ -26,7 +23,7 @@ const Sidebar = () => {
 
     // Simulación de datos de usuario (asegúrate de que authService funcione)
     const currentUser = authService.getCurrentUser() || {
-        // Ajuste: El rol de Almacenes/Movimientos es 'OPERADOR' o 'ADMINISTRADOR'
+        // Rol de Almacenes/Movimientos es 'OPERADOR' o 'ADMINISTRADOR'
         role: 'ADMINISTRADOR',
         name: 'Juan Pérez',
         initials: 'JP'
@@ -49,7 +46,7 @@ const Sidebar = () => {
         <div className="sidebar">
             {/* --- Encabezado / Logo --- */}
             <div className="sidebar-header">
-                {/* Se reemplaza el 📦 por la etiqueta <img> */}
+
                 <span className="logo-icon-box">
                 <img
                     src={LogoImage}
@@ -58,24 +55,23 @@ const Sidebar = () => {
                 />
             </span>
                 <h3 className="app-title">StockMaster</h3>
-                <i className="fas fa-chevron-left sidebar-collapse-icon"></i> {/* Ícono < de la esquina */}
+                <i className="fas fa-chevron-left sidebar-collapse-icon"></i>
             </div>
 
             {/* --- Menú de navegación principal --- */}
             <ul className="sidebar-menu">
                 {menuItems.map((item) => {
-                    // 1. Condición de renderizado por rol
+
                     const hasRequiredRole = item.role.includes(userRole);
 
                     if (!hasRequiredRole) return null;
 
-                    // 2. 💡 CORRECCIÓN CRUCIAL: Solo mostramos las rutas que tenemos implementadas
-                    // Hay que incluir /warehouses y /movements en la lista de rutas a renderizar.
-                    const isImplementedPath = item.path === '/users' ||
+                    const isImplementedPath = item.path === '/dashboard' ||
+                        item.path === '/users' ||
                         item.path === '/products' ||
-                        item.path === '/warehouses' || // Agregado
-                        item.path === '/movements' ||  // Agregado
-                        item.path === '/';
+                        item.path === '/warehouses' ||
+                        item.path === '/movements' ||
+                        item.path === '/reports'; // 🟢 RUTA DE REPORTES AGREGADA
 
                     if (!isImplementedPath) return null;
 
@@ -83,7 +79,7 @@ const Sidebar = () => {
                     // Determina si el ítem está activo
                     const isActive = location.pathname.startsWith(item.path) && item.path !== '/';
                     // Usar startsWith permite que rutas como /warehouses/edit/1 sigan marcando /warehouses como activo.
-                    const isDashboardActive = item.path === '/' && location.pathname === '/';
+                    const isDashboardActive = item.path === '/dashboard' && location.pathname === '/dashboard';
 
 
                     return (
@@ -111,7 +107,6 @@ const Sidebar = () => {
                     </div>
                 )}
 
-                {/* Panel de usuario - Siempre visible */}
                 <div
                     className="user-profile-panel"
                     onClick={toggleUserPanel}

@@ -1,0 +1,46 @@
+/* Estilos para el Encabezado de la Vista de Recuperación */
+
+.recovery-header {
+    margin-bottom: 25px;
+}
+
+.back-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: #475569; /* Gris oscuro para texto */
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 5px 0;
+    margin-bottom: 15px; /* Espacio debajo del botón Volver */
+    transition: color 0.2s;
+}
+
+.back-button:hover {
+    color: #1e293b; /* Color más oscuro al pasar el ratón */
+}
+
+.recovery-header .title-group h1 {
+    font-size: 2.2em;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+.recovery-header .page-subtitle {
+    font-size: 1em;
+    color: #64748b;
+    margin: 5px 0 0 0;
+}
+
+/* Contenedor tipo Tarjeta para la lista */
+.recovery-card-container {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 30px; /* Padding interno de la tarjeta */
+    overflow-x: auto;
+}

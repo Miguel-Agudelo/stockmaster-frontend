@@ -1,11 +1,13 @@
-// src/pages/products/ProductList.js (VERSIÓN FINAL CON API IMPLEMENTADA)
+// src/pages/products/ProductList.js (VERSIÓN FINAL CON BOTÓN PAPELERA)
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom'; // 🟢 1. Importar useNavigate
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faBoxOpen, faLayerGroup, faWarehouse, faPencilAlt, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+// 2. Importar faTrashRestore
+import { faPlus, faBoxOpen, faLayerGroup, faWarehouse, faPencilAlt, faTrashAlt, faTrashRestore } from '@fortawesome/free-solid-svg-icons';
 import ProductForm from '../../components/products/ProductForm';
-import productService from '../../services/productService'; // 🎯 1. Descomentado e Importado
-import './ProductList.css';
+import productService from '../../services/productService';
+import '../../pages/products/ProductList.css';
 
 
 // Reutilizamos MetricCard (componente local)
@@ -21,31 +23,29 @@ const MetricCard = ({ title, value, icon, color }) => (
 
 
 const ProductList = ({userRole}) => {
+    // 3. Inicializar useNavigate para la navegación
+    const navigate = useNavigate();
+
     // 1. ESTADOS CLAVE
-    const [products, setProducts] = useState([]); // Inicializa a vacío, se llenará con la API
-    const [isLoading, setIsLoading] = useState(true); // Inicializa a true para mostrar el loading
-    const [error, setError] = useState(null); // Nuevo estado para manejar errores de API
+    const [products, setProducts] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    // Estados para el modal de formulario
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [currentProduct, setCurrentProduct] = useState(null);
-    // Estado para el modal de eliminación
     const [productToDelete, setProductToDelete] = useState(null);
 
     const isAdmin = userRole === 'ADMINISTRADOR';
 
-    // 🎯 2. Lógica de carga de datos real
+    // 2. Lógica de carga de datos real (sin cambios)
     const fetchProducts = async () => {
         setIsLoading(true);
-        setError(null); // Limpiar errores antes de una nueva petición
+        setError(null);
         try {
-            // productService.getProducts() debe devolver una respuesta con .data
             const response = await productService.getAllProducts();
-            // 💡 Asumimos que response.data es la lista de productos
             setProducts(response.data);
         } catch (err) {
             console.error("Error al cargar productos:", err);
-            // Mensaje de error para el usuario
             setError("No se pudieron cargar los productos. Revise la consola y los permisos.");
             setProducts([]);
         } finally {
@@ -53,13 +53,12 @@ const ProductList = ({userRole}) => {
         }
     };
 
-    // 3. Efecto para cargar datos al montar el componente
+    // 3. Efecto para cargar datos al montar el componente (sin cambios)
     useEffect(() => {
         fetchProducts();
     }, []);
 
-
-    // 🎯 4. CÁLCULO DE MÉTRICAS REALES (useMemo para optimización)
+    // 4. CÁLCULO DE MÉTRICAS REALES (useMemo para optimización) (sin cambios)
     const DYNAMIC_METRICS = useMemo(() => {
         if (products.length === 0) {
             return [
@@ -70,7 +69,7 @@ const ProductList = ({userRole}) => {
         }
 
         const totalProducts = products.length;
-        const uniqueCategories = new Set(products.map(p => p.categoryName)); // 💡 Usa categoryName del backend
+        const uniqueCategories = new Set(products.map(p => p.categoryName));
         const totalCategories = uniqueCategories.size;
 
         const totalStock = products.reduce((sum, p) =>
@@ -86,8 +85,7 @@ const ProductList = ({userRole}) => {
     }, [products]);
 
 
-    // 5. FUNCIONES DE MODAL Y ACCIONES
-
+    // 5. FUNCIONES DE MODAL Y ACCIONES (sin cambios)
     const handleNewProduct = () => {
         setCurrentProduct(null); // Modo Creación
         setIsFormOpen(true);
@@ -98,14 +96,12 @@ const ProductList = ({userRole}) => {
         setIsFormOpen(true);
     };
 
-    // 🎯 6. Función para cerrar el modal y RECAGAR DATOS REALES
     const handleCloseForm = () => {
         setIsFormOpen(false);
         setCurrentProduct(null);
-        fetchProducts(); // 💡 Recarga la lista de la API
+        fetchProducts(); // Recarga la lista de la API
     };
 
-    // Funciones de eliminación
     const handleDelete = (product) => {
         setProductToDelete(product);
     };
@@ -116,10 +112,9 @@ const ProductList = ({userRole}) => {
 
     const confirmDeletion = async () => {
         try {
-            // 💡 Llama al servicio de eliminación real
             await productService.deleteProduct(productToDelete.id);
-            setProductToDelete(null); // Cerrar modal de eliminación
-            fetchProducts(); // Recargar la lista
+            setProductToDelete(null);
+            fetchProducts();
         } catch (error) {
             console.error("Error al eliminar el producto:", error);
             alert("Error al eliminar el producto. Revise los permisos.");
@@ -128,33 +123,48 @@ const ProductList = ({userRole}) => {
     };
 
 
-    // 7. Filtrado de productos por búsqueda
+    // 7. Filtrado de productos por búsqueda (sin cambios)
     const filteredProducts = products.filter(product =>
         (product.name && product.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (product.categoryName && product.categoryName.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
+    // 8. Función de navegación a la papelera
+    const handleGoToRecovery = () => {
+        navigate('/products/recovery');
+    };
 
-    // 8. RENDERING
+
+    // 9. RENDERING
     return (
         <div className="main-content">
-            {/* Header y botón "Nuevo Producto" */}
+            {/* Header y botones de acción */}
             <div className="page-header">
                 <div className="title-group">
                     <h1>Gestión de Productos</h1>
                     <p className="page-subtitle">Administrar catálogo de productos</p>
                 </div>
-                <button className="add-new-button-orange" onClick={handleNewProduct}>
-                    <FontAwesomeIcon icon={faPlus} />
-                    Nuevo Producto
-                </button>
+                <div className="action-buttons-group"> {/* 🟢 Contenedor para alinear los botones */}
+                    {/* BOTÓN PAPELERA (Solo Admin) */}
+                    {isAdmin && (
+                        <button className="delete-recovery-button" onClick={handleGoToRecovery}>
+                            <FontAwesomeIcon icon={faTrashRestore} />
+                            Papelera
+                        </button>
+                    )}
+
+                    {/* Botón Nuevo Producto */}
+                    <button className="add-new-button-orange" onClick={handleNewProduct}>
+                        <FontAwesomeIcon icon={faPlus} />
+                        Nuevo Producto
+                    </button>
+                </div>
             </div>
 
-            {/* Métricas */}
+            {/* Métricas (sin cambios) */}
             <div className="metrics-grid">
                 {DYNAMIC_METRICS.map((metric, index) => (
-                    // Aseguramos que el valor se muestre correctamente si está cargando
                     <MetricCard
                         key={index}
                         title={metric.title}
@@ -177,14 +187,13 @@ const ProductList = ({userRole}) => {
             </div>
 
 
-            {/* Lista de Productos (Tabla Estilizada) */}
+            {/* Lista de Productos (Tabla Estilizada) (sin cambios en la tabla) */}
             <div className="product-list-card">
                 <div className="table-info">
                     Lista de Productos
                     <p className="product-count">{filteredProducts.length} de {products.length} productos</p>
                 </div>
 
-                {/* 🎯 Manejo de Estados (Cargando, Error, No Data) */}
                 {isLoading ? (
                     <p className="loading-message">Cargando productos...</p>
                 ) : error ? (
@@ -203,7 +212,6 @@ const ProductList = ({userRole}) => {
                         </thead>
                         <tbody>
                         {filteredProducts.map(product => (
-                            // 💡 Usar categoryName y stockTotal del backend
                             <tr key={product.id}>
                                 <td>{product.name}</td>
                                 <td>{product.description}</td>
@@ -236,18 +244,17 @@ const ProductList = ({userRole}) => {
                 )}
             </div>
 
-            {/* 🎯 MODAL DE FORMULARIO DE PRODUCTO */}
+            {/* MODALES (sin cambios) */}
             {isFormOpen && (
                 <div className="modal-backdrop">
                     <ProductForm
-                        onSave={handleCloseForm} // Esto recarga los datos
+                        onSave={handleCloseForm}
                         onCancel={handleCloseForm}
                         currentProduct={currentProduct}
                     />
                 </div>
             )}
 
-            {/* 🎯 MODAL DE ELIMINACIÓN DE PRODUCTO */}
             {productToDelete && (
                 <div className="modal-backdrop">
                     <div className="custom-modal delete-modal">

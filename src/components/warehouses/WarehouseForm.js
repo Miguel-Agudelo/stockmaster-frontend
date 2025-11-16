@@ -1,6 +1,4 @@
-//WarehouseForm.js
 import React, { useState, useEffect } from 'react';
-// RUTA CORREGIDA: Asumiendo que services está un nivel arriba de warehouses
 import warehouseService from '../../services/warehouseService';
 import './WarehouseForm.css';
 

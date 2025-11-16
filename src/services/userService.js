@@ -1,4 +1,3 @@
-// src/services/userService.js
 import api from './api';
 
 const getAllUsers = () => {

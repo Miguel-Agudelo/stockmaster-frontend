@@ -1,9 +1,6 @@
-// src/components/products/ProductForm.js (VERSIÓN FINAL CON SELECTOR DE ALMACÉN ACTIVO)
-
 import React, { useState, useEffect } from 'react';
 import './ProductForm.css';
 import productService from '../../services/productService';
-// 🟢 Importamos el servicio de almacenes
 import warehouseService from '../../services/warehouseService';
 
 
@@ -16,7 +13,6 @@ const ProductForm = ({ onSave, onCancel, currentProduct }) => {
         price: '',
         categoryName: '',
         warehouseId: '',
-        // 🎯 NUEVOS CAMPOS AÑADIDOS AL ESTADO INICIAL
         initialQuantity: '',
         minStock: '',
     };
@@ -25,10 +21,7 @@ const ProductForm = ({ onSave, onCancel, currentProduct }) => {
     const [errors, setErrors] = useState({});
     const [message, setMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    // 🟢 NUEVO ESTADO: Lista de almacenes activos para el selector
     const [activeWarehouses, setActiveWarehouses] = useState([]);
-    // 🟢 NUEVO ESTADO: Mensaje de carga para el selector
     const [warehouseLoadMessage, setWarehouseLoadMessage] = useState('Cargando almacenes...');
 
 
@@ -41,9 +34,9 @@ const ProductForm = ({ onSave, onCancel, currentProduct }) => {
                 description: currentProduct.description || '',
                 price: currentProduct.price !== undefined ? currentProduct.price.toString() : '',
                 categoryName: currentProduct.categoryName || '',
-                warehouseId: '', // Vacío en edición
-                initialQuantity: '', // Vacío en edición
-                minStock: '', // Vacío en edición
+                warehouseId: '',
+                initialQuantity: '',
+                minStock: '',
             });
         } else {
             setFormData(initialState);
@@ -53,18 +46,15 @@ const ProductForm = ({ onSave, onCancel, currentProduct }) => {
         setMessage('');
 
 
-        // 🟢 Función para cargar los almacenes activos (solo si no estamos editando)
         const fetchActiveWarehouses = async () => {
-            if (isEditing) return; // No necesitamos almacenes si estamos editando
+            if (isEditing) return;
 
             try {
-                // Llamamos al nuevo servicio
                 const warehouses = await warehouseService.getActiveWarehousesList();
 
                 setActiveWarehouses(warehouses);
 
                 if (warehouses.length > 0) {
-                    // Preseleccionar el primer almacén y establecerlo en formData
                     setFormData(prev => ({ ...prev, warehouseId: warehouses[0].id.toString() }));
                     setWarehouseLoadMessage(null);
                 } else {
@@ -80,7 +70,7 @@ const ProductForm = ({ onSave, onCancel, currentProduct }) => {
 
         fetchActiveWarehouses();
 
-    }, [currentProduct, isEditing]); // Añadimos isEditing a las dependencias
+    }, [currentProduct, isEditing]);
 
 
     // 2. Manejo de cambios
@@ -107,9 +97,7 @@ const ProductForm = ({ onSave, onCancel, currentProduct }) => {
         if (!formData.categoryName) { tempErrors.categoryName = "La categoría es obligatoria."; isValid = false; }
 
         if (!isEditing) {
-            // VALIDACIONES PARA CREACIÓN
 
-            // 🟢 CAMBIO: Validamos que haya almacenes cargados y uno seleccionado
             if (activeWarehouses.length === 0) {
                 tempErrors.warehouseId = "No hay almacenes activos disponibles para la creación.";
                 isValid = false;
@@ -118,20 +106,17 @@ const ProductForm = ({ onSave, onCancel, currentProduct }) => {
                 isValid = false;
             }
 
-            // 🎯 VALIDACIÓN: Cantidad Inicial
             const initialQuantity = parseInt(formData.initialQuantity);
             if (isNaN(initialQuantity) || initialQuantity < 0) {
                 tempErrors.initialQuantity = "La cantidad inicial debe ser un número positivo (o 0).";
                 isValid = false;
             }
 
-            // 🎯 VALIDACIÓN: Stock Mínimo
             const minStock = parseInt(formData.minStock);
             if (isNaN(minStock) || minStock < 0) {
                 tempErrors.minStock = "El stock mínimo debe ser un número positivo (o 0).";
                 isValid = false;
             }
-            // Opcional: minStock no puede ser mayor que initialQuantity
             if (initialQuantity < minStock) {
                 tempErrors.minStock = "El stock mínimo no debe ser mayor que la cantidad inicial.";
                 isValid = false;
@@ -142,7 +127,7 @@ const ProductForm = ({ onSave, onCancel, currentProduct }) => {
         return isValid;
     };
 
-    // 4. Envío del formulario (Se mantiene igual, se utiliza el ID seleccionado)
+    // 4. Envío del formulario
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -234,10 +219,10 @@ const ProductForm = ({ onSave, onCancel, currentProduct }) => {
                     <input type="text" id="categoryName" name="categoryName" value={formData.categoryName} onChange={handleChange} className="form-input" required placeholder="Categoría del producto" disabled={isSubmitting}/>
                     {errors.categoryName && <div className="error-message">{errors.categoryName}</div>}
 
-                    {/* 🎯 SECCIÓN DE INVENTARIO INICIAL (SOLO EN CREACIÓN) */}
+                    {/* SECCIÓN DE INVENTARIO INICIAL */}
                     {!isEditing && (
                         <>
-                            {/* 1. SELECTOR DEL ALMACÉN ACTIVO (Reemplazo del input) */}
+                            {/* 1. SELECTOR DEL ALMACÉN ACTIVO */}
                             <label htmlFor="warehouseId">Almacén de Asignación *</label>
 
                             {warehouseLoadMessage ? (
@@ -245,7 +230,6 @@ const ProductForm = ({ onSave, onCancel, currentProduct }) => {
                             ) : (
                                 <select
                                     id="warehouseId" name="warehouseId"
-                                    // 💡 El valor de formData.warehouseId se inicializa con el primer almacén cargado
                                     value={formData.warehouseId} onChange={handleChange}
                                     className="form-input" required
                                     disabled={isSubmitting || activeWarehouses.length === 0}
@@ -293,7 +277,6 @@ const ProductForm = ({ onSave, onCancel, currentProduct }) => {
                     <button type="button" className="cancel-button-white" onClick={onCancel} disabled={isSubmitting}>
                         Cancelar
                     </button>
-                    {/* El botón de guardar se deshabilita si no hay almacenes en modo creación */}
                     <button type="submit" className="save-button-orange" disabled={isSubmitting || (!isEditing && activeWarehouses.length === 0)}>
                         {isSubmitting ? 'Guardando...' : submitButtonText}
                     </button>

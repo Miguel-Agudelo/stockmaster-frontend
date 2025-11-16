@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ReportService from '../../services/reportService';
 import Table  from '../common/Table';
-import Input from '../common/Input';
 import Button from '../common/Button';
 
 import { exportToCsv } from '../../utils/exportUtils';
@@ -41,7 +40,6 @@ const LowStockReport = ({ setLowStockCount }) => {
 
             setLowStockProducts(data);
 
-            // IMPORTANTE: Actualiza el contador de la tarjeta en el Dashboard
             if (setLowStockCount) {
                 setLowStockCount(data.length);
             }
@@ -50,7 +48,7 @@ const LowStockReport = ({ setLowStockCount }) => {
             console.error("Error al cargar reporte de Stock Bajo:", err);
             setError("No se pudo cargar el reporte de Stock Bajo. Intente nuevamente.");
             if (setLowStockCount) {
-                setLowStockCount(0); // Asegura que el contador se resetee
+                setLowStockCount(0);
             }
         } finally {
             setLoading(false);

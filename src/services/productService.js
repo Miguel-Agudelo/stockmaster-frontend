@@ -1,4 +1,4 @@
-// src/services/productService.js
+
 import api from './api';
 
 const getAllProducts = () => {
@@ -17,4 +17,9 @@ const deleteProduct = (productId) => {
     return api.delete(`/products/${productId}`);
 };
 
-export default { getAllProducts, createProduct, updateProduct, deleteProduct };
+const getActiveProductsList = () => {
+    // Asume que este endpoint devuelve: [{id: 1, name: "Mouse"}, ...]
+    return api.get('/products/active-list');
+};
+
+export default { getAllProducts, createProduct, updateProduct, deleteProduct, getActiveProductsList};

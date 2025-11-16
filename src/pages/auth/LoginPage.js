@@ -1,11 +1,8 @@
-// src/pages/auth/LoginPage.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../../services/authService';
 import './LoginPage.css';
 import {ReactComponent as StockMasterLogo} from "../../assets/LogoStockMaster.svg";
-
-// Importa los iconos si usas Font Awesome
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
@@ -13,14 +10,14 @@ const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
-    const [showPassword, setShowPassword] = useState(false); // Nuevo estado para la visibilidad de la contraseña
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
             await authService.login(email, password);
-            navigate('/products');
+            navigate('/dashboard');
         } catch (error) {
             const errorMessage = error.response?.data?.message || 'Error de conexión. Inténtelo de nuevo.';
             setMessage(errorMessage);

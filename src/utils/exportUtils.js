@@ -19,7 +19,6 @@ export const exportToCsv = (headers, accessors, data, fileName) => {
         return accessors.map(accessor => {
             let value = item[accessor];
 
-            // Tratamiento especial para objetos anidados y formatos
             // Si el valor es null, undefined, o un objeto, lo convertimos a string vacío o manejamos la anidación
             if (value === null || value === undefined) {
                 value = '';

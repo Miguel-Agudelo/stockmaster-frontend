@@ -1,29 +1,33 @@
-// src/pages/products/ProductList.js (VERSIÓN FINAL CON BOTÓN PAPELERA)
-
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom'; // 🟢 1. Importar useNavigate
+import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// 2. Importar faTrashRestore
 import { faPlus, faBoxOpen, faLayerGroup, faWarehouse, faPencilAlt, faTrashAlt, faTrashRestore } from '@fortawesome/free-solid-svg-icons';
 import ProductForm from '../../components/products/ProductForm';
 import productService from '../../services/productService';
 import '../../pages/products/ProductList.css';
 
 
-// Reutilizamos MetricCard (componente local)
-const MetricCard = ({ title, value, icon, color }) => (
-    <div className="metric-card">
-        <div className="card-header">
-            <span className="card-title">{title}</span>
-            <FontAwesomeIcon icon={icon} style={{ color: color, opacity: 0.8 }} />
+const SummaryCard = ({ title, value, colorClass }) => {
+
+    const formatValue = (val) => {
+        return val.toLocaleString('es-CO'); // Formato de miles
+    };
+
+    const displayValue = formatValue(value);
+
+    return (
+        <div className={`summary-card ${colorClass}`}>
+            <div className="card-content">
+                <p className="card-title">{title}</p>
+                <h2 className="card-value">{displayValue}</h2>
+            </div>
         </div>
-        <div className="card-value">{value}</div>
-    </div>
-);
+    );
+};
 
 
 const ProductList = ({userRole}) => {
-    // 3. Inicializar useNavigate para la navegación
+    // Inicializar useNavigate para la navegación
     const navigate = useNavigate();
 
     // 1. ESTADOS CLAVE
@@ -37,7 +41,7 @@ const ProductList = ({userRole}) => {
 
     const isAdmin = userRole === 'ADMINISTRADOR';
 
-    // 2. Lógica de carga de datos real (sin cambios)
+    // 2. Lógica de carga de datos real
     const fetchProducts = async () => {
         setIsLoading(true);
         setError(null);
@@ -53,18 +57,19 @@ const ProductList = ({userRole}) => {
         }
     };
 
-    // 3. Efecto para cargar datos al montar el componente (sin cambios)
+    // 3. Efecto para cargar datos al montar el componente
     useEffect(() => {
         fetchProducts();
     }, []);
 
-    // 4. CÁLCULO DE MÉTRICAS REALES (useMemo para optimización) (sin cambios)
+    // 4. CÁLCULO DE MÉTRICAS
     const DYNAMIC_METRICS = useMemo(() => {
+
         if (products.length === 0) {
             return [
-                { title: "Total Productos", value: 0, icon: faBoxOpen, color: "#FF7B00" },
-                { title: "Categorías", value: 0, icon: faLayerGroup, color: "#10B981" },
-                { title: "Stock Total", value: 0, icon: faWarehouse, color: "#F59E0B" },
+                { title: "Total Productos", value: 0, icon: faBoxOpen, colorClass: 'metric-orange' },
+                { title: "Categorías", value: 0, icon: faLayerGroup, colorClass: 'metric-green' },
+                { title: "Stock Total", value: 0, icon: faWarehouse, colorClass: 'metric-yellow' },
             ];
         }
 
@@ -78,28 +83,28 @@ const ProductList = ({userRole}) => {
 
 
         return [
-            { title: "Total Productos", value: totalProducts, icon: faBoxOpen, color: "#FF7B00" },
-            { title: "Categorías", value: totalCategories, icon: faLayerGroup, color: "#10B981" },
-            { title: "Stock Total", value: totalStock, icon: faWarehouse, color: "#F59E0B" },
+            { title: "Total Productos", value: totalProducts, icon: faBoxOpen, colorClass: 'metric-orange' },
+            { title: "Categorías", value: totalCategories, icon: faLayerGroup, colorClass: 'metric-green' },
+            { title: "Stock Total", value: totalStock, icon: faWarehouse, colorClass: 'metric-yellow' },
         ];
     }, [products]);
 
 
-    // 5. FUNCIONES DE MODAL Y ACCIONES (sin cambios)
+    // 5. FUNCIONES DE MODAL Y ACCIONES
     const handleNewProduct = () => {
-        setCurrentProduct(null); // Modo Creación
+        setCurrentProduct(null);
         setIsFormOpen(true);
     };
 
     const handleEdit = (product) => {
-        setCurrentProduct(product); // Modo Edición
+        setCurrentProduct(product);
         setIsFormOpen(true);
     };
 
     const handleCloseForm = () => {
         setIsFormOpen(false);
         setCurrentProduct(null);
-        fetchProducts(); // Recarga la lista de la API
+        fetchProducts();
     };
 
     const handleDelete = (product) => {
@@ -123,7 +128,7 @@ const ProductList = ({userRole}) => {
     };
 
 
-    // 7. Filtrado de productos por búsqueda (sin cambios)
+    // 7. Filtrado de productos por búsqueda
     const filteredProducts = products.filter(product =>
         (product.name && product.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -145,7 +150,7 @@ const ProductList = ({userRole}) => {
                     <h1>Gestión de Productos</h1>
                     <p className="page-subtitle">Administrar catálogo de productos</p>
                 </div>
-                <div className="action-buttons-group"> {/* 🟢 Contenedor para alinear los botones */}
+                <div className="action-buttons-group"> {/* Contenedor para alinear los botones */}
                     {/* BOTÓN PAPELERA (Solo Admin) */}
                     {isAdmin && (
                         <button className="delete-recovery-button" onClick={handleGoToRecovery}>
@@ -162,15 +167,14 @@ const ProductList = ({userRole}) => {
                 </div>
             </div>
 
-            {/* Métricas (sin cambios) */}
-            <div className="metrics-grid">
+            {/* METRICAS */}
+            <div className="summary-cards-container">
                 {DYNAMIC_METRICS.map((metric, index) => (
-                    <MetricCard
+                    <SummaryCard
                         key={index}
                         title={metric.title}
                         value={isLoading ? 'Cargando...' : metric.value}
-                        icon={metric.icon}
-                        color={metric.color}
+                        colorClass={metric.colorClass}
                     />
                 ))}
             </div>
@@ -187,7 +191,7 @@ const ProductList = ({userRole}) => {
             </div>
 
 
-            {/* Lista de Productos (Tabla Estilizada) (sin cambios en la tabla) */}
+            {/* Lista de Productos */}
             <div className="product-list-card">
                 <div className="table-info">
                     Lista de Productos
@@ -244,7 +248,7 @@ const ProductList = ({userRole}) => {
                 )}
             </div>
 
-            {/* MODALES (sin cambios) */}
+            {/* MODALES */}
             {isFormOpen && (
                 <div className="modal-backdrop">
                     <ProductForm

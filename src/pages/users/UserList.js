@@ -1,26 +1,29 @@
-// src/pages/users/UserList.js (VERSIÓN FINAL CON BOTÓN PAPELERA)
-
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // 🟢 1. Importar useNavigate
+import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// 2. Importar faTrashRestore
 import { faPlus, faUser, faUserTie, faPencilAlt, faTrashAlt, faTrashRestore } from '@fortawesome/free-solid-svg-icons';
 import UserForm from '../../components/users/UserForm';
 import userService from '../../services/userService';
 import './UserList.css';
 
-// Componente para la Tarjeta de Métrica (Mantenido)
-const MetricCard = ({ title, value, icon, color }) => (
-    <div className="metric-card">
-        <div className="card-header">
-            <span className="card-title">{title}</span>
-            <FontAwesomeIcon icon={icon} style={{ color: color, opacity: 0.8 }} />
-        </div>
-        <div className="card-value">{value}</div>
-    </div>
-);
+const SummaryCard = ({ title, value, colorClass }) => {
+    const formatValue = (val) => {
+        return val.toLocaleString('es-CO'); // Formato de miles
+    };
 
-// FUNCIÓN CLAVE: Formatea la cadena de fecha (Mantenido)
+    const displayValue = formatValue(value);
+
+    return (
+        <div className={`summary-card ${colorClass}`}>
+            <div className="card-content">
+                <p className="card-title">{title}</p>
+                <h2 className="card-value">{displayValue}</h2>
+            </div>
+        </div>
+    );
+};
+
+// FUNCIÓN CLAVE: Formatea la cadena de fecha
 const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     try {
@@ -33,13 +36,10 @@ const formatDate = (dateString) => {
     }
 };
 
-
-// UserList ahora recibe 'userRole' de PrivateRoute
 const UserList = ({ userRole }) => {
-    // 3. Inicializar useNavigate para la navegación
     const navigate = useNavigate();
 
-    // 1. ESTADOS CLAVE (Mantenido)
+    // 1. ESTADOS CLAVE
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
     const [users, setUsers] = useState([]);
@@ -47,10 +47,9 @@ const UserList = ({ userRole }) => {
     const [error, setError] = useState(null);
     const [userToDelete, setUserToDelete] = useState(null);
 
-    // Variable de control para visibilidad del botón de recuperación
     const isAdmin = userRole === 'ADMINISTRADOR';
 
-    // 2. LÓGICA DE CARGA DE DATOS (Mantenido)
+    // 2. LÓGICA DE CARGA DE DATOS
     const fetchUsers = async () => {
         setIsLoading(true);
         setError(null);
@@ -65,12 +64,12 @@ const UserList = ({ userRole }) => {
         }
     };
 
-    // 3. EFECTO: Cargar datos al montar el componente (Mantenido)
+    // 3. EFECTO: Cargar datos al montar el componente
     useEffect(() => {
         fetchUsers();
     }, []);
 
-    // LÓGICA DE BOTONES (Mantenido)
+    // LÓGICA DE BOTONES
     const handleNewUser = () => {
         setCurrentUser(null);
         setIsFormOpen(true);
@@ -116,16 +115,14 @@ const UserList = ({ userRole }) => {
     const handleGoToRecovery = () => {
         navigate('/users/recovery');
     };
-
-    // CÁLCULO DE MÉTRICAS (Mantenido)
     const totalUsers = users.length;
     const totalAdmins = users.filter(u => u.role === 'ADMINISTRADOR').length;
     const totalOperators = users.filter(u => u.role === 'OPERADOR').length;
 
     const DYNAMIC_METRICS = [
-        { title: "Total Usuarios", value: totalUsers, icon: faUser, color: "#FF7B00" },
-        { title: "Administradores", value: totalAdmins, icon: faUserTie, color: "#10B981" },
-        { title: "Operadores", value: totalOperators, icon: faUser, color: "#3B82F6" },
+        { title: "Total Usuarios", value: totalUsers, icon: faUser, colorClass: "metric-orange" },
+        { title: "Administradores", value: totalAdmins, icon: faUserTie, colorClass: "metric-green" },
+        { title: "Operadores", value: totalOperators, icon: faUser, colorClass: "metric-blue" },
     ];
 
 
@@ -155,14 +152,18 @@ const UserList = ({ userRole }) => {
                 </div>
             </div>
 
-            {/* Métricas (Mantenido) */}
-            <div className="metrics-grid">
+            <div className="summary-cards-container">
                 {DYNAMIC_METRICS.map((metric, index) => (
-                    <MetricCard key={index} {...metric} />
+                    <SummaryCard
+                        key={index}
+                        title={metric.title}
+                        value={metric.value}
+                        colorClass={metric.colorClass}
+                    />
                 ))}
             </div>
 
-            {/* Lista de Usuarios (Tabla Estilizada) - Mantenido */}
+            {/* Lista de Usuarios */}
             <div className="user-list-card">
                 <div className="table-info">
                     Lista de Usuarios
@@ -215,7 +216,7 @@ const UserList = ({ userRole }) => {
                 )}
             </div>
 
-            {/* MODALES (Mantenido) */}
+            {/* MODALES */}
             {isFormOpen && (
                 <div className="modal-backdrop">
                     <UserForm

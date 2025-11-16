@@ -4,13 +4,10 @@ import RecoveryService from '../../services/recoveryService';
 import '../../pages/users/UserList.css';
 import RecoveryView from './RecoveryView';
 
-/**
- * Función auxiliar para formatear una cadena de fecha ISO 8601 a un formato legible.
- */
+
 const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
 
-    // Asume que dateString es un formato válido que Date() puede parsear (ej: ISO)
     const date = new Date(dateString);
 
     // Opciones de formato de fecha y hora local (ej: DD/MM/YYYY hh:mm AM/PM)
@@ -23,8 +20,6 @@ const formatDate = (dateString) => {
         hour12: true, // Para mostrar AM/PM
     };
 
-    // Usar toLocaleString para obtener el formato local deseado
-    // Nota: ajusta 'es-CO' a tu localización si es necesario.
     return date.toLocaleString('es-CO', options);
 };
 
@@ -40,9 +35,6 @@ const productColumns = [
         accessor: 'deletedAt',
         render: (item) => formatDate(item.deletedAt)
     }
-    // Si deseas incluir stock o precio en la recuperación:
-    // { header: 'Stock Total', accessor: 'totalStock' },
-    // { header: 'Precio', accessor: 'price' }
 ];
 
 const ProductRecovery = () => {

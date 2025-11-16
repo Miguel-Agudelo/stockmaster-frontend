@@ -1,6 +1,5 @@
-import api from './api'; // Asumo que este es tu cliente Axios configurado
+import api from './api';
 
-// Obtiene el token JWT del localStorage y lo formatea para el header 'Authorization'.
 const getAuthHeader = () => {
     const token = localStorage.getItem('token');
 
@@ -47,8 +46,6 @@ const getCurrentUser = () => {
 
     let user = JSON.parse(userJson);
 
-    // Normalizar la ID de 'id_user' a 'id'
-    // Esto asegura que el frontend siempre use 'user.id'
     if (user.id_user && !user.id) {
         user.id = user.id_user;
         delete user.id_user;
@@ -61,11 +58,10 @@ const isUserAuthenticated = () => {
     return !!localStorage.getItem('token');
 };
 
-// EXPORTAR la nueva función getAuthHeader para que otros servicios puedan usarla
 export default {
     login,
     logout,
     getCurrentUser,
     isUserAuthenticated,
-    getAuthHeader // ⬅️ ¡Agregado!
+    getAuthHeader
 };

@@ -1,4 +1,3 @@
-// src/components/layout/Sidebar.js
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import authService from '../../services/authService';
@@ -8,22 +7,21 @@ import LogoImage from '../../assets/LogoStockMaster.png';
 
 // --- Configuración del Menú de Navegación ---
 const menuItems = [
-    { name: 'Dashboard', path: '/dashboard', iconClass: 'fas fa-home', role: ['ADMINISTRADOR', 'OPERADOR'] },
+    { name: 'Dashboard/Reportes', path: '/reports', iconClass: 'fas fa-chart-bar', role: ['ADMINISTRADOR', 'OPERADOR'] },
     { name: 'Usuarios', path: '/users', iconClass: 'fas fa-users', role: ['ADMINISTRADOR'] },
     { name: 'Productos', path: '/products', iconClass: 'fas fa-box', role: ['ADMINISTRADOR', 'OPERADOR'] },
     { name: 'Almacenes', path: '/warehouses', iconClass: 'fas fa-warehouse', role: ['ADMINISTRADOR', 'OPERADOR'] },
-    { name: 'Movimientos', path: '/movements', iconClass: 'fas fa-exchange-alt', role: ['ADMINISTRADOR', 'OPERADOR'] },
-    { name: 'Reportes', path: '/reports', iconClass: 'fas fa-chart-bar', role: ['ADMINISTRADOR'] },
+    { name: 'Movimientos', path: '/movements', iconClass: 'fas fa-truck-moving', role: ['ADMINISTRADOR', 'OPERADOR'] },
+    { name: 'Transferencias', path: '/movements/transfer', iconClass: 'fas fa-exchange-alt', role: ['ADMINISTRADOR', 'OPERADOR'] },
+
 ];
 
 const Sidebar = () => {
     const navigate = useNavigate();
-    const location = useLocation(); // Para saber la ruta actual
-    const [isMenuOpen, setIsMenuOpen] = useState(false); // Estado para el menú de Cerrar Sesión
+    const location = useLocation();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    // Simulación de datos de usuario (asegúrate de que authService funcione)
     const currentUser = authService.getCurrentUser() || {
-        // Rol de Almacenes/Movimientos es 'OPERADOR' o 'ADMINISTRADOR'
         role: 'ADMINISTRADOR',
         name: 'Juan Pérez',
         initials: 'JP'
@@ -66,26 +64,41 @@ const Sidebar = () => {
 
                     if (!hasRequiredRole) return null;
 
-                    const isImplementedPath = item.path === '/dashboard' ||
+                    const isImplementedPath =
+                        item.path === '/reports' ||
                         item.path === '/users' ||
                         item.path === '/products' ||
                         item.path === '/warehouses' ||
                         item.path === '/movements' ||
-                        item.path === '/reports'; // 🟢 RUTA DE REPORTES AGREGADA
+                        item.path === '/movements/transfer';
 
                     if (!isImplementedPath) return null;
 
 
-                    // Determina si el ítem está activo
-                    const isActive = location.pathname.startsWith(item.path) && item.path !== '/';
-                    // Usar startsWith permite que rutas como /warehouses/edit/1 sigan marcando /warehouses como activo.
-                    const isDashboardActive = item.path === '/dashboard' && location.pathname === '/dashboard';
+                    let finalActiveState = false;
+
+                    // 1. Caso especial para Reportes: activo si la URL es '/' o '/reports'
+                    if (item.path === '/reports') {
+                        finalActiveState = location.pathname === '/' || location.pathname.startsWith('/reports');
+                    }
+                    // 2. Caso para Transferencias: debe ser exacto para no activar solo /movements
+                    else if (item.path === '/movements/transfer') {
+                        finalActiveState = location.pathname.startsWith('/movements/transfer');
+                    }
+                    // 3. Caso para Movimientos: solo activo si es /movements (no /movements/transfer)
+                    else if (item.path === '/movements') {
+                        finalActiveState = location.pathname === '/movements';
+                    }
+                    // 4. Casos generales (users, products, warehouses, etc.)
+                    else {
+                        finalActiveState = location.pathname.startsWith(item.path) && item.path !== '/';
+                    }
 
 
                     return (
                         <li
                             key={item.name}
-                            className={`menu-item ${isActive || isDashboardActive ? 'active' : ''}`}
+                            className={`menu-item ${finalActiveState ? 'active' : ''}`}
                             onClick={() => navigate(item.path)}
                         >
                             <i className={item.iconClass}></i>

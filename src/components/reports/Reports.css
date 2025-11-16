@@ -2,9 +2,10 @@
 /* --- ESTILOS GENERALES DEL DASHBOARD (ReportsDashboard.js) --- */
 /* ------------------------------------------- */
 .reports-dashboard {
-    padding: 20px;
-    background-color: #f8f9fa; /* Fondo gris claro */
-    min-height: 85vh;
+    background-color: #f8f9fa;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .reports-dashboard h2 {
@@ -19,13 +20,49 @@
     font-size: 1.05rem;
 }
 
+/* ------------------------------------------------------------------- */
+/* --- SECCIÓN INTEGRADA DEL DASHBOARD (Encabezado y Alerta) --- */
+/* ------------------------------------------------------------------- */
+
+/* --- Encabezado del Dashboard --- */
+.dashboard-header {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+}
+
+.dashboard-header h1 {
+    color: #333;
+    margin: 0 0 5px 0;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.dashboard-header .dashboard-date {
+    color: #666;
+    margin: 0;
+    font-size: 15px;
+}
+
+/* --- Alerta Superior de Stock Bajo --- */
+.low-stock-banner {
+    background-color: #ffe0b2;
+    color: #e65100;
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    font-weight: 500;
+    border: 1px solid #ffcc80;
+    display: flex;
+    align-items: center;
+}
+
 /* ------------------------------------------- */
 /* --- TARJETAS DE RESUMEN (SummaryCard) --- */
 /* ------------------------------------------- */
 .summary-cards-container {
-    /* 🟢 CORRECCIÓN: Usar Grid para asegurar 4 columnas iguales */
+    width: 100%;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
     margin-bottom: 30px;
 }
@@ -54,11 +91,16 @@
     justify-content: space-between;
     align-items: center;
     min-width: 200px;
+    min-height: 120px;
     transition: transform 0.3s;
 }
 
 .summary-card:hover {
     transform: translateY(-3px);
+}
+
+.summary-card .card-content {
+    flex-grow: 1;
 }
 
 .summary-card .card-title {
@@ -74,27 +116,31 @@
     margin: 0;
 }
 
+/* Para valores monetarios (Ingresos Totales) para usar un tamaño de fuente más pequeño */
+.summary-card .card-value-money {
+    font-size: 1.8rem;
+}
+
 .summary-card .card-icon {
     font-size: 3rem;
     opacity: 0.6;
 }
 
 /* Paleta de Colores para Tarjetas */
-.summary-card.alert .card-value, .summary-card.alert .card-icon { color: #dc3545; } /* Rojo */
-.summary-card.info .card-value, .summary-card.info .card-icon { color: #007bff; } /* Azul */
-.summary-card.success .card-value, .summary-card.success .card-icon { color: #28a745; } /* Verde */
-.summary-card.success-money .card-value, .summary-card.success-money .card-icon { color: #17a2b8; } /* Turquesa/Moneda */
+.summary-card.alert .card-value, .summary-card.alert .card-icon { color: #dc3545; }
+.summary-card.info .card-value, .summary-card.info .card-icon { color: #007bff; }
+.summary-card.success .card-value, .summary-card.success .card-icon { color: #28a745; }
+.summary-card.success-money .card-value, .summary-card.success-money .card-icon { color: #17a2b8; }
 
 
 /* ------------------------------------------- */
 /* --- NAVEGACIÓN POR PESTAÑAS (TABS) --- */
 /* ------------------------------------------- */
 .tabs-container {
-    /* 🟢 CORRECCIÓN: Padding ajustado (5px) para hacerlo compacto */
     display: flex;
     border-bottom: none;
     margin-bottom: 30px;
-    padding: 5px; /* Padding vertical reducido */
+    padding: 5px;
     background-color: #e6e6e8;
     border-radius: 50px;
     width: 100%;
@@ -104,7 +150,7 @@
     flex-grow: 1;
     background-color: transparent;
     border: none;
-    padding: 10px 15px; /* Padding del botón ajustado */
+    padding: 10px 15px;
     cursor: pointer;
     font-size: 1.05rem;
     color: #495057;
@@ -140,7 +186,7 @@
     margin-top: -1px;
 }
 
-/* 🟢 Contenedor para alinear título y botón de exportar */
+/* Contenedor para alinear título y botón de exportar */
 .report-header-section {
     display: flex;
     justify-content: space-between;
@@ -211,17 +257,15 @@
 .date-filter-form .filter-controls {
     display: flex;
     gap: 15px;
-    align-items: flex-end; /* Alineación crucial para que los botones estén a la misma altura que los inputs */
+    align-items: flex-end;
     margin-bottom: 20px;
 }
 
-/* 🟢 Asegura que la etiqueta esté encima del Input */
 .date-filter-form .filter-controls .input-group {
     display: flex;
     flex-direction: column;
 }
 
-/* Etiqueta de "Desde"/"Hasta" */
 .date-filter-form .filter-controls .input-label {
     font-size: 0.9rem;
     color: #6c757d;
@@ -233,7 +277,6 @@
 /* --- AJUSTE VISUAL DE INPUTS Y BOTONES DE FILTRO --- */
 /* ------------------------------------------- */
 
-/* Estilo moderno y unificado para Input de fecha */
 .date-filter-form input[type="date"] {
     padding: 8px 10px;
     border: 1px solid #ced4da;
@@ -253,19 +296,15 @@
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
-/* Ocultar el ícono de calendario nativo para uniformidad */
 .date-filter-form input[type="date"]::-webkit-calendar-picker-indicator {
     opacity: 0.7;
     cursor: pointer;
 }
 
-/* 🟢 Estilo Final de los Botones del Filtro (Unificado para Aplicar y Limpiar) */
 .filter-button {
     padding: 10px 15px;
     font-size: 0.9rem;
     height: 40px;
-
-    /* Estilo de la imagen (fondo blanco, borde sutil) */
     background-color: #fff !important;
     border: 1px solid #ced4da !important;
     color: #495057 !important;
@@ -282,7 +321,7 @@
 
 /* --- ESTILOS DE INSIGNIAS DE MOVIMIENTO (BADGES) --- */
 
-/* CLASE BASE: badge-movement */
+/* badge-movement */
 .badge-movement {
     padding: 3px 8px;
     border-radius: 4px;
@@ -313,7 +352,7 @@
 }
 
 
-/* 🟢 ESTILOS PARA LA CANTIDAD (texto con signo y color) */
+/* ESTILOS PARA LA CANTIDAD (texto con signo y color) */
 .text-success {
     color: #28a745 !important;
     font-weight: 600;
@@ -341,15 +380,15 @@
 }
 
 .badge-ranking-1 {
-    background-color: #ffc107; /* Dorado */
+    background-color: #ffc107;
 }
 
 .badge-ranking-2 {
-    background-color: #6c757d; /* Plateado (gris oscuro) */
+    background-color: #6c757d;
 }
 
 .badge-ranking-3 {
-    background-color: #fd7e14; /* Bronce (naranja) */
+    background-color: #fd7e14;
 }
 
 /* Para posiciones 4 en adelante */
@@ -360,10 +399,20 @@
 .badge-ranking-8,
 .badge-ranking-9,
 .badge-ranking-10 {
-    background-color: #e0e0e0; /* Gris claro */
-    color: #333; /* Texto oscuro */
+    background-color: #e0e0e0;
+    color: #333;
 }
 
+
 /* ------------------------------------------- */
-/* --- FIN DE ESTILOS PERSONALIZADOS --- */
+/* --- EFECTO DE HOVER REUTILIZABLE --- */
 /* ------------------------------------------- */
+.hover-lift {
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+}
+
+.hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}

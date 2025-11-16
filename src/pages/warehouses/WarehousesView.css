@@ -25,59 +25,117 @@
     margin: 5px 0 0 0;
 }
 
-.add-new-button {
-    background-color: #FF7B00; /* Naranja principal (StockMaster) */
-    color: white;
+.action-buttons-group {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.add-new-button,
+.delete-recovery-button {
+    padding: 10px 20px;
     border: none;
     border-radius: 8px;
-    padding: 10px 20px;
-    font-size: 1em;
+    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.add-new-button:hover {
-    background-color: #E66A00;
+/* Estilos para el Botón "Nuevo Almacén" */
+.add-new-button {
+    background-color: #FF7B00;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* --- 3. Metric Cards Grid --- */
-.metrics-grid {
+.add-new-button:hover {
+    background-color: #E66A00;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Estilos para el Botón "Papelera" */
+.delete-recovery-button {
+    background-color: #64748b;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.delete-recovery-button:hover {
+    background-color: #475569;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+
+.summary-cards-container {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
     margin-bottom: 30px;
 }
 
-.metric-card {
+.summary-card {
     background-color: #ffffff;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
     border: 1px solid #f1f5f9;
-}
 
-.card-header {
+    /* Layout de tarjeta de resumen */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    min-height: 120px;
+
+    /* Efecto de movimiento al pasar el ratón */
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
 }
 
-.card-title {
-    font-size: 0.9em;
+.summary-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Estilos internos de la Tarjeta de Resumen */
+.summary-card .card-content {
+    flex-grow: 1;
+}
+
+.summary-card .card-title {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
     font-weight: 500;
-    color: #64748b;
 }
 
-.card-value {
-    font-size: 2em;
+.summary-card .card-value {
+    font-size: 2.2rem;
     font-weight: 700;
     color: #1e293b;
+    margin: 0;
 }
+
+/* Total Almacenes  */
+.summary-card.metric-orange .card-value {
+    color: #FF7B00;
+}
+
+/* Productos Almacenados  */
+.summary-card.metric-green .card-value {
+    color: #10B981;
+}
+
+/* Stock Total  */
+.summary-card.metric-blue .card-value {
+    color: #3B82F6;
+}
+
 
 /* --- 4. Tabla de Almacenes (Contenedor y Estilos) --- */
 .data-table-card {
@@ -85,7 +143,6 @@
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     padding: 20px;
-    /* Permite el scroll horizontal */
     overflow-x: auto;
 }
 
@@ -117,7 +174,7 @@
     font-size: 0.9em;
     font-weight: 600;
     border-bottom: 1px solid #e2e8f0;
-    white-space: nowrap; /* Asegura que no se rompan las cabeceras */
+    white-space: nowrap;
 }
 
 .data-table td {
@@ -132,7 +189,7 @@
     background-color: #f8fafc;
 }
 
-/* --- 5. Badges de Stock (Clonado de los Badges de Rol) --- */
+/* --- 5. Badges de Stock --- */
 .stock-badge {
     display: inline-block;
     padding: 6px 10px;
@@ -143,13 +200,11 @@
 }
 
 .badge-products {
-    /* Naranja claro/oscuro (Simulando rol ADMINISTRADOR) */
     background-color: #ffedd5;
     color: #f97316;
 }
 
 .badge-stock {
-    /* Azul claro/oscuro (Simulando rol OPERADOR) */
     background-color: #dbeafe;
     color: #2563eb;
 }
@@ -173,11 +228,11 @@
 }
 
 .edit-button {
-    color: #4f46e5; /* Índigo */
+    color: #4f46e5;
 }
 
 .delete-button {
-    color: #ef4444; /* Rojo */
+    color: #ef4444;
 }
 
 .action-button:hover {
@@ -263,14 +318,13 @@
     border: 1px solid #ccc;
 }
 
-.delete-button {
+.delete-button-red {
     background-color: #e74c3c;
     color: white;
     border-color: #E74C3C;
 }
 
-.delete-button:hover:not(:disabled) {
-    /* Fondo Rojo y Letra Blanca al hacer hover */
+.delete-button-red:hover:not(:disabled) {
     background-color: #dc3545;
     color: white;
     border-color: #dc3545;
@@ -323,7 +377,7 @@
 /* Contenedor Flex para la lista de tarjetas de almacenes */
 .warehouse-stock-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* 2 a 3 columnas flexibles */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
 }
 
@@ -332,7 +386,7 @@
     padding: 20px;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
-    background-color: #f8fafc; /* Fondo ligeramente diferente para destacar */
+    background-color: #f8fafc;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
     display: flex;
     flex-direction: column;
@@ -359,14 +413,14 @@
     margin: 0 0 15px 0;
     padding-bottom: 10px;
     border-bottom: 1px solid #e2e8f0;
-    font-weight: 600; /* Le damos peso al mensaje "Stock actual por producto" */
+    font-weight: 600;
 }
 /* Lista de productos dentro del almacén */
 .product-list {
     list-style: none;
     padding: 0;
     margin: 0;
-    max-height: 200px; /* Limitar altura para mostrar el scroll si hay muchos productos */
+    max-height: 200px;
     overflow-y: auto;
 }
 
@@ -375,7 +429,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px 0;
-    border-bottom: 1px dotted #cbd5e1; /* Línea punteada para separar productos */
+    border-bottom: 1px dotted #cbd5e1;
     font-size: 0.95em;
 }
 
@@ -389,10 +443,10 @@
     font-weight: 500;
 }
 
-/* Badge del stock actual del producto (usamos un color nuevo o existente) */
+/* Badge del stock actual del producto  */
 .product-stock-badge {
-    background-color: #ecfdf5; /* Verde claro */
-    color: #059669; /* Verde oscuro */
+    background-color: #ecfdf5;
+    color: #059669;
     padding: 4px 8px;
     border-radius: 4px;
     font-weight: 600;
@@ -400,8 +454,8 @@
 }
 
 .low-stock-badge {
-    background-color: #fee2e2; /* Rojo claro */
-    color: #ef4444; /* Rojo oscuro */
+    background-color: #fee2e2;
+    color: #ef4444;
     padding: 4px 8px;
     border-radius: 4px;
     font-weight: 600;

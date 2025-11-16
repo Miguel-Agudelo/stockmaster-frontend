@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Componente simple para mostrar un indicador de carga.
+ * Componente simple para mostrar un indicador de carga en pantalla.
  * @param {object} props
  * @param {string} props.message - Mensaje opcional para mostrar junto al spinner.
  */

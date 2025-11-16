@@ -1,28 +1,51 @@
 import React, { useState, useEffect, useCallback } from 'react';
-// Importa los componentes de las pestañas (se asume exportación default)
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBell } from '@fortawesome/free-solid-svg-icons';
+
 import LowStockReport from '../../components/reports/LowStockReport';
 import MovementReport from '../../components/reports/MovementReport';
 import TopSellingReport from '../../components/reports/TopSellingReport';
-import ReportService from '../../services/reportService';
+
+import reportService from '../../services/reportService';
+import dashboardService from '../../services/dashboardService';
+import authService from '../../services/authService';
 import '../../components/reports/Reports.css';
 
+const LowStockAlert = ({ count }) => {
+    if (count === 0) return null;
+    const message = count === 1
+        ? '1 producto tiene stock por debajo del umbral mínimo.'
+        : `${count} productos tienen stock por debajo del umbral mínimo.`;
+
+    // Usamos la clase 'low-stock-banner' del Dashboard
+    return (
+        <div className="alert alert-warning low-stock-banner">
+            <FontAwesomeIcon icon={faBell} style={{ marginRight: '10px' }} />
+            Alerta de Stock Bajo: {message}
+        </div>
+    );
+};
+
+// Componente: SummaryCard (Formato de valores)
 /**
  * Componente reutilizable para las tarjetas de resumen
  */
 const SummaryCard = ({ title, value, iconClass, colorClass }) => {
 
-    // FUNCIÓN DE FORMATO: Usamos Intl.NumberFormat para moneda sin decimales
     const formatValue = (val, isMoney) => {
+        if (typeof val !== 'number' || isNaN(val)) {
+            val = 0;
+        }
+
         if (isMoney) {
-            // Usa formato local (ej: 'es-CO') para moneda sin decimales para ahorrar espacio
             return new Intl.NumberFormat('es-CO', {
                 style: 'currency',
-                currency: 'COP', // Asumiendo COP, ajusta si es USD o otra
+                currency: 'COP',
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0
             }).format(val);
         }
-        return val;
+        return new Intl.NumberFormat('es-CO').format(val);
     };
 
     const isMoney = title.includes('Ingresos');
@@ -41,95 +64,132 @@ const SummaryCard = ({ title, value, iconClass, colorClass }) => {
     );
 };
 
+// --- COMPONENTE PRINCIPAL MODIFICADO ---
+
 const ReportsDashboard = () => {
     // 1. Estado para manejar la pestaña activa: 'lowStock', 'movements', 'topSelling'
     const [activeTab, setActiveTab] = useState('lowStock');
 
-    // 2. Estado para los datos de resumen (tarjetas)
-    const [summaryData, setSummaryData] = useState({
-        lowStock: 0,
+    // 2. Estado para los datos unificados
+    const [pageData, setPageData] = useState({
+        // Datos del Dashboard
+        userName: 'Usuario',
+        date: new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+        lowStockCount: 0, // Para la alerta superior
+
+        // Datos de Reportes (tarjetas de resumen)
+        lowStockReportCount: 0, // Para la tarjeta de resumen
         totalMovements: 0,
-        totalSold: 0,
+        // Eliminado: totalSold
         totalRevenue: 0.00,
     });
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     // FUNCIÓN ESTABLE PARA ACTUALIZAR EL CONTADOR DE STOCK BAJO EN EL ESTADO DEL DASHBOARD
-    const updateLowStockCount = useCallback((count) => {
-        setSummaryData(prev => ({...prev, lowStock: count}));
-    }, [setSummaryData]);
+    const updateLowStockReportCount = useCallback((count) => {
+        // Se usa para la tarjeta de resumen y se asegura que la alerta superior también esté sincronizada.
+        setPageData(prev => ({...prev, lowStockReportCount: count, lowStockCount: count}));
+    }, []);
 
-    // Función para calcular los datos de resumen a partir de los reportes
+    // Función principal para obtener todos los datos
     useEffect(() => {
-        const fetchSummary = async () => {
+        const fetchAllData = async () => {
+            setLoading(true);
             try {
-                // Lógica para obtener las métricas de Ingresos
-                const topSellingResponse = await ReportService.getTopSellingReport();
-                // Calcula el total de ingresos de todos los ítems vendidos
-                const totalRevenue = topSellingResponse.data.reduce((sum, item) => sum + (item.totalRevenue || 0), 0);
+                // 1. OBTENER NOMBRE DEL USUARIO DESDE AUTHSERVICE
+                const currentUser = authService.getCurrentUser();
+                const currentUserName = currentUser ? currentUser.name : 'Usuario';
 
-                setSummaryData(prev => ({
+                // 2. Obtener datos del Dashboard (Alertas, Reportes)
+                const {
+                    lowStockCount: rawLowStockCount,
+                    totalMovements: rawTotalMovements
+                } = await dashboardService.getDashboardSummary();
+
+                // Aseguramos que los valores sean numéricos (0 si son null, undefined o NaN)
+                const lowStockCount = Number(rawLowStockCount) || 0;
+                const totalMovements = Number(rawTotalMovements) || 0;
+
+                // 3. Obtener el Reporte de Más Vendidos para calcular Ingresos
+                const topSellingResponse = await reportService.getTopSellingReport();
+
+                // Calcular Ingresos Totales (siempre seguro contra null)
+                const totalRevenue = topSellingResponse.data.reduce((sum, item) => sum + (Number(item.totalRevenue) || 0), 0);
+
+
+                setPageData(prev => ({
                     ...prev,
-                    totalMovements: 2, // Simulado
-                    totalSold: 5, // Simulado
+                    userName: currentUserName,
+
+                    lowStockCount: lowStockCount,
+                    lowStockReportCount: lowStockCount,
+
+                    totalMovements: totalMovements,
                     totalRevenue: totalRevenue,
                 }));
+
             } catch (err) {
-                console.error("Error al cargar datos de resumen:", err);
-                setError("Error al cargar datos de resumen.");
+                console.error("Error al cargar datos unificados:", err);
+                setError("Error al cargar datos del Dashboard/Reportes. Ver consola para más detalles.");
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchSummary();
-        // Solo se ejecuta al montar el Dashboard
+        fetchAllData();
     }, []);
 
     // Función para renderizar el contenido según la pestaña activa
     const renderContent = () => {
         switch (activeTab) {
             case 'lowStock':
-                // PASAMOS LA FUNCIÓN ESTABLE updateLowStockCount AL HIJO
-                return <LowStockReport setLowStockCount={updateLowStockCount} />;
+                return <LowStockReport setLowStockCount={updateLowStockReportCount} />;
             case 'movements':
                 return <MovementReport />;
             case 'topSelling':
                 return <TopSellingReport />;
             default:
-                return <LowStockReport />;
+                return <LowStockReport setLowStockCount={updateLowStockReportCount} />;
         }
     };
 
+    if (loading) {
+        return <div className="main-content">Cargando Panel de Control y Reportes...</div>;
+    }
+
     return (
         <div className="main-content">
-            <h2>Reportes</h2>
+            {/* 1. MENSAJE DE PANEL DE CONTROL Y DÍA ACTUALIZADO */}
+            <header className="dashboard-header">
+                <h1>Bienvenido, {pageData.userName}</h1>
+                <p className="dashboard-date">Panel de control - {pageData.date}</p>
+            </header>
+
+            {/* 2. ALERTA DE STOCK BAJO */}
+            <LowStockAlert count={pageData.lowStockCount} />
+
+            <h2 className="report-title-header">Reportes</h2>
             <p className="subtitle">Análisis e informes del sistema de inventario</p>
 
-            {/* Tarjetas de Resumen (Mockup Superior) */}
+            {/* Tarjetas de Resumen */}
             <div className="summary-cards-container">
                 <SummaryCard
                     title="Productos con Stock Bajo"
-                    value={summaryData.lowStock}
+                    value={pageData.lowStockReportCount}
                     iconClass="fa-exclamation-triangle"
                     colorClass="alert"
                 />
                 <SummaryCard
                     title="Movimientos Total"
-                    value={summaryData.totalMovements}
+                    value={pageData.totalMovements}
                     iconClass="fa-exchange-alt"
                     colorClass="info"
                 />
                 <SummaryCard
-                    title="Total Vendido"
-                    value={summaryData.totalSold}
-                    iconClass="fa-chart-line"
-                    colorClass="success"
-                />
-                <SummaryCard
                     title="Ingresos Totales"
-                    value={summaryData.totalRevenue} // 🟢 CORRECCIÓN: Pasamos el valor numérico
+                    value={pageData.totalRevenue}
                     iconClass="fa-dollar-sign"
                     colorClass="success-money"
                 />
@@ -159,7 +219,7 @@ const ReportsDashboard = () => {
 
             {/* Contenido Dinámico del Reporte */}
             <div className="report-content-area">
-                {loading ? <p>Cargando reportes...</p> : renderContent()}
+                {error ? <p className="error-message">{error}</p> : renderContent()}
             </div>
         </div>
     );

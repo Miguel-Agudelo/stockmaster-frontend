@@ -10,7 +10,6 @@ import RecoveryView from './RecoveryView';
 const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
 
-    // Asume que dateString es un formato válido que Date() puede parsear (ej: ISO)
     const date = new Date(dateString);
 
     // Opciones de formato de fecha y hora local (DD/MM/YYYY hh:mm AM/PM)
@@ -34,12 +33,11 @@ const warehouseColumns = [
     { header: 'Nombre', accessor: 'name' },
     { header: 'Dirección', accessor: 'address' },
     { header: 'Ciudad', accessor: 'city' },
-    // El stock total podría no ser relevante si el almacén está inactivo, pero lo mantenemos
 
     {
         header: 'Fecha Eliminación',
         accessor: 'deletedAt',
-        // 🟢 IMPLEMENTACIÓN CLAVE: Usa la función render para formatear el valor
+
         render: (item) => formatDate(item.deletedAt)
     }
 ];

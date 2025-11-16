@@ -8,19 +8,15 @@
     left: 0;
     right: 0;
     bottom: 0;
-    /* Fondo semi-transparente */
     background-color: rgba(0, 0, 0, 0.5);
-    /* Asegura que esté por encima de todo */
     z-index: 1000;
     display: flex;
     justify-content: center;
     align-items: center;
-    /* Animación de desvanecimiento suave */
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
 }
 
-/* Fuerza la opacidad a 1 cuando el componente está montado */
 .modal-overlay {
     opacity: 1;
 }
@@ -28,11 +24,9 @@
 .modal-container {
     background: white;
     border-radius: 8px;
-    /* Sombras suaves */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    max-width: 450px; /* Ancho similar al de tu mockup */
+    max-width: 450px;
     width: 90%;
-    /* Animación de entrada: ligera elevación */
     transform: translateY(-20px);
     transition: transform 0.3s ease-in-out;
 }
@@ -64,12 +58,12 @@
     padding: 20px;
     border-top: 1px solid #eee;
     display: flex;
-    justify-content: flex-end; /* Alinear botones a la derecha */
-    gap: 10px; /* Espacio entre botones */
+    justify-content: flex-end;
+    gap: 10px;
 }
 
 /* ---------------------------------- */
-/* 3. BOTONES (Adaptados a tu estilo) */
+/* 3. BOTONES */
 /* ---------------------------------- */
 .modal-button {
     padding: 10px 20px;
@@ -88,19 +82,16 @@
     background-color: #f0f0f0;
 }
 
-/* Botón de ELIMINAR (Estilo de tu mockup: Rojo/Naranja) */
 .modal-button-delete {
-    background-color: #f3624c; /* Naranja/Rojo del mockup */
+    background-color: #f3624c;
     color: white;
 }
 .modal-button-delete:hover {
     background-color: #e55a46;
 }
 
-/* Botón de RESTAURAR/CONFIRMAR (Usaremos el color principal/verde para restauración) */
 .modal-button-confirm {
-    /* Aquí puedes usar un color verde (#28a745) o tu color principal (Naranja/Azul) */
-    background-color: #4caf50; /* Verde típico de confirmación/restauración */
+    background-color: #4caf50;
     color: white;
 }
 .modal-button-confirm:hover {

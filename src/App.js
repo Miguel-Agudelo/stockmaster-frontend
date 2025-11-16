@@ -10,15 +10,16 @@ import UserList from './pages/users/UserList';
 import WarehousesView from './pages/warehouses/WarehousesView';
 import StockMovementList from './pages/movements/StockMovementList';
 
-// Página de Reportes (HU14, HU15, HU16)
+// Página de Reportes (UNIFICADA - Dashboard/Reports)
 import ReportsDashboard from './pages/reports/ReportsDashboard';
 
 // Vistas de Recuperación (HU17, HU18, HU19)
-// Asumo que estos componentes están en la carpeta 'components/admin' como definimos
 import ProductRecovery from './components/admin/ProductRecovery';
 import WarehouseRecovery from './components/admin/WarehouseRecovery';
 import UserRecovery from './components/admin/UserRecovery';
 
+//Transferencia de Stock (HU20)
+import StockTransferPage from "./pages/movements/StockTransferPage";
 // Componentes de Layout
 import Sidebar from './components/layout/Sidebar';
 import authService from './services/authService';
@@ -79,7 +80,20 @@ function App() {
         <Router>
             <Routes>
                 <Route path="/login" element={<LoginPage />} />
-                <Route path="/" element={<Navigate to="/login" replace />} />
+
+                {/* Muestra ReportsDashboard (requiere autenticación) */}
+                <Route
+                    path="/"
+                    element={
+                        <PrivateRoute roles={['ADMINISTRADOR', 'OPERADOR']}>
+                            <ReportsDashboard />
+                        </PrivateRoute>
+                    }
+                />
+
+                {/* Si se usa /reports, redirigimos a / para mantener la URL simple */}
+                <Route path="/reports" element={<Navigate to="/" replace />} />
+
 
                 {/* Ruta de Usuarios (ADMIN) */}
                 <Route
@@ -148,12 +162,12 @@ function App() {
                     }
                 />
 
-                {/* RUTA: Reportes (ADMIN) - HU14, HU15, HU16 */}
+                {/* RUTA: Transferencia de Stock (ADMIN, OPERADOR) - HU20 */}
                 <Route
-                    path="/reports"
+                    path="/movements/transfer"
                     element={
-                        <PrivateRoute roles={['ADMINISTRADOR']}>
-                            <ReportsDashboard />
+                        <PrivateRoute roles={['ADMINISTRADOR', 'OPERADOR']}>
+                            <StockTransferPage />
                         </PrivateRoute>
                     }
                 />

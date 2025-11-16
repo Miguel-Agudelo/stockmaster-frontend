@@ -28,7 +28,7 @@ const RecoveryView = ({ title, subtitle, children }) => {
                 </div>
             </div>
 
-            {/* 3. Contenedor del contenido (RecoveryList se renderiza aquí) */}
+            {/* 3. Contenedor del contenido (Aquí se renderiza RecoveryList) */}
             <div className="recovery-card-container">
                 {children}
             </div>

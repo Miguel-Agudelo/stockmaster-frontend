@@ -1,6 +1,9 @@
-/* CSS específico del componente (App.css)*/
 .App {
     text-align: center;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
 }
 
 .App-logo {
@@ -38,39 +41,35 @@
     }
 }
 
-/* CSS global (App.css o index.css) */
 
 html, body, #root {
     /* 1. Aseguramos que ocupen toda la ventana */
     height: 100%;
     margin: 0;
     padding: 0;
+    overflow: hidden;
 }
 
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
 
-
-/* ---------------------------------------------------- */
-/* --- NUEVOS ESTILOS PARA EL LAYOUT DE LA APLICACIÓN (CORRECCIÓN SIDEBAR) --- */
-/* ---------------------------------------------------- */
-
-/* 1. Definición del Sidebar (Ajusta si tu Sidebar tiene otra clase o ancho) */
+/* 1. Definición del Sidebar  */
 .sidebar-container {
     position: fixed;
     top: 0;
     left: 0;
-    width: 250px; /* 🚨 ASUMIDO: Ancho del Sidebar. AJUSTAR SI ES NECESARIO. */
+    width: 250px;
     height: 100vh;
-    z-index: 1000; /* Asegura que esté por encima del contenido */
-    /* Aquí irían el background-color, box-shadow, etc. de tu Sidebar */
+    z-index: 1000;
 }
 
 /* 2. Contenedor del Contenido Principal (Usado en PrivateRoute de App.js) */
 .main-content-wrapper {
-    /* 🟢 CLAVE: El margen izquierdo debe coincidir con el ancho del Sidebar */
     margin-left: 2px;
-    transition: margin-left 0.3s ease; /* Transición suave opcional */
+    transition: margin-left 0.3s ease;
     min-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
+

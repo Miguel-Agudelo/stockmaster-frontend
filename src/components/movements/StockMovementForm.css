@@ -1,5 +1,3 @@
-/* src/components/stock/StockMovementForm.css (Estandarizado y con Colores de Diseño Objetivo) */
-
 /* --- 1. Fondo (Backdrop) --- */
 .modal-backdrop {
     position: fixed;
@@ -21,33 +19,28 @@
     background-color: white;
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    max-width: 480px; /* Ancho ajustado */
+    max-width: 480px;
     width: 90%;
 
     display: flex;
     flex-direction: column;
     max-height: 90vh;
-    /* ✅ Mantiene el scroll interno y evita el desbordamiento externo */
     overflow: hidden;
 }
 
-/* 🎯 FIX CLAVE: EL ELEMENTO <FORM> */
 .movement-form-container > form {
     display: flex;
     flex-direction: column;
-    /* Usamos flex-grow: 1 para que ocupe el espacio flexible restante */
     flex-grow: 1;
     margin: 0;
     padding: 0;
 }
 
-/* Animación (copiada de ProductForm.css) */
 @keyframes fadeIn {
     from { opacity: 0; transform: scale(0.95); }
     to { opacity: 1; transform: scale(1); }
 }
 
-/* Estilos para el estado de carga */
 .loading-state {
     padding: 40px;
     text-align: center;
@@ -55,8 +48,6 @@
     color: #6c757d;
 }
 
-
-/* --- 3. Encabezado del Modal --- */
 .form-header {
     padding: 25px 30px 15px;
     border-bottom: 1px solid #f0f0f0;
@@ -65,7 +56,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    flex-shrink: 0; /* Altura fija */
+    flex-shrink: 0;
 }
 
 .form-header h2 {
@@ -81,7 +72,6 @@
     margin: 5px 0 0;
 }
 
-/* Botón de cerrar 'x' */
 .close-button {
     position: absolute;
     top: 25px;
@@ -99,11 +89,8 @@
     color: #1e293b;
 }
 
-/* --- Mensajes de Feedback (CORRECCIÓN DE CLASES Y COLORES) --- */
-/* Tu componente usa 'form-message' para el contenedor de mensajes, y 'message.type' (success/error) */
 .form-message {
     padding: 10px;
-    /* Ajuste el margin para coincidir con el padding del modal */
     margin: 10px 30px 0 30px;
     border-radius: 6px;
     font-size: 0.9rem;
@@ -112,20 +99,15 @@
     flex-shrink: 0; /* Altura fija */
 }
 
-/* 🚨 CORRECCIÓN DE COLOR: Mensaje de Éxito (Success) */
 .form-message.success {
     background-color: #d4edda;
     color: #155724;
     border-color: #c3e6cb;
 }
 
-/* 🚨 CORRECCIÓN DE COLOR: Mensaje de Error (Error) */
 .form-message.error {
-    /* Fondo rojo claro de la imagen */
     background-color: #fcebeb;
-    /* Borde rojo de la imagen */
     border: 1px solid #f09595;
-    /* Texto rojo oscuro */
     color: #9c2e2e;
 }
 
@@ -159,20 +141,18 @@
 .form-group input {
     width: 100%;
     padding: 12px 15px;
-    /* Borde más suave */
     border: 1px solid #e5e7eb;
     border-radius: 8px;
     font-size: 1em;
     color: #1e293b;
     box-sizing: border-box;
     transition: border-color 0.2s, box-shadow 0.2s;
-    background-color: #f9fafb; /* Fondo blanco-gris muy claro */
+    background-color: #f9fafb;
 }
 
-/* 🚨 CORRECCIÓN DE COLOR: Foco (El naranja primario) */
 .form-group select:focus,
 .form-group input:focus {
-    border-color: #FF8C2B; /* Naranja más brillante del diseño */
+    border-color: #FF8C2B;
     box-shadow: 0 0 0 3px rgba(255, 140, 43, 0.25);
     outline: none;
     background-color: white;
@@ -186,21 +166,19 @@
 }
 
 .error-message {
-    color: #ef4444; /* Rojo estándar para errores de campo */
+    color: #ef4444;
     font-size: 0.9em;
     margin-top: 5px;
 }
 
-/* --- 5. Pie de Página y Botones - Estilos de .modal-footer-actions --- */
 .modal-footer-actions {
     padding: 20px 30px;
     border-top: 1px solid #f0f0f0;
     display: flex;
     justify-content: flex-end;
     gap: 10px;
-    flex-shrink: 0; /* Altura fija */
-    background-color: white; /* Asegura que el footer tape el scroll */
-    /* Las propiedades sticky/bottom ya no son necesarias gracias a flex-grow: 1 en el <form> */
+    flex-shrink: 0;
+    background-color: white;
 }
 
 .modal-footer-actions button {
@@ -213,7 +191,7 @@
     border: 1px solid transparent;
 }
 
-/* Botón CANCELAR - Estilos de .cancel-button-white */
+/* Botón CANCELAR */
 .btn-cancel {
     background-color: white;
     color: #64748b;
@@ -223,15 +201,14 @@
     background-color: #f1f5f9;
 }
 
-/* 🚨 CORRECCIÓN DE COLOR: Botón GUARDAR - Estilos de .save-button-orange */
 .btn-save {
-    background-color: #FF8C2B; /* Naranja brillante del diseño */
+    background-color: #FF8C2B;
     color: white;
     border: 1px solid #FF8C2B;
-    box-shadow: 0 4px 6px rgba(255, 140, 43, 0.3); /* Sombra para el botón principal */
+    box-shadow: 0 4px 6px rgba(255, 140, 43, 0.3);
 }
 .btn-save:hover:not(:disabled) {
-    background-color: #E07A25; /* Tono de hover ligeramente más oscuro */
+    background-color: #E07A25;
 }
 
 .modal-footer-actions button:disabled {

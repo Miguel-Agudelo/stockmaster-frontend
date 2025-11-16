@@ -1,8 +1,6 @@
-// src/services/warehouseService.js
-// Importamos la instancia de Axios configurada con el Interceptor JWT
 import api from './api';
 
-const WAREHOUSE_URL = '/warehouses'; // Endpoint específico para almacenes
+const WAREHOUSE_URL = '/warehouses';
 
 const warehouseService = {
 
@@ -23,14 +21,13 @@ const warehouseService = {
     },
 
     /**
-     * 🟢 NUEVO MÉTODO
+     * 🟢 NUEVO METODO
      * @description Obtiene la lista simplificada de almacenes activos para selectores.
      * @endpoint GET /api/warehouses/active-list
      * Asume que este endpoint devuelve: [{id: 1, name: "Almacén Principal"}, ...]
      */
     async getActiveWarehousesList() {
         try {
-            // 💡 Asumo este endpoint en tu backend que filtra por is_active = true
             const response = await api.get(`${WAREHOUSE_URL}/active-list`);
             return response.data;
         } catch (error) {

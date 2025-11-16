@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom'; // Importado para la navegación
+import { useNavigate } from 'react-router-dom';
 import warehouseService from '../../services/warehouseService';
 import WarehouseForm from '../../components/warehouses/WarehouseForm';
 import './WarehousesView.css';
 import {
-    faBuilding,       // 🏢 Para Almacenes
-    faBoxesStacked,   // 📦📦 Para Productos Almacenados
-    faClipboardCheck, // ✅📝 Para Stock Total
-    faTrashRestore,   // 🟢 Ícono para la Papelera (Recuperación)
-    faPlus            // Ícono para Nuevo Almacén
+    faTrashRestore,
+    faPlus
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -34,22 +31,31 @@ const Toast = ({ message, type, isVisible, onClose }) => {
     );
 };
 
-// Componente Tarjeta de Métrica (Mantenido)
-const MetricCard = ({ title, value, icon, color }) => (
-    <div className="metric-card">
-        <div className="card-header">
-            <span className="card-title">{title}</span>
-            <span style={{ color: color, opacity: 0.8, fontSize: '1.2em' }}>
-                <FontAwesomeIcon icon={icon} />
-            </span>
+
+const SummaryCard = ({ title, value, colorClass }) => {
+
+    const formatValue = (val) => {
+        return val.toLocaleString('es-CO');
+    };
+
+    const displayValue = formatValue(value);
+
+    return (
+
+        <div className={`summary-card ${colorClass}`}>
+            <div className="card-content">
+                <p className="card-title">{title}</p>
+
+                <h2 className="card-value">{displayValue}</h2>
+            </div>
+
         </div>
-        <div className="card-value">{value}</div>
-    </div>
-);
+    );
+};
 
 
 const WarehousesView = ({ userRole }) => {
-    const navigate = useNavigate(); // 🟢 Inicializar useNavigate
+    const navigate = useNavigate();
 
     const [warehouses, setWarehouses] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -80,7 +86,7 @@ const WarehousesView = ({ userRole }) => {
     }, [fetchWarehouses]);
 
 
-    // --- Lógica del CRUD y Formularios (Se mantiene igual) ---
+    // --- Lógica del CRUD y Formularios
 
     const handleCreateClick = () => { setEditingWarehouse(null); setShowForm(true); };
     const handleEditClick = (warehouse) => { setEditingWarehouse(warehouse); setShowForm(true); };
@@ -117,19 +123,19 @@ const WarehousesView = ({ userRole }) => {
         navigate('/warehouses/recovery');
     };
 
-    // --- Cálculo de Métricas (Se mantiene igual) ---
+    // --- Cálculo de Métricas
     const totalWarehouses = warehouses.length;
     const totalProductsCount = warehouses.reduce((acc, wh) => acc + (wh.products?.length || 0), 0);
     const totalStock = warehouses.reduce((acc, wh) => acc + (wh.totalStock || 0), 0);
 
     const WAREHOUSE_METRICS = [
-        { title: "Total Almacenes", value: totalWarehouses, icon: faBuilding, color: "#FF7B00" },
-        { title: "Productos Almacenados", value: totalProductsCount, icon: faBoxesStacked, color: "#10B981" },
-        { title: "Stock Total (Unidades)", value: totalStock, icon: faClipboardCheck, color: "#3B82F6" },
+        { title: "Total Almacenes", value: totalWarehouses, colorClass: "metric-orange" },
+        { title: "Productos Almacenados", value: totalProductsCount, colorClass: "metric-green" },
+        { title: "Stock Total (Unidades)", value: totalStock, colorClass: "metric-blue" },
     ];
 
 
-    // --- Renderizado de la Tabla (Se mantiene igual) ---
+    // --- Renderizado de la Tabla
     const renderWarehouseTable = () => {
         if (isLoading) return <p className="loading-message">Cargando almacenes...</p>;
         if (error) return <p className="error-display">{error}</p>;
@@ -191,7 +197,7 @@ const WarehousesView = ({ userRole }) => {
         );
     };
 
-    // Renderizado del Resumen de Stock por Producto (Se mantiene igual)
+    // Renderizado del Resumen de Stock por Producto
     const renderStockSummary = () => {
         const warehousesWithStock = warehouses.filter(wh => wh.products && wh.products.length > 0);
 
@@ -268,7 +274,7 @@ const WarehousesView = ({ userRole }) => {
                     <p className="page-subtitle">Administrar ubicaciones de almacenamiento y stock</p>
                 </div>
                 {isAdmin && (
-                    <div className="action-buttons-group"> {/* 🟢 Agrupamiento de botones */}
+                    <div className="action-buttons-group">
                         {/* BOTÓN PAPELERA */}
                         <button className="delete-recovery-button" onClick={handleGoToRecovery}>
                             <FontAwesomeIcon icon={faTrashRestore} />
@@ -283,9 +289,14 @@ const WarehousesView = ({ userRole }) => {
                 )}
             </div>
 
-            <div className="metrics-grid">
+            <div className="summary-cards-container">
                 {WAREHOUSE_METRICS.map((metric, index) => (
-                    <MetricCard key={index} {...metric} />
+                    <SummaryCard
+                        key={index}
+                        title={metric.title}
+                        value={metric.value}
+                        colorClass={metric.colorClass}
+                    />
                 ))}
             </div>
 
@@ -327,7 +338,7 @@ const WarehousesView = ({ userRole }) => {
                 </div>
             )}
 
-            {/* TOAST DE NOTIFICACIÓN (Parte inferior derecha) */}
+            {/* TOAST DE NOTIFICACIÓN */}
             <Toast
                 message={toast.message}
                 type={toast.type}

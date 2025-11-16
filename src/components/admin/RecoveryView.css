@@ -1,4 +1,3 @@
-/* Estilos para el Encabezado de la Vista de Recuperación */
 
 .recovery-header {
     margin-bottom: 25px;
@@ -10,17 +9,17 @@
     gap: 8px;
     background: none;
     border: none;
-    color: #475569; /* Gris oscuro para texto */
+    color: #475569;
     font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
     padding: 5px 0;
-    margin-bottom: 15px; /* Espacio debajo del botón Volver */
+    margin-bottom: 15px;
     transition: color 0.2s;
 }
 
 .back-button:hover {
-    color: #1e293b; /* Color más oscuro al pasar el ratón */
+    color: #1e293b;
 }
 
 .recovery-header .title-group h1 {

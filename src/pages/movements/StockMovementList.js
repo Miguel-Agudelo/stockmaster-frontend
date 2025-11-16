@@ -1,26 +1,33 @@
-// src/pages/stock/StockMovementList.js
 import React, { useState, useEffect, useMemo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // Íconos adaptados para movimientos/métricas:
-import { faPlus, faSearch, faFilter, faClipboardList, faArrowDown, faArrowUp } from '@fortawesome/free-solid-svg-icons';
-// Importamos el formulario que creamos para registrar movimientos (HU 8 y 9)
+import { faPlus, faSearch, faFilter } from '@fortawesome/free-solid-svg-icons';
+
 import StockMovementForm from '../../components/movements/StockMovementForm';
-// Importamos el servicio
 import stockMovementService from '../../services/stockMovementService';
-// 🟢 Importamos el nuevo CSS
 import './StockMovementList.css';
 
 
-// 🟢 Reutilizamos MetricCard (componente local, como en ProductList)
-const MetricCard = ({ title, value, icon, color }) => (
-    <div className="metric-card">
-        <div className="card-header">
-            <span className="card-title">{title}</span>
-            <FontAwesomeIcon icon={icon} style={{ color: color, opacity: 0.8 }} />
+const SummaryCard = ({ title, value, colorClass }) => {
+
+    // Función de formato simple para números
+    const formatValue = (val) => {
+        const numberValue = Number(val);
+        if (isNaN(numberValue)) return val;
+        return numberValue.toLocaleString('es-CO');
+    };
+
+    const displayValue = formatValue(value);
+
+    return (
+        <div className={`summary-card ${colorClass}`}>
+            <div className="card-content">
+                <p className="card-title">{title}</p>
+                <h2 className="card-value">{displayValue}</h2>
+            </div>
         </div>
-        <div className="card-value">{value}</div>
-    </div>
-);
+    );
+};
 
 
 const StockMovementList = ({userRole}) => {
@@ -44,9 +51,8 @@ const StockMovementList = ({userRole}) => {
         setIsLoading(true);
         setError(null);
         try {
-            // Llama al servicio para obtener el historial (HU 10)
+            // Llama al servicio para obtener el historial
             const response = await stockMovementService.getMovementHistory();
-            // Aseguramos que la cantidad sea numérica para los cálculos
             const data = response.data.map(m => ({
                 ...m,
                 quantity: parseInt(m.quantity) || 0
@@ -66,41 +72,37 @@ const StockMovementList = ({userRole}) => {
     }, []);
 
 
-    // 🟢 CÁLCULO DE MÉTRICAS DINÁMICAS (CORREGIDO: Usando movementType)
     const DYNAMIC_METRICS = useMemo(() => {
         if (movements.length === 0) {
             return [
-                { title: "Total Movimientos", value: 0, icon: faClipboardList, color: "#FF7B00" },
-                { title: "Unidades de Entrada", value: 0, icon: faArrowDown, color: "#10B981" },
-                { title: "Unidades de Salida", value: 0, icon: faArrowUp, color: "#EF4444" },
+                { title: "Total Movimientos", value: 0, colorClass: "metric-orange" },
+                { title: "Unidades de Entrada", value: 0, colorClass: "metric-green" },
+                { title: "Unidades de Salida", value: 0, colorClass: "metric-red" },
             ];
         }
 
         const totalMovements = movements.length;
         const totalEntries = movements
-            // 🟢 CORRECCIÓN: Usar movementType
             .filter(m => m.movementType === 'ENTRADA')
             .reduce((sum, m) => sum + m.quantity, 0);
         const totalExits = movements
-            // 🟢 CORRECCIÓN: Usar movementType
             .filter(m => m.movementType === 'SALIDA')
             .reduce((sum, m) => sum + m.quantity, 0);
 
         return [
-            { title: "Total Movimientos", value: totalMovements, icon: faClipboardList, color: "#FF7B00" },
-            { title: "Unidades de Entrada", value: totalEntries, icon: faArrowDown, color: "#10B981" },
-            { title: "Unidades de Salida", value: totalExits, icon: faArrowUp, color: "#EF4444" },
+            { title: "Total Movimientos", value: totalMovements, colorClass: "metric-orange" },
+            { title: "Unidades de Entrada", value: totalEntries, colorClass: "metric-green" },
+            { title: "Unidades de Salida", value: totalExits, colorClass: "metric-red" },
         ];
     }, [movements]);
 
 
-    // FUNCIONALIDAD DE FILTRADO (CORREGIDO: Usando nombres de campos del DTO)
+    // FUNCIONALIDAD DE FILTRADO
     const filteredMovements = useMemo(() => {
         let list = movements;
 
-        // 3. FILTRO POR TIPO DE MOVIMIENTO
+        // 1. FILTRO POR TIPO DE MOVIMIENTO
         if (filterType !== 'ALL') {
-            // 🟢 CORRECCIÓN: Usar movementType
             list = list.filter(m => m.movementType === filterType);
         }
 
@@ -108,7 +110,6 @@ const StockMovementList = ({userRole}) => {
         if (searchTerm.trim() !== '') {
             const term = searchTerm.toLowerCase();
             list = list.filter(m =>
-                // 🟢 CORRECCIÓN: Usar productName, warehouseName, userName y motive
                 (m.productName && m.productName.toLowerCase().includes(term)) ||
                 (m.warehouseName && m.warehouseName.toLowerCase().includes(term)) ||
                 (m.userName && m.userName.toLowerCase().includes(term)) ||
@@ -156,15 +157,13 @@ const StockMovementList = ({userRole}) => {
                 </button>
             </div>
 
-            {/* 🟢 MÉTRICAS */}
-            <div className="metrics-grid">
+            <div className="summary-cards-container">
                 {DYNAMIC_METRICS.map((metric, index) => (
-                    <MetricCard
+                    <SummaryCard
                         key={index}
                         title={metric.title}
                         value={isLoading ? 'Cargando...' : metric.value}
-                        icon={metric.icon}
-                        color={metric.color}
+                        colorClass={metric.colorClass}
                     />
                 ))}
             </div>
@@ -213,23 +212,20 @@ const StockMovementList = ({userRole}) => {
                             <th>Usuario</th>
                         </tr>
                         </thead>
-                        {/* 🟢 CORRECCIÓN: Eliminar espacios y saltos de línea innecesarios alrededor del map para evitar advertencias */}
                         <tbody>
                         {filteredMovements.map((movement, index) => (
-                            // 🟢 CORRECCIÓN: Usar index como respaldo si movement.id es null (para evitar la advertencia de key=null)
                             <tr key={movement.id || index}>
-                                <td>{movement.movementDate}</td>      {/* 🟢 CORREGIDO: Usar movementDate */}
+                                <td>{movement.movementDate}</td>
                                 <td>
-                                    {/* 🟢 CORREGIDO: Usar movementType */}
                                     <span className={`type-badge type-${movement.movementType}`}>
                                             {movement.movementType}
                                         </span>
                                 </td>
-                                <td>{movement.productName}</td>      {/* 🟢 CORREGIDO: Usar productName */}
-                                <td>{movement.warehouseName}</td>    {/* 🟢 CORREGIDO: Usar warehouseName */}
+                                <td>{movement.productName}</td>
+                                <td>{movement.warehouseName}</td>
                                 <td>{movement.quantity}</td>
-                                <td>{movement.motive}</td>          {/* 🟢 CORREGIDO: Usar motive */}
-                                <td>{movement.userName}</td>        {/* 🟢 CORREGIDO: Usar userName */}
+                                <td>{movement.motive}</td>
+                                <td>{movement.userName}</td>
                             </tr>
                         ))}</tbody>
                     </table>
@@ -254,7 +250,6 @@ const StockMovementList = ({userRole}) => {
 
 // Componente auxiliar para el menú desplegable de filtro (HU 3) - Se mantiene sin cambios
 const FilterDropdown = ({ filterType, setFilterType }) => {
-// ... (código del componente auxiliar)
     const [isOpen, setIsOpen] = useState(false);
 
     const handleSelect = (type) => {

@@ -1,4 +1,3 @@
-//UserForm.js
 import React, { useState, useEffect } from 'react';
 import userService from '../../services/userService';
 import './UserForm.css';
@@ -6,7 +5,7 @@ import './UserForm.css';
 const UserForm = ({ onSave, onCancel, currentUser }) => {
 
     const isEditing = !!currentUser;
-    const MIN_PASSWORD_LENGTH = 6; // 🎯 Nuevo: Definimos el mínimo aquí
+    const MIN_PASSWORD_LENGTH = 6;
 
     const [formData, setFormData] = useState({
         name: currentUser?.name || '',
@@ -43,7 +42,7 @@ const UserForm = ({ onSave, onCancel, currentUser }) => {
         }
     };
 
-    // 🎯 FUNCIÓN DE VALIDACIÓN MANUAL
+    //FUNCIÓN DE VALIDACIÓN MANUAL
     const validate = () => {
         let formErrors = {};
         let isValid = true;
@@ -68,19 +67,16 @@ const UserForm = ({ onSave, onCancel, currentUser }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // 🎯 CLAVE: Ejecutamos la validación del Frontend antes de hacer el envío
         if (!validate()) {
-            // Si la validación falla, detenemos el proceso aquí.
             return;
         }
 
         setIsSubmitting(true);
         setMessage(null);
-        setErrors({}); // Limpiamos errores generales antes de enviar
+        setErrors({});
 
         try {
             if (isEditing) {
-                // MODO EDICIÓN
                 const dataToSend = {
                     name: formData.name,
                     role: formData.role,
@@ -88,13 +84,11 @@ const UserForm = ({ onSave, onCancel, currentUser }) => {
                 };
                 await userService.updateUser(currentUser.id, dataToSend);
             } else {
-                // MODO CREACIÓN
                 await userService.createUser(formData);
             }
 
             setMessage('Usuario guardado con éxito');
 
-            // Usamos un timeout para que el usuario vea el mensaje de éxito antes de cerrar
             setTimeout(() => {
                 onSave();
             }, 1000);
@@ -102,16 +96,13 @@ const UserForm = ({ onSave, onCancel, currentUser }) => {
         } catch (error) {
             console.error("Error al guardar usuario:", error.response?.data || error.message);
 
-            // Asumimos que el backend devuelve un mensaje útil
             const errorMessage = error.response?.data?.message || 'Error de conexión o datos inválidos.';
-
-            // Si el error viene específicamente del campo de contraseña, podemos mostrarlo ahí
             if (errorMessage.toLowerCase().includes('password')) {
                 setErrors({ password: errorMessage });
             } else {
                 setErrors({ general: errorMessage });
             }
-            setMessage(null); // Ocultamos el mensaje de éxito si hay error
+            setMessage(null);
 
         } finally {
             setIsSubmitting(false);

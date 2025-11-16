@@ -6,7 +6,6 @@ import '../../pages/movements/StockMovementList.css';
 // Función utilitaria para formatear la fecha a 'DD/MM/YYYY HH:mm:ss'
 const formatDate = (dateString) => {
     if (!dateString) return '';
-    // Usamos la API de Internacionalización (Intl) para un formato legible
     const options = {
         year: 'numeric',
         month: '2-digit',
@@ -16,7 +15,7 @@ const formatDate = (dateString) => {
         second: '2-digit',
         hour12: false // Formato 24 horas
     };
-    // new Date() maneja el ISO string correctamente
+
     return new Date(dateString).toLocaleTimeString('es-ES', options).replace(',', '');
 };
 
@@ -61,8 +60,6 @@ const StockMovementList = () => {
         setLoading(true);
         setError(null);
         try {
-            // Llama al servicio que obtiene TODO el historial de movimientos
-            // Asumo que el endpoint general es GET /api/movements o similar
             const response = await stockMovementService.getMovementHistory();
             setMovements(response.data);
 

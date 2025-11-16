@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-// Importaciones de Common Components
 import Table from '../common/Table';
 import Alert from '../common/Alert';
 import Spinner from '../common/Spinner';
-import ConfirmationModal from '../common/ConfirmationModal'; // 🟢 1. IMPORTACIÓN DEL MODAL
+import ConfirmationModal from '../common/ConfirmationModal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUndoAlt, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
-
-// Importamos el CSS donde está definido el estilo de la tabla y botones
 import '../../pages/users/UserList.css';
 
 /**
@@ -59,19 +56,18 @@ const RecoveryList = ({ title, columns, apiConfig }) => {
         setItemToRestore(null);
     };
 
-    // 3. HANDLER DE RESTAURACIÓN (Ahora ejecuta la acción después de la confirmación del modal)
+    // 3. HANDLER DE RESTAURACIÓN
     const executeRestore = async () => {
         closeRestoreModal(); // Cierra el modal inmediatamente
 
         if (!itemToRestore || !itemToRestore.id) return;
 
-        const idsArray = [itemToRestore.id]; // Usamos array para el servicio
+        const idsArray = [itemToRestore.id];
         const itemName = itemToRestore.name || 'el elemento'; // Obtener nombre para el mensaje
 
         setLoading(true);
         setAlert(null);
         try {
-            // El servicio debe ser capaz de manejar un array de IDs, incluso si solo hay uno.
             await apiConfig.restoreItems(idsArray);
 
             setAlert({
@@ -101,7 +97,6 @@ const RecoveryList = ({ title, columns, apiConfig }) => {
         header: 'Acciones',
         accessor: 'actions',
         render: (item) => (
-            // 🟢 CORRECCIÓN: Llamamos a openRestoreModal con el ITEM completo
             <button
                 className="restore-single-button"
                 onClick={() => openRestoreModal(item)}
@@ -159,10 +154,10 @@ const RecoveryList = ({ title, columns, apiConfig }) => {
                 <FontAwesomeIcon icon={faInfoCircle} /> Al restaurar, los elementos vuelven a estar activos en el sistema.
             </p>
 
-            {/* 🟢 RENDERIZADO DEL MODAL DE CONFIRMACIÓN */}
+            {/* RENDERIZADO DEL MODAL DE CONFIRMACIÓN */}
             {isModalOpen && itemToRestore && (
                 <ConfirmationModal
-                    title={`¿Restaurar ${title.replace('Papelera de ', '').slice(0, -1)}?`} // Ej: ¿Restaurar Usuario? (quitando la 's')
+                    title={`¿Restaurar ${title.replace('Papelera de ', '').slice(0, -1)}?`}
                     message={`¿Está seguro de que desea restaurar "${itemToRestore.name}"? El elemento será reactivado en el sistema.`}
                     confirmText="Restaurar"
                     cancelText="Cancelar"

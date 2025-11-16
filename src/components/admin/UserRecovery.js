@@ -11,7 +11,6 @@ import RecoveryView from './RecoveryView';
 const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
 
-    // Asume que dateString es un formato válido que Date() puede parsear (ej: ISO)
     const date = new Date(dateString);
 
     // Opciones de formato de fecha y hora local (DD/MM/YYYY hh:mm AM/PM)
@@ -45,7 +44,6 @@ const userColumns = [
 const UserRecovery = () => {
     return (
         <RecoveryView
-            // 🟢 CORRECCIÓN: Las props van dentro de la etiqueta
             title="Usuarios Eliminados"
             subtitle="Restaura cuentas de usuarios marcados como inactivos"
         >

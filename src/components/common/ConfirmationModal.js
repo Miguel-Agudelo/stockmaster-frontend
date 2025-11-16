@@ -1,5 +1,5 @@
 import React from 'react';
-import './ConfirmationModal.css'; // Asegúrate de crear este archivo CSS
+import './ConfirmationModal.css';
 
 /**
  * Componente genérico para modales de confirmación (Eliminar, Restaurar, etc.).
@@ -22,7 +22,6 @@ const ConfirmationModal = ({
                                type = 'default'
                            }) => {
 
-    // Define la clase CSS del botón principal en base al 'type'
     const confirmButtonClass = type === 'delete' ? 'modal-button-delete' : 'modal-button-confirm';
 
     // Manejador para evitar que el clic dentro del modal cierre todo

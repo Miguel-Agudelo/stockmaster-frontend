@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ReportService from '../../services/reportService';
 import Table  from '../common/Table';
-import Button from '../common/Button';
-
 import { exportToCsv } from '../../utils/exportUtils';
 
 const TopSellingReport = () => {
@@ -22,7 +20,6 @@ const TopSellingReport = () => {
     // Función para renderizar el número de posición con el diseño de insignia redonda
     const renderPosition = (index) => {
         const position = index + 1;
-        // Usamos las clases definidas en Reports.css para el diseño de pastilla/círculo
         return (
             <span className={`badge-ranking badge-ranking-${position}`}>
                 #{position}
@@ -30,28 +27,24 @@ const TopSellingReport = () => {
         );
     };
 
-    // Definición de las columnas de la tabla (incluyendo lógica de renderizado)
+    // Definición de las columnas de la tabla
     const columns = [
         {
             header: 'Posición',
             accessor: 'position',
-            // El item no se usa, solo el índice de la fila
             render: (item, index) => renderPosition(index)
         },
         { header: 'Producto', accessor: 'productName' },
         {
             header: 'Unidades Vendidas',
             accessor: 'unitsSold',
-            // Aplicamos la clase 'text-success' para el color verde
             render: (item) => <span className="text-success">{item.unitsSold} unidades</span>
         },
         {
             header: 'Ingresos Generados',
             accessor: 'totalRevenue',
-            // Aplicamos la clase 'text-success' para el color verde
             render: (item) => (
                 <span className="text-success">
-                    {/* toFixed(2) es seguro si totalRevenue es un número, si es null/undefined, usa 0 */}
                     ${item.totalRevenue ? item.totalRevenue.toFixed(2) : '0.00'}
                 </span>
             )

@@ -5,8 +5,6 @@ import Input from '../common/Input';
 
 import { exportToCsv } from '../../utils/exportUtils';
 
-// --- FUNCIONES HELPER (Formato y Estilo) ---
-
 // Función utilitaria para formatear la fecha a 'YYYY-MM-DD'
 const getISODate = (date) => {
     if (!date) return '';
@@ -38,7 +36,6 @@ const formatTableDateTime = (isoDateTime) => {
 
 // Renderizado de la insignia de Tipo de Movimiento
 const renderMovementBadge = (type) => {
-    // Los valores del backend son 'ENTRADA' y 'SALIDA'
     const isExit = type === 'SALIDA';
     const className = isExit ? 'badge-movement-danger' : 'badge-movement-success';
     const displayType = isExit ? 'Salida' : 'Entrada';
@@ -73,7 +70,7 @@ const MovementReport = () => {
     const [endDate, setEndDate] = useState(initialDates.end);
 
 
-    // Definición de las columnas de la tabla (AJUSTADA CON RENDERS)
+    // Definición de las columnas de la tabla
     const columns = [
         {
             header: 'Fecha',
@@ -85,17 +82,15 @@ const MovementReport = () => {
         {
             header: 'Tipo',
             accessor: 'movementType',
-            // Renderizado de Insignia
             render: (item) => renderMovementBadge(item.movementType)
         },
         {
             header: 'Cantidad',
             accessor: 'quantity',
-            // Renderizado de Cantidad con Signo y Color
+
             render: (item) => {
                 const isExit = item.movementType === 'SALIDA';
                 const sign = isExit ? '-' : '+';
-                // Reutilizamos las clases de texto ya definidas para Más Vendidos/Stock Bajo
                 const className = isExit ? 'text-danger' : 'text-success';
                 return (
                     <span className={className}>
@@ -108,7 +103,6 @@ const MovementReport = () => {
         { header: 'Usuario', accessor: 'userName' },
     ];
 
-    // ... (fetchMovementsData, useEffect, handleApplyFilter se mantienen) ...
 
     const fetchMovementsData = useCallback(async (start, end) => {
         setLoading(true);

@@ -1,8 +1,4 @@
-/* src/pages/stock/StockMovementList.css */
-
-/* --- Estilos Generales y Layout --- */
 .main-content {
-    /* Asume que el main-content-wrapper de App.js ya maneja el margin-left */
     height: 100vh;
     overflow-y: scroll ;
     overflow-x: hidden;
@@ -29,9 +25,9 @@
     margin-top: 5px;
 }
 
-/* --- Botón Principal "Nuevo Movimiento" (Naranja) --- */
+/* --- Botón Principal "Nuevo Movimiento" */
 .add-new-button-orange {
-    background-color: #FF7B00; /* Igual que ProductList */
+    background-color: #FF7B00;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -48,41 +44,66 @@
     background-color: #E66A00;
 }
 
-/* --- Métricas (Copiado de ProductList) --- */
-.metrics-grid {
+.summary-cards-container {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
     margin-bottom: 30px;
 }
 
-.metric-card {
-    background-color: white;
+.summary-card {
+    background-color: #ffffff;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-.metric-card .card-header {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    border: 1px solid #f1f5f9;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    min-height: 100px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
 }
 
-.metric-card .card-title {
-    font-size: 0.9em;
-    color: #64748b;
+.summary-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.summary-card .card-content {
+    flex-grow: 1;
+}
+
+.summary-card .card-title {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
     font-weight: 500;
 }
 
-.metric-card .card-value {
-    font-size: 2em;
+.summary-card .card-value {
+    font-size: 2.2rem;
     font-weight: 700;
     color: #1e293b;
+    margin: 0;
 }
 
-/* --- BARRA DE BÚSQUEDA Y FILTRO (Nueva combinación de estilos) --- */
+/* Total Movimientos */
+.summary-card.metric-orange .card-value {
+    color: #FF7B00;
+}
+
+/* Unidades de Entrada */
+.summary-card.metric-green .card-value {
+    color: #10B981;
+}
+
+/* Unidades de Salida */
+.summary-card.metric-red .card-value {
+    color: #EF4444;
+}
+
+/* --- BARRA DE BÚSQUEDA Y FILTRO */
 .search-filter-container {
     display: flex;
     gap: 10px;
@@ -95,10 +116,9 @@
     flex-grow: 1;
 }
 
-/* Estilo para el input de búsqueda (Clase movement-search-input en el JSX) */
 .movement-search-input {
     width: 100%;
-    padding: 10px 10px 10px 40px; /* Espacio para el icono */
+    padding: 10px 10px 10px 40px;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     font-size: 1em;
@@ -119,13 +139,12 @@
     transform: translateY(-50%);
     color: #94a3b8;
     font-size: 1em;
-    pointer-events: none; /* Asegura que el icono no interfiera con el input */
+    pointer-events: none;
 }
 
-/* Dropdown de Filtro (Copiado y mejorado del JSX anterior) */
 .filter-dropdown {
     position: relative;
-    z-index: 20; /* Mayor z-index para el menú */
+    z-index: 20;
 }
 .filter-button {
     background-color: #f8fafc;
@@ -170,11 +189,10 @@
     background-color: #f1f5f9;
 }
 .dropdown-menu button.active {
-    background-color: #ffe8cc; /* Naranja muy claro */
-    color: #FF7B00; /* Texto naranja */
+    background-color: #ffe8cc;
+    color: #FF7B00;
     font-weight: 600;
 }
-
 
 /* --- Tarjeta y Tabla de Movimientos --- */
 .movement-list-card {
@@ -191,7 +209,7 @@
     color: #1e293b;
     border-bottom: 1px solid #f1f5f9;
     display: flex;
-    justify-content: space-between; /* Para alinear el contador */
+    justify-content: space-between;
     align-items: center;
 }
 
@@ -238,13 +256,13 @@
 }
 
 .type-ENTRADA {
-    background-color: #D1FAE5; /* Verde muy claro (igual que stock-badge) */
-    color: #10B981; /* Verde */
+    background-color: #D1FAE5;
+    color: #10B981;
 }
 
 .type-SALIDA {
-    background-color: #FEE2E2; /* Rojo muy claro */
-    color: #EF4444; /* Rojo */
+    background-color: #FEE2E2;
+    color: #EF4444;
 }
 
 /* --- Mensajes --- */

@@ -1,23 +1,17 @@
 import axios from 'axios';
-import authService from './authService'; // 🟢 CORRECCIÓN CLAVE: Importamos el servicio completo
+import authService from './authService';
 
-const API_URL = 'http://localhost:8080/api'; // URL base
+const API_URL = 'http://localhost:8080/api';
 
-// Definir la función authHeader para simplificar el código
+
 const authHeader = () => authService.getAuthHeader();
-
-// ===================================================================
-// 1. CONFIGURACIÓN DE ENDPOINTS POR ENTIDAD
-// ===================================================================
 
 /**
  * Objeto que mapea las funciones CRUD de recuperación a sus respectivos
  * endpoints y servicios. Este objeto se pasará como prop al RecoveryList.js.
  */
 const RecoveryService = {
-    // ------------------------------------
-    // HU17: PRODUCTOS
-    // ------------------------------------
+
     product: {
         // GET /api/products/inactive
         getAllInactive: () => {
@@ -25,7 +19,6 @@ const RecoveryService = {
         },
         // PUT /api/products/{id}/restore
         restoreItems: (ids) => {
-            // Usamos Promise.all para manejar la restauración múltiple.
             const restorePromises = ids.map(id =>
                 axios.put(API_URL + `/products/${id}/restore`, {}, { headers: authHeader() })
             );
@@ -33,9 +26,6 @@ const RecoveryService = {
         }
     },
 
-    // ------------------------------------
-    // HU18: ALMACENES
-    // ------------------------------------
     warehouse: {
         // GET /api/warehouses/inactive
         getAllInactive: () => {
@@ -50,13 +40,9 @@ const RecoveryService = {
         }
     },
 
-    // ------------------------------------
-    // HU19: USUARIOS
-    // ------------------------------------
     user: {
         // GET /api/users/inactive
         getAllInactive: () => {
-            // Nota: El backend devuelve una lista de objetos User directamente
             return axios.get(API_URL + '/users/inactive', { headers: authHeader() });
         },
         // PUT /api/users/{id}/restore

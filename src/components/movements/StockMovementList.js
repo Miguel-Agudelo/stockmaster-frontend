@@ -3,7 +3,6 @@ import stockMovementService from '../../services/stockMovementService';
 import { Table } from '../../components/common/Table';
 import '../../pages/movements/StockMovementList.css';
 
-// Función utilitaria para formatear la fecha a 'DD/MM/YYYY HH:mm:ss'
 const formatDate = (dateString) => {
     if (!dateString) return '';
     const options = {
@@ -51,7 +50,21 @@ const StockMovementList = () => {
                 return `${sign}${item.quantity}`;
             }
         },
-        { header: 'Motivo', accessor: 'reason' },
+        {
+            header: 'Motivo',
+            accessor: 'motive',
+            render: (item) => {
+                // Muestra el motivo si existe, o la referencia de transferencia si es parte de un par de movimientos
+                if (item.motive) {
+                    return item.motive;
+                }
+
+                if (item.transferReference) {
+                    return `Transferencia (Ref: ${item.transferReference.substring(0, 8)}...)`;
+                }
+                return '-';
+            }
+        },
         { header: 'Usuario', accessor: 'userName' },
     ];
 
@@ -65,7 +78,6 @@ const StockMovementList = () => {
 
         } catch (err) {
             console.error("Error al cargar movimientos:", err);
-            // Manejo de error 403 Forbidden o Not Found
             const msg = err.response?.status === 403
                 ? "Acceso denegado. No tiene permisos para ver el historial."
                 : "Error al cargar el historial de movimientos.";

@@ -46,8 +46,18 @@ const stockMovementService = {
     },
 
     /**
+     * Obtiene el stock detallado de un producto en todos los almacenes.
+     * @param {number} productId - ID del producto.
+     * @returns {Promise<AxiosResponse<Array<WarehouseStockDto>>>} - Retorna una lista de objetos { warehouseId, currentStock, ... }
+     */
+    getProductStockByWarehouses: (productId) => {
+        // Llama al nuevo endpoint que implementamos en InventoryController
+        return axios.get(`${API_URL}/inventory/stock-by-product/${productId}`, { headers: authHeader() });
+    },
+
+    /**
      * Realiza la transferencia de stock entre dos almacenes.
-     * @param {Object} transferData - Objeto TransferDto: { productId, originWarehouseId, destinationWarehouseId, quantity, userId }
+     * @param {Object} transferData - Objeto TransferDto: { productId, originWarehouseId, destinationWarehouseId, quantity, userId, motive }
      * @returns {Promise<AxiosResponse<TransferResult>>}
      */
     transferStock: (transferData) => {

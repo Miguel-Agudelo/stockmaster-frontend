@@ -172,6 +172,7 @@
 }
 
 .alert.error, .alert-error {
+    /* Color base de error para alertas generales */
     background-color: #fcebeb;
     color: #c04242;
     border: 1px solid #f9dcdc;
@@ -187,4 +188,19 @@
     font-size: 0.9em;
     color: #888;
     margin-top: 5px;
+}
+
+/* 1. Estilo para el borde del input cuando hay un error específico */
+.input-error-border {
+    border-color: #c04242 !important;
+    box-shadow: 0 0 0 3px rgba(192, 66, 66, 0.2);
+}
+
+/* 2. Estilo específico para la alerta debajo del campo de cantidad */
+.alert-quantity-specific {
+    padding: 8px 12px;
+    margin-bottom: 0;
+    margin-top: 5px;
+    font-size: 0.9em;
+    font-weight: 600;
 }

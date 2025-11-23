@@ -10,7 +10,7 @@ import UserList from './pages/users/UserList';
 import WarehousesView from './pages/warehouses/WarehousesView';
 import StockMovementList from './pages/movements/StockMovementList';
 
-// Página de Reportes (UNIFICADA - Dashboard/Reports)
+// Página de Reportes (Dashboard)
 import ReportsDashboard from './pages/reports/ReportsDashboard';
 
 // Vistas de Recuperación (HU17, HU18, HU19)
@@ -18,8 +18,9 @@ import ProductRecovery from './components/admin/ProductRecovery';
 import WarehouseRecovery from './components/admin/WarehouseRecovery';
 import UserRecovery from './components/admin/UserRecovery';
 
-//Transferencia de Stock (HU20)
+// Transferencia de Stock (HU20)
 import StockTransferPage from "./pages/movements/StockTransferPage";
+
 // Componentes de Layout
 import Sidebar from './components/layout/Sidebar';
 import authService from './services/authService';
@@ -28,18 +29,18 @@ import './App.css';
 
 /**
  * Componente que verifica la autenticación y la autorización (roles).
- * También inyecta el rol y el ID del usuario en los componentes hijos.
  */
 const PrivateRoute = ({ children, roles }) => {
     // Obtener los datos del usuario logueado
     const isAuthenticated = authService.isUserAuthenticated();
     const currentUser = authService.getCurrentUser();
 
+    // 💡 PASO CLAVE 1: Si NO está autenticado, redirige al Login.
     if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
     }
 
-    // 1. Verificación de Roles (Autorización)
+    // 2. Verificación de Roles (Autorización)
     if (roles && roles.length > 0 && (!currentUser || !roles.includes(currentUser.role))) {
         // Estilo básico para Denegado
         return (
@@ -52,7 +53,7 @@ const PrivateRoute = ({ children, roles }) => {
         );
     }
 
-    // 2. Pasar el rol y el ID del usuario como props
+    // 3. Pasar el rol y el ID del usuario como props (Mismo código)
     const childWithProps = React.Children.map(children, child => {
         if (React.isValidElement(child)) {
             return React.cloneElement(child, {
@@ -79,11 +80,23 @@ function App() {
     return (
         <Router>
             <Routes>
+                {/* 1. RUTA DE LOGIN (PÚBLICA) */}
                 <Route path="/login" element={<LoginPage />} />
 
-                {/* Muestra ReportsDashboard (requiere autenticación) */}
+                {/* 2. RUTA RAÍZ (NUEVA LÓGICA DE REDIRECCIÓN INTELIGENTE) */}
                 <Route
                     path="/"
+                    element={
+                        // Creamos un "protector" temporal que redirigirá
+                        <PrivateRoute roles={['ADMINISTRADOR', 'OPERADOR']}>
+                            <Navigate to="/dashboard" replace />
+                        </PrivateRoute>
+                    }
+                />
+
+                {/* 3. DASHBOARD / REPORTS (NUEVA RUTA PRINCIPAL PROTEGIDA) */}
+                <Route
+                    path="/dashboard"
                     element={
                         <PrivateRoute roles={['ADMINISTRADOR', 'OPERADOR']}>
                             <ReportsDashboard />
@@ -91,11 +104,11 @@ function App() {
                     }
                 />
 
-                {/* Si se usa /reports, redirigimos a / para mantener la URL simple */}
-                <Route path="/reports" element={<Navigate to="/" replace />} />
+                {/* RUTA DE REPORTES (AHORA SOLO REDIRIGE AL DASHBOARD) */}
+                <Route path="/reports" element={<Navigate to="/dashboard" replace />} />
 
 
-                {/* Ruta de Usuarios (ADMIN) */}
+                {/* RUTA: Usuarios (ADMIN) */}
                 <Route
                     path="/users"
                     element={
@@ -172,7 +185,7 @@ function App() {
                     }
                 />
 
-                {/* Manejo de rutas no encontradas */}
+                {/* Manejo de rutas no encontradas: redirige a la raíz, que a su vez redirige a Dashboard o Login */}
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </Router>

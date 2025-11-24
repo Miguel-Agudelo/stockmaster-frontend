@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import authService from '../services/authService';
 
-const INACTIVITY_TIME = 110000;
+const INACTIVITY_TIME = 1800000;
 
 const useInactivityTimer = () => {
 

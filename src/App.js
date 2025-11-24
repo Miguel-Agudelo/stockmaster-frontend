@@ -25,6 +25,9 @@ import StockTransferPage from "./pages/movements/StockTransferPage";
 import Sidebar from './components/layout/Sidebar';
 import authService from './services/authService';
 
+// HOOK DE INACTIVIDAD
+import useInactivityTimer from './hooks/useInactivityTimer';
+
 import './App.css';
 
 /**
@@ -35,7 +38,7 @@ const PrivateRoute = ({ children, roles }) => {
     const isAuthenticated = authService.isUserAuthenticated();
     const currentUser = authService.getCurrentUser();
 
-    // 💡 PASO CLAVE 1: Si NO está autenticado, redirige al Login.
+    // Si NO está autenticado, redirige al Login.
     if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
     }
@@ -53,7 +56,7 @@ const PrivateRoute = ({ children, roles }) => {
         );
     }
 
-    // 3. Pasar el rol y el ID del usuario como props (Mismo código)
+    // 3. Pasar el rol y el ID del usuario como props
     const childWithProps = React.Children.map(children, child => {
         if (React.isValidElement(child)) {
             return React.cloneElement(child, {
@@ -77,24 +80,26 @@ const PrivateRoute = ({ children, roles }) => {
 };
 
 function App() {
+    useInactivityTimer();
+
     return (
         <Router>
             <Routes>
                 {/* 1. RUTA DE LOGIN (PÚBLICA) */}
                 <Route path="/login" element={<LoginPage />} />
 
-                {/* 2. RUTA RAÍZ (NUEVA LÓGICA DE REDIRECCIÓN INTELIGENTE) */}
+                {/* 2. RUTA RAÍZ (LÓGICA DE REDIRECCIÓN INTELIGENTE) */}
                 <Route
                     path="/"
                     element={
-                        // Creamos un "protector" temporal que redirigirá
+                        // Usa PrivateRoute como portero para ir al Dashboard
                         <PrivateRoute roles={['ADMINISTRADOR', 'OPERADOR']}>
                             <Navigate to="/dashboard" replace />
                         </PrivateRoute>
                     }
                 />
 
-                {/* 3. DASHBOARD / REPORTS (NUEVA RUTA PRINCIPAL PROTEGIDA) */}
+                {/* 3. DASHBOARD / REPORTS (RUTA PRINCIPAL PROTEGIDA) */}
                 <Route
                     path="/dashboard"
                     element={
@@ -104,7 +109,7 @@ function App() {
                     }
                 />
 
-                {/* RUTA DE REPORTES (AHORA SOLO REDIRIGE AL DASHBOARD) */}
+                {/* RUTA DE REPORTES (REDIRECCIÓN) */}
                 <Route path="/reports" element={<Navigate to="/dashboard" replace />} />
 
 
@@ -185,7 +190,7 @@ function App() {
                     }
                 />
 
-                {/* Manejo de rutas no encontradas: redirige a la raíz, que a su vez redirige a Dashboard o Login */}
+                {/* Manejo de rutas no encontradas: redirige a la raíz */}
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </Router>

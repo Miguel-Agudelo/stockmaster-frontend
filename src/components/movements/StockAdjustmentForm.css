@@ -1,0 +1,275 @@
+/* ── StockAdjustmentForm.css — HU-11 Ajuste de Inventario ────────────────── */
+
+.adj-modal {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+    width: 100%;
+    max-width: 540px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.adj-header {
+    padding: 22px 28px 16px;
+    border-bottom: 1px solid #F3F4F6;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-shrink: 0;
+}
+.adj-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+.adj-header p {
+    margin: 4px 0 0;
+    font-size: 0.85rem;
+    color: #64748b;
+}
+.adj-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #9CA3AF;
+    line-height: 1;
+    padding: 0 0 0 12px;
+    transition: color 0.15s;
+}
+.adj-close:hover { color: #374151; }
+
+/* ── Body ────────────────────────────────────────────────────────────────── */
+.adj-body {
+    padding: 20px 28px;
+    overflow-y: auto;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.adj-loading {
+    padding: 40px;
+    text-align: center;
+    color: #6B7280;
+}
+
+/* Mensajes de alerta */
+.adj-alert {
+    padding: 10px 14px;
+    border-radius: 7px;
+    font-size: 0.88rem;
+    font-weight: 500;
+}
+.adj-alert--success {
+    background: #F0FDF4;
+    color: #166534;
+    border: 1px solid #BBF7D0;
+}
+.adj-alert--error {
+    background: #FEF2F2;
+    color: #B91C1C;
+    border: 1px solid #FECACA;
+}
+
+/* Título de sección */
+.adj-section-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #374151;
+    padding-bottom: 2px;
+    border-bottom: 1px solid #F3F4F6;
+}
+
+/* ── Campos ──────────────────────────────────────────────────────────────── */
+.adj-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.adj-field label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+}
+.adj-req  { color: #EF4444; margin-left: 2px; }
+.adj-opt  { font-weight: 400; color: #9CA3AF; font-size: 0.8rem; }
+
+.adj-field select,
+.adj-field input[type="text"],
+.adj-field input[type="number"] {
+    padding: 10px 13px;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #1e293b;
+    background: #F9FAFB;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-sizing: border-box;
+    width: 100%;
+}
+.adj-field select:focus,
+.adj-field input:focus {
+    outline: none;
+    border-color: #FF7B00;
+    box-shadow: 0 0 0 3px rgba(255, 123, 0, 0.18);
+    background: #fff;
+}
+
+.adj-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+/* Stock info banner */
+.adj-stock-info {
+    background: #EFF6FF;
+    border: 1px solid #BFDBFE;
+    border-radius: 7px;
+    padding: 9px 14px;
+    font-size: 0.85rem;
+    color: #1D4ED8;
+}
+
+/* ── Tipo de ajuste ──────────────────────────────────────────────────────── */
+.adj-type-group {
+    display: flex;
+    gap: 10px;
+}
+.adj-type-btn {
+    flex: 1;
+    padding: 9px 0;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    border: 2px solid transparent;
+}
+/* Positivo */
+.adj-type-btn--pos {
+    background: #F0FDF4;
+    color: #16A34A;
+    border-color: #BBF7D0;
+}
+.adj-type-btn--pos.active,
+.adj-type-btn--pos:hover:not(:disabled) {
+    background: #16A34A;
+    color: #fff;
+    border-color: #16A34A;
+}
+/* Negativo */
+.adj-type-btn--neg {
+    background: #FFF1F2;
+    color: #DC2626;
+    border-color: #FECACA;
+}
+.adj-type-btn--neg.active,
+.adj-type-btn--neg:hover:not(:disabled) {
+    background: #DC2626;
+    color: #fff;
+    border-color: #DC2626;
+}
+.adj-type-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.adj-type-hint {
+    font-size: 0.78rem;
+    color: #6B7280;
+    margin: 0;
+}
+
+/* ── Preview stock resultante ────────────────────────────────────────────── */
+.adj-resultante {
+    font-size: 0.82rem;
+    color: #16A34A;
+    margin: 2px 0 0;
+}
+.adj-resultante--neg { color: #DC2626; }
+
+/* ── Razones (chips) ─────────────────────────────────────────────────────── */
+.adj-reasons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.adj-reason-chip {
+    padding: 6px 13px;
+    border-radius: 20px;
+    border: 1.5px solid #D1D5DB;
+    background: #fff;
+    color: #374151;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.adj-reason-chip:hover:not(:disabled) {
+    border-color: #FF7B00;
+    color: #FF7B00;
+    background: #FFF7ED;
+}
+.adj-reason-chip.active {
+    background: #FF7B00;
+    border-color: #FF7B00;
+    color: #fff;
+}
+.adj-reason-chip:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ── Error inline ────────────────────────────────────────────────────────── */
+.adj-err {
+    font-size: 0.8rem;
+    color: #DC2626;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+.adj-footer {
+    padding: 16px 28px;
+    border-top: 1px solid #F3F4F6;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-shrink: 0;
+    background: #fff;
+}
+.adj-btn-cancel {
+    padding: 9px 20px;
+    border-radius: 8px;
+    border: 1.5px solid #D1D5DB;
+    background: #fff;
+    color: #6B7280;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.adj-btn-cancel:hover:not(:disabled) { background: #F9FAFB; }
+
+.adj-btn-save {
+    padding: 9px 22px;
+    border-radius: 8px;
+    border: none;
+    background: #FF7B00;
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(255, 123, 0, 0.28);
+    transition: background 0.15s;
+}
+.adj-btn-save:hover:not(:disabled) { background: #E06A00; }
+.adj-btn-save:disabled,
+.adj-btn-cancel:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 520px) {
+    .adj-grid-2 { grid-template-columns: 1fr; }
+    .adj-modal   { max-width: 100%; border-radius: 10px 10px 0 0; }
+}

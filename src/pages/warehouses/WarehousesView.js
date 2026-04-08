@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import warehouseService from '../../services/warehouseService';
+import Pagination from '../../components/common/Pagination';
+import usePagination from '../../hooks/usePagination';
 import WarehouseForm from '../../components/warehouses/WarehouseForm';
 import './WarehousesView.css';
 import {
@@ -65,6 +67,7 @@ const WarehousesView = ({ userRole }) => {
 
     const [warehouseToDelete, setWarehouseToDelete] = useState(null);
     const [toast, setToast] = useState({ message: '', type: '', isVisible: false });
+    const [searchTerm, setSearchTerm] = useState('');
 
     const isAdmin = userRole === ADMIN_ROLE;
 
@@ -123,6 +126,17 @@ const WarehousesView = ({ userRole }) => {
         navigate('/warehouses/recovery');
     };
 
+    // HU-PI2-07: filtrado por búsqueda
+    const filteredWarehouses = warehouses.filter(wh =>
+        (wh.name && wh.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (wh.address && wh.address.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (wh.city && wh.city.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (wh.description && wh.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
+    // HU-PI2-07: paginación sobre almacenes filtrados
+    const { currentPage, pageSize, paginated: paginatedWarehouses, setPage, setPageSize } = usePagination(filteredWarehouses);
+
     // --- Cálculo de Métricas
     const totalWarehouses = warehouses.length;
     const totalProductsCount = warehouses.reduce((acc, wh) => acc + (wh.products?.length || 0), 0);
@@ -144,10 +158,19 @@ const WarehousesView = ({ userRole }) => {
             <div className="data-table-card">
                 <div className="table-info">
                     Lista de Almacenes
-                    <p className="data-count">{warehouses.length} almacenes registrados en el sistema</p>
+                    <p className="data-count">Mostrando {filteredWarehouses.length} de {warehouses.length} almacenes</p>
                 </div>
 
-                {warehouses.length === 0 ? (
+                <div className="search-bar-container" style={{padding:'0 0 12px'}}>
+                    <input
+                        type="text"
+                        placeholder="Buscar almacenes por nombre, dirección o ciudad..."
+                        className="product-search-input"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                {filteredWarehouses.length === 0 ? (
                     <p className="no-data">No se encontraron almacenes en la base de datos.</p>
                 ) : (
                     <div style={{ overflowX: 'auto' }}>
@@ -163,7 +186,7 @@ const WarehousesView = ({ userRole }) => {
                             </tr>
                             </thead>
                             <tbody>
-                            {warehouses.map((wh) => (
+                            {paginatedWarehouses.map((wh) => (
                                 <tr key={wh.id}>
                                     <td>{wh.name}</td>
                                     <td>{`${wh.address}, ${wh.city}`}</td>
@@ -193,6 +216,13 @@ const WarehousesView = ({ userRole }) => {
                         </table>
                     </div>
                 )}
+                <Pagination
+                    currentPage={currentPage}
+                    totalItems={filteredWarehouses.length}
+                    pageSize={pageSize}
+                    onPageChange={setPage}
+                    onSizeChange={setPageSize}
+                />
             </div>
         );
     };

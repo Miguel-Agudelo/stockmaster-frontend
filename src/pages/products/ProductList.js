@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faBoxOpen, faLayerGroup, faWarehouse, faPencilAlt, faTrashAlt, faTrashRestore } from '@fortawesome/free-solid-svg-icons';
 import ProductForm from '../../components/products/ProductForm';
+import Pagination from '../../components/common/Pagination';
+import usePagination from '../../hooks/usePagination';
 import productService from '../../services/productService';
 import '../../pages/products/ProductList.css';
 
@@ -135,6 +137,9 @@ const ProductList = ({userRole}) => {
         (product.categoryName && product.categoryName.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
+    // HU-PI2-07: Paginación sobre los productos filtrados
+    const { currentPage, pageSize, paginated: paginatedProducts, setPage, setPageSize } = usePagination(filteredProducts);
+
     // 8. Función de navegación a la papelera
     const handleGoToRecovery = () => {
         navigate('/products/recovery');
@@ -195,7 +200,7 @@ const ProductList = ({userRole}) => {
             <div className="product-list-card">
                 <div className="table-info">
                     Lista de Productos
-                    <p className="product-count">{filteredProducts.length} de {products.length} productos</p>
+                    <p className="product-count">Mostrando {filteredProducts.length} de {products.length} productos</p>
                 </div>
 
                 {isLoading ? (
@@ -215,7 +220,7 @@ const ProductList = ({userRole}) => {
                         </tr>
                         </thead>
                         <tbody>
-                        {filteredProducts.map(product => (
+                        {paginatedProducts.map(product => (
                             <tr key={product.id}>
                                 <td>{product.name}</td>
                                 <td>{product.description}</td>
@@ -246,6 +251,13 @@ const ProductList = ({userRole}) => {
                 ) : (
                     <p className="no-data-message">No se encontraron productos registrados.</p>
                 )}
+                <Pagination
+                    currentPage={currentPage}
+                    totalItems={filteredProducts.length}
+                    pageSize={pageSize}
+                    onPageChange={setPage}
+                    onSizeChange={setPageSize}
+                />
             </div>
 
             {/* MODALES */}

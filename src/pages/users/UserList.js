@@ -4,6 +4,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faUser, faUserTie, faPencilAlt, faTrashAlt, faTrashRestore } from '@fortawesome/free-solid-svg-icons';
 import UserForm from '../../components/users/UserForm';
 import userService from '../../services/userService';
+import Pagination from '../../components/common/Pagination';
+import usePagination from '../../hooks/usePagination';
 import './UserList.css';
 
 const SummaryCard = ({ title, value, colorClass }) => {
@@ -46,6 +48,7 @@ const UserList = ({ userRole }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [userToDelete, setUserToDelete] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const isAdmin = userRole === 'ADMINISTRADOR';
 
@@ -115,6 +118,16 @@ const UserList = ({ userRole }) => {
     const handleGoToRecovery = () => {
         navigate('/users/recovery');
     };
+    // HU-PI2-07: filtrado por búsqueda
+    const filteredUsers = users.filter(u =>
+        (u.name && u.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (u.email && u.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (u.role && u.role.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
+    // HU-PI2-07: paginación sobre usuarios filtrados
+    const { currentPage, pageSize, paginated: paginatedUsers, setPage, setPageSize } = usePagination(filteredUsers);
+
     const totalUsers = users.length;
     const totalAdmins = users.filter(u => u.role === 'ADMINISTRADOR').length;
     const totalOperators = users.filter(u => u.role === 'OPERADOR').length;
@@ -163,11 +176,22 @@ const UserList = ({ userRole }) => {
                 ))}
             </div>
 
+            {/* Búsqueda HU-PI2-07 */}
+            <div className="search-bar-container">
+                <input
+                    type="text"
+                    placeholder="Buscar usuarios por nombre, email o rol..."
+                    className="product-search-input"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
+
             {/* Lista de Usuarios */}
             <div className="user-list-card">
                 <div className="table-info">
                     Lista de Usuarios
-                    <p className="user-count">{users.length} usuarios registrados en el sistema</p>
+                    <p className="user-count">Mostrando {filteredUsers.length} de {users.length} usuarios</p>
                 </div>
 
                 {isLoading && <p className="loading-message">Cargando usuarios...</p>}
@@ -185,7 +209,7 @@ const UserList = ({ userRole }) => {
                         </tr>
                         </thead>
                         <tbody>
-                        {users.map(user => (
+                        {paginatedUsers.map(user => (
                             <tr key={user.id}>
                                 <td>{user.name}</td>
                                 <td>{user.email}</td>
@@ -211,9 +235,16 @@ const UserList = ({ userRole }) => {
                     </table>
                 )}
 
-                {!isLoading && !error && users.length === 0 && (
+                {!isLoading && !error && filteredUsers.length === 0 && (
                     <p className="no-data-message">No se encontraron usuarios en la base de datos.</p>
                 )}
+                <Pagination
+                    currentPage={currentPage}
+                    totalItems={filteredUsers.length}
+                    pageSize={pageSize}
+                    onPageChange={setPage}
+                    onSizeChange={setPageSize}
+                />
             </div>
 
             {/* MODALES */}

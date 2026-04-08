@@ -1,0 +1,102 @@
+/* CategoryForm.css — mismo patrón que ProductForm.css */
+.category-form-modal {
+    background: #fff;
+    border-radius: 10px;
+    width: 480px;
+    max-width: 95vw;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow: hidden;
+}
+.category-form-header {
+    padding: 20px 24px 12px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+.category-form-header h3 { margin: 0; font-size: 1.1rem; color: #1F2937; }
+.category-form-header p  { margin: 4px 0 0; font-size: 0.82rem; color: #6B7280; }
+.category-form-body {
+    padding: 20px 24px;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.category-form-body label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 4px;
+    display: block;
+}
+.category-form-body .form-input,
+.category-form-body .form-select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #D1D5DB;
+    border-radius: 6px;
+    font-size: 0.88rem;
+    color: #111827;
+    font-family: inherit;
+    outline: none;
+    transition: border 0.15s;
+    box-sizing: border-box;
+}
+.category-form-body .form-input:focus,
+.category-form-body .form-select:focus {
+    border-color: #F97316;
+    box-shadow: 0 0 0 3px rgba(249,115,22,0.12);
+}
+.form-hint {
+    font-size: 0.78rem;
+    color: #9CA3AF;
+    margin-top: 3px;
+}
+/* Toggle tipo categoría */
+.type-toggle {
+    display: flex;
+    border: 1px solid #D1D5DB;
+    border-radius: 6px;
+    overflow: hidden;
+    width: fit-content;
+}
+.type-toggle button {
+    padding: 8px 18px;
+    border: none;
+    background: #fff;
+    color: #6B7280;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.type-toggle button:first-child { border-right: 1px solid #D1D5DB; }
+.type-toggle button.active-root { background: #F97316; color: #fff; font-weight: 600; }
+.type-toggle button.active-sub  { background: #3B82F6; color: #fff; font-weight: 600; }
+
+.category-form-footer {
+    padding: 14px 24px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+.btn-cancel-cat {
+    padding: 8px 18px; border-radius: 6px; border: 1px solid #D1D5DB;
+    background: #fff; color: #374151; font-size: 0.88rem;
+    font-family: inherit; cursor: pointer;
+}
+.btn-save-cat {
+    padding: 8px 20px; border-radius: 6px; border: none;
+    background: #F97316; color: #fff; font-size: 0.88rem;
+    font-weight: 600; font-family: inherit; cursor: pointer;
+}
+.btn-save-cat:disabled { background: #D1D5DB; cursor: not-allowed; }
+.form-error-msg { font-size: 0.82rem; color: #EF4444; margin-top: 2px; }
+.form-success-msg { font-size: 0.82rem; color: #22C55E; }

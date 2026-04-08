@@ -2,286 +2,275 @@ import React, { useState, useEffect } from 'react';
 import './ProductForm.css';
 import productService from '../../services/productService';
 import warehouseService from '../../services/warehouseService';
-
+import categoryService from '../../services/categoryService';
+import supplierService from '../../services/supplierService';
 
 const ProductForm = ({ onSave, onCancel, currentProduct }) => {
-
     const isEditing = !!currentProduct;
+
     const initialState = {
-        name: '',
-        description: '',
-        price: '',
-        categoryName: '',
-        warehouseId: '',
-        initialQuantity: '',
-        minStock: '',
+        name: '', description: '', price: '',
+        categoryId: '',  // HU-PI2-02: ahora usamos ID en lugar de nombre libre
+        warehouseId: '', initialQuantity: '', minStock: '',
+        supplierIds: [],  // HU-PI2-01: IDs de proveedores asociados
     };
 
-    const [formData, setFormData] = useState(initialState);
-    const [errors, setErrors] = useState({});
-    const [message, setMessage] = useState('');
+    const [formData, setFormData]       = useState(initialState);
+    const [errors, setErrors]           = useState({});
+    const [message, setMessage]         = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [activeWarehouses, setActiveWarehouses] = useState([]);
+    const [categories, setCategories]   = useState([]);  // HU-PI2-02
+    const [allSuppliers, setAllSuppliers] = useState([]);   // HU-PI2-01
     const [warehouseLoadMessage, setWarehouseLoadMessage] = useState('Cargando almacenes...');
 
-
-    // 1. Efecto para cargar datos y almacenes
     useEffect(() => {
-        // Lógica de carga de datos de edición/creación
         if (currentProduct) {
             setFormData({
-                name: currentProduct.name || '',
+                name:        currentProduct.name || '',
                 description: currentProduct.description || '',
-                price: currentProduct.price !== undefined ? currentProduct.price.toString() : '',
-                categoryName: currentProduct.categoryName || '',
-                warehouseId: '',
-                initialQuantity: '',
-                minStock: '',
+                price:       currentProduct.price !== undefined ? currentProduct.price.toString() : '',
+                categoryId:  currentProduct.categoryId ? currentProduct.categoryId.toString() : '',
+                warehouseId: '', initialQuantity: '', minStock: '',
+                supplierIds: currentProduct.suppliers ? currentProduct.suppliers.map(s => s.id) : [],
             });
         } else {
             setFormData(initialState);
         }
-
         setErrors({});
         setMessage('');
 
+        // Cargar categorías para el selector
+        categoryService.getAllCategories()
+            .then(res => setCategories(res.data))
+            .catch(() => setCategories([]));
 
+        // HU-PI2-01: cargar proveedores activos para el selector
+        supplierService.getAllSuppliers()
+            .then(res => setAllSuppliers(res.data.filter(s => s.active)))
+            .catch(() => setAllSuppliers([]));
+
+        // Cargar almacenes activos (solo en creación)
         const fetchActiveWarehouses = async () => {
             if (isEditing) return;
-
             try {
                 const warehouses = await warehouseService.getActiveWarehousesList();
-
                 setActiveWarehouses(warehouses);
-
                 if (warehouses.length > 0) {
                     setFormData(prev => ({ ...prev, warehouseId: warehouses[0].id.toString() }));
                     setWarehouseLoadMessage(null);
                 } else {
-                    setWarehouseLoadMessage('No hay almacenes activos disponibles para asignar productos.');
+                    setWarehouseLoadMessage('No hay almacenes activos disponibles.');
                 }
-
-            } catch (err) {
-                console.error("Error al cargar almacenes:", err);
-                setWarehouseLoadMessage('Error al cargar la lista de almacenes.');
+            } catch {
+                setWarehouseLoadMessage('Error al cargar almacenes.');
                 setActiveWarehouses([]);
             }
         };
-
         fetchActiveWarehouses();
+    }, [currentProduct]);
 
-    }, [currentProduct, isEditing]);
-
-
-    // 2. Manejo de cambios
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
-        if (errors[name]) setErrors(prev => { const newErrors = { ...prev }; delete newErrors[name]; return newErrors; });
+        if (errors[name]) setErrors(prev => { const n = { ...prev }; delete n[name]; return n; });
         setMessage('');
     };
 
-    // 3. Validación
     const validate = () => {
-        let tempErrors = {};
-        let isValid = true;
-
-        if (!formData.name) { tempErrors.name = "El nombre es obligatorio."; isValid = false; }
-
+        const errs = {};
+        if (!formData.name)       errs.name = 'El nombre es obligatorio.';
+        if (!formData.categoryId) errs.categoryId = 'La categoría es obligatoria.';
         const price = parseFloat(formData.price);
-        if (isNaN(price) || price <= 0) {
-            tempErrors.price = "El precio debe ser un número mayor a 0.";
-            isValid = false;
-        }
-
-        if (!formData.categoryName) { tempErrors.categoryName = "La categoría es obligatoria."; isValid = false; }
-
+        if (isNaN(price) || price <= 0) errs.price = 'El precio debe ser mayor a 0.';
         if (!isEditing) {
-
-            if (activeWarehouses.length === 0) {
-                tempErrors.warehouseId = "No hay almacenes activos disponibles para la creación.";
-                isValid = false;
-            } else if (!formData.warehouseId || isNaN(parseInt(formData.warehouseId))) {
-                tempErrors.warehouseId = "Debe seleccionar un almacén activo.";
-                isValid = false;
-            }
-
-            const initialQuantity = parseInt(formData.initialQuantity);
-            if (isNaN(initialQuantity) || initialQuantity < 0) {
-                tempErrors.initialQuantity = "La cantidad inicial debe ser un número positivo (o 0).";
-                isValid = false;
-            }
-
-            const minStock = parseInt(formData.minStock);
-            if (isNaN(minStock) || minStock < 0) {
-                tempErrors.minStock = "El stock mínimo debe ser un número positivo (o 0).";
-                isValid = false;
-            }
-            if (initialQuantity < minStock) {
-                tempErrors.minStock = "El stock mínimo no debe ser mayor que la cantidad inicial.";
-                isValid = false;
-            }
+            if (activeWarehouses.length === 0) errs.warehouseId = 'No hay almacenes activos.';
+            else if (!formData.warehouseId)    errs.warehouseId = 'Selecciona un almacén.';
+            const qty = parseInt(formData.initialQuantity);
+            if (isNaN(qty) || qty < 0) errs.initialQuantity = 'Cantidad inicial inválida.';
+            const min = parseInt(formData.minStock);
+            if (isNaN(min) || min < 0)   errs.minStock = 'Stock mínimo inválido.';
+            if (!isNaN(qty) && !isNaN(min) && qty < min)
+                errs.minStock = 'El stock mínimo no puede ser mayor que la cantidad inicial.';
         }
-
-        setErrors(tempErrors);
-        return isValid;
+        setErrors(errs);
+        return Object.keys(errs).length === 0;
     };
 
-    // 4. Envío del formulario
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        if (!validate()) {
-            setMessage('Por favor, corrija los errores del formulario.');
-            return;
-        }
-
+        if (!validate()) { setMessage('Corrija los errores del formulario.'); return; }
         setIsSubmitting(true);
-
         try {
             const productData = {
-                name: formData.name,
+                name:        formData.name,
                 description: formData.description,
-                price: parseFloat(formData.price),
-                categoryName: formData.categoryName,
+                price:       parseFloat(formData.price),
+                categoryId:  parseInt(formData.categoryId),
+                supplierIds: formData.supplierIds,  // HU-PI2-01
             };
-
-            let responseMessage = '';
-
             if (isEditing) {
-                // MODO EDICIÓN: Solo datos básicos
                 await productService.updateProduct(currentProduct.id, productData);
-                responseMessage = 'Producto actualizado exitosamente.';
+                setMessage('Producto actualizado exitosamente.');
             } else {
-                // MODO CREACIÓN: Todos los campos requeridos
-                const fullProductData = {
+                await productService.createProduct({
                     ...productData,
-                    warehouseId: parseInt(formData.warehouseId),
+                    warehouseId:     parseInt(formData.warehouseId),
                     initialQuantity: parseInt(formData.initialQuantity),
-                    minStock: parseInt(formData.minStock),
-                };
-                await productService.createProduct(fullProductData);
-                responseMessage = 'Producto creado exitosamente.';
+                    minStock:        parseInt(formData.minStock),
+                });
+                setMessage('Producto creado exitosamente.');
             }
-
-            setMessage(responseMessage);
-            setTimeout(() => { onSave(); }, 1000);
-
-        } catch (error) {
-            console.error("Error al guardar producto:", error.response?.data);
-            const apiErrorMessage = error.response?.data?.message || 'Error de conexión o datos inválidos.';
-            setMessage(apiErrorMessage);
-            setErrors({ general: apiErrorMessage });
+            setTimeout(() => onSave(), 900);
+        } catch (err) {
+            const msg = err.response?.data?.message || 'Error al guardar el producto.';
+            setErrors({ general: msg });
+            setMessage(msg);
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    // 5. Textos dinámicos
-    const modalTitle = isEditing ? 'Editar Producto' : 'Crear Producto';
-    const modalSubtitle = isEditing ? 'Modifique la información del producto' : 'Complete los datos del nuevo producto';
-    const submitButtonText = isEditing ? 'Guardar Cambios' : 'Crear Producto';
+    // HU-PI2-01: toggle de proveedor seleccionado
+    const toggleSupplier = (supplierId) => {
+        setFormData(prev => {
+            const ids = prev.supplierIds.includes(supplierId)
+                ? prev.supplierIds.filter(id => id !== supplierId)
+                : [...prev.supplierIds, supplierId];
+            return { ...prev, supplierIds: ids };
+        });
+    };
 
+    // Construir opciones del selector mostrando jerarquía: "Tecnología > Periféricos"
+    const buildCategoryOptions = () => {
+        const roots = categories.filter(c => !c.parentCategoryId);
+        const subs  = categories.filter(c =>  c.parentCategoryId);
+        const opts  = [];
+        roots.forEach(root => {
+            opts.push(<option key={root.id} value={root.id}>{root.name}</option>);
+            subs.filter(s => s.parentCategoryId === root.id).forEach(sub => {
+                opts.push(<option key={sub.id} value={sub.id}>&nbsp;&nbsp;&nbsp;↳ {sub.name}</option>);
+            });
+        });
+        return opts;
+    };
 
-    // 6. JSX del Formulario
     return (
         <div className="form-modal-container">
             <form className="form-modal-content" onSubmit={handleSubmit}>
-
-                {/* Encabezado... */}
                 <div className="modal-header-edit">
-                    <h3>{modalTitle}</h3>
-                    <p>{modalSubtitle}</p>
-                    <button type="button" onClick={onCancel} className="close-x-button">
-                        &times;
-                    </button>
+                    <h3>{isEditing ? 'Editar Producto' : 'Crear Producto'}</h3>
+                    <p>{isEditing ? 'Modifique la información del producto' : 'Complete los datos del nuevo producto'}</p>
+                    <button type="button" onClick={onCancel} className="close-x-button">&times;</button>
                 </div>
 
-                {/* Cuerpo del Formulario */}
                 <div className="modal-body-form">
-                    {/* Mensajes de error... */}
                     {message && !errors.general && <div className="form-message">{message}</div>}
                     {errors.general && <div className="error-message">{errors.general}</div>}
 
-                    {/* Campos de Información General: Nombre, Descripción, Precio, Categoría... */}
                     <label htmlFor="name">Nombre *</label>
-                    <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} className="form-input" required placeholder="Nombre del producto" disabled={isSubmitting}/>
+                    <input type="text" id="name" name="name" value={formData.name}
+                           onChange={handleChange} className="form-input" placeholder="Nombre del producto"
+                           disabled={isSubmitting} />
                     {errors.name && <div className="error-message">{errors.name}</div>}
 
                     <label htmlFor="description">Descripción</label>
-                    <input type="text" id="description" name="description" value={formData.description} onChange={handleChange} className="form-input" placeholder="Descripción del producto" disabled={isSubmitting}/>
+                    <input type="text" id="description" name="description" value={formData.description}
+                           onChange={handleChange} className="form-input" placeholder="Descripción del producto"
+                           disabled={isSubmitting} />
 
                     <label htmlFor="price">Precio *</label>
-                    <input type="number" id="price" name="price" value={formData.price} onChange={handleChange} className="form-input" required placeholder="0.00" min="0" step="0.01" disabled={isSubmitting}/>
+                    <input type="number" id="price" name="price" value={formData.price}
+                           onChange={handleChange} className="form-input" placeholder="0.00"
+                           min="0" step="0.01" disabled={isSubmitting} />
                     {errors.price && <div className="error-message">{errors.price}</div>}
 
-                    <label htmlFor="categoryName">Categoría *</label>
-                    <input type="text" id="categoryName" name="categoryName" value={formData.categoryName} onChange={handleChange} className="form-input" required placeholder="Categoría del producto" disabled={isSubmitting}/>
-                    {errors.categoryName && <div className="error-message">{errors.categoryName}</div>}
+                    {/* HU-PI2-02: selector de categoría por ID */}
+                    <label htmlFor="categoryId">Categoría *</label>
+                    <select id="categoryId" name="categoryId" value={formData.categoryId}
+                            onChange={handleChange} className="form-input" disabled={isSubmitting}>
+                        <option value="" disabled>Seleccionar categoría...</option>
+                        {buildCategoryOptions()}
+                    </select>
+                    {errors.categoryId && <div className="error-message">{errors.categoryId}</div>}
 
-                    {/* SECCIÓN DE INVENTARIO INICIAL */}
+                    {/* HU-PI2-01: Proveedores asociados */}
+                    {allSuppliers.length > 0 && (
+                        <>
+                            <label>Proveedores asociados</label>
+                            <div style={{ display:'flex', flexWrap:'wrap', gap:'8px', padding:'8px 0' }}>
+                                {allSuppliers.map(s => {
+                                    const selected = formData.supplierIds.includes(s.id);
+                                    return (
+                                        <button
+                                            key={s.id}
+                                            type="button"
+                                            onClick={() => toggleSupplier(s.id)}
+                                            disabled={isSubmitting}
+                                            style={{
+                                                padding:'5px 12px', borderRadius:'20px',
+                                                fontSize:'0.82rem', fontFamily:'inherit',
+                                                cursor:'pointer', transition:'all 0.15s',
+                                                border: selected ? '1px solid #F97316' : '1px solid #D1D5DB',
+                                                background: selected ? '#FFF7ED' : '#fff',
+                                                color: selected ? '#C2410C' : '#6B7280',
+                                                fontWeight: selected ? '600' : '400',
+                                            }}
+                                        >
+                                            {s.name}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            <div style={{ fontSize:'0.78rem', color:'#9CA3AF' }}>
+                                Selecciona uno o varios proveedores que suministran este producto.
+                            </div>
+                        </>
+                    )}
+
                     {!isEditing && (
                         <>
-                            {/* 1. SELECTOR DEL ALMACÉN ACTIVO */}
                             <label htmlFor="warehouseId">Almacén de Asignación *</label>
-
                             {warehouseLoadMessage ? (
-                                <p className="loading-message" style={{ margin: '10px 0', fontSize: '0.9em', color: 'gray' }}>{warehouseLoadMessage}</p>
+                                <p style={{ margin:'8px 0', fontSize:'0.88rem', color:'gray' }}>{warehouseLoadMessage}</p>
                             ) : (
-                                <select
-                                    id="warehouseId" name="warehouseId"
-                                    value={formData.warehouseId} onChange={handleChange}
-                                    className="form-input" required
-                                    disabled={isSubmitting || activeWarehouses.length === 0}
-                                >
-                                    {/* Opción por defecto para asegurar que se seleccione algo */}
+                                <select id="warehouseId" name="warehouseId" value={formData.warehouseId}
+                                        onChange={handleChange} className="form-input"
+                                        disabled={isSubmitting || activeWarehouses.length === 0}>
                                     <option value="" disabled>Seleccione un almacén activo</option>
-
                                     {activeWarehouses.map(wh => (
-                                        <option key={wh.id} value={wh.id}>
-                                            {wh.name} (ID: {wh.id})
-                                        </option>
+                                        <option key={wh.id} value={wh.id}>{wh.name} (ID: {wh.id})</option>
                                     ))}
                                 </select>
                             )}
                             {errors.warehouseId && <div className="error-message">{errors.warehouseId}</div>}
 
-
-                            {/* 2. CANTIDAD INICIAL */}
                             <label htmlFor="initialQuantity">Cantidad Inicial *</label>
-                            <input
-                                type="number" id="initialQuantity" name="initialQuantity"
-                                value={formData.initialQuantity} onChange={handleChange}
-                                className="form-input" required
-                                placeholder="Stock inicial al registrar" min="0"
-                                disabled={isSubmitting}
-                            />
+                            <input type="number" id="initialQuantity" name="initialQuantity"
+                                   value={formData.initialQuantity} onChange={handleChange}
+                                   className="form-input" placeholder="Stock inicial" min="0"
+                                   disabled={isSubmitting} />
                             {errors.initialQuantity && <div className="error-message">{errors.initialQuantity}</div>}
 
-                            {/* 3. STOCK MÍNIMO */}
                             <label htmlFor="minStock">Stock Mínimo *</label>
-                            <input
-                                type="number" id="minStock" name="minStock"
-                                value={formData.minStock} onChange={handleChange}
-                                className="form-input" required
-                                placeholder="Nivel de alerta de inventario" min="0"
-                                disabled={isSubmitting}
-                            />
+                            <input type="number" id="minStock" name="minStock"
+                                   value={formData.minStock} onChange={handleChange}
+                                   className="form-input" placeholder="Nivel de alerta" min="0"
+                                   disabled={isSubmitting} />
                             {errors.minStock && <div className="error-message">{errors.minStock}</div>}
                         </>
                     )}
                 </div>
 
-                {/* Footer/Acciones... */}
                 <div className="modal-footer-actions">
                     <button type="button" className="cancel-button-white" onClick={onCancel} disabled={isSubmitting}>
                         Cancelar
                     </button>
-                    <button type="submit" className="save-button-orange" disabled={isSubmitting || (!isEditing && activeWarehouses.length === 0)}>
-                        {isSubmitting ? 'Guardando...' : submitButtonText}
+                    <button type="submit" className="save-button-orange"
+                            disabled={isSubmitting || (!isEditing && activeWarehouses.length === 0)}>
+                        {isSubmitting ? 'Guardando...' : isEditing ? 'Guardar Cambios' : 'Crear Producto'}
                     </button>
                 </div>
-
             </form>
         </div>
     );

@@ -1,23 +1,20 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// Íconos adaptados para movimientos/métricas:
-import { faPlus, faSearch, faFilter } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faSearch, faFilter, faSlidersH } from '@fortawesome/free-solid-svg-icons';
 
-import StockMovementForm from '../../components/movements/StockMovementForm';
+import StockMovementForm   from '../../components/movements/StockMovementForm';
+import StockAdjustmentForm from '../../components/movements/StockAdjustmentForm';
 import stockMovementService from '../../services/stockMovementService';
+import Pagination   from '../../components/common/Pagination';
+import usePagination from '../../hooks/usePagination';
 import './StockMovementList.css';
 
 
+// ─── Tarjeta de métrica ───────────────────────────────────────────────────────
 const SummaryCard = ({ title, value, colorClass }) => {
-
-    // Función de formato simple para números
-    const formatValue = (val) => {
-        const numberValue = Number(val);
-        if (isNaN(numberValue)) return val;
-        return numberValue.toLocaleString('es-CO');
-    };
-
-    const displayValue = formatValue(value);
+    const displayValue = isNaN(Number(value))
+        ? value
+        : Number(value).toLocaleString('es-CO');
 
     return (
         <div className={`summary-card ${colorClass}`}>
@@ -30,137 +27,140 @@ const SummaryCard = ({ title, value, colorClass }) => {
 };
 
 
-const StockMovementList = ({userRole}) => {
-    // 1. ESTADOS CLAVE
-    const [movements, setMovements] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
+// ─── Componente principal ─────────────────────────────────────────────────────
+const StockMovementList = ({ userRole }) => {
 
+    const [movements,  setMovements]  = useState([]);
+    const [isLoading,  setIsLoading]  = useState(true);
+    const [error,      setError]      = useState(null);
     const hasAccess = userRole === 'ADMINISTRADOR' || userRole === 'OPERADOR';
 
-    // 2. ESTADOS DE BÚSQUEDA Y FILTRO
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filterType, setFilterType] = useState('ALL'); // 'ALL', 'ENTRADA', 'SALIDA'
+    const [searchTerm,  setSearchTerm]  = useState('');
+    const [filterType,  setFilterType]  = useState('ALL');
 
-    // 3. ESTADO PARA EL MODAL DE MOVIMIENTO (HU 8 y 9)
-    const [isFormOpen, setIsFormOpen] = useState(false);
+    // HU08/09 — modal movimiento
+    const [isMovementOpen, setIsMovementOpen] = useState(false);
+    // HU11 — modal ajuste
+    const [isAdjustOpen, setIsAdjustOpen] = useState(false);
 
-
-    // FUNCIONALIDAD DE CARGA DE DATOS
+    // ── Carga de datos ────────────────────────────────────────────────────────
     const fetchMovements = async () => {
         setIsLoading(true);
         setError(null);
         try {
-            // Llama al servicio para obtener el historial
             const response = await stockMovementService.getMovementHistory();
             const data = response.data.map(m => ({
                 ...m,
-                quantity: parseInt(m.quantity) || 0
+                quantity: parseInt(m.quantity) || 0,
             }));
             setMovements(data);
         } catch (err) {
-            console.error("Error al cargar movimientos:", err);
-            setError("No se pudo cargar el historial de movimientos. Revise la consola.");
+            console.error('Error al cargar movimientos:', err);
+            setError('No se pudo cargar el historial de movimientos.');
             setMovements([]);
         } finally {
             setIsLoading(false);
         }
     };
 
-    useEffect(() => {
-        fetchMovements();
-    }, []);
+    useEffect(() => { fetchMovements(); }, []);
 
-
+    // ── Métricas dinámicas ────────────────────────────────────────────────────
     const DYNAMIC_METRICS = useMemo(() => {
-        if (movements.length === 0) {
-            return [
-                { title: "Total Movimientos", value: 0, colorClass: "metric-orange" },
-                { title: "Unidades de Entrada", value: 0, colorClass: "metric-green" },
-                { title: "Unidades de Salida", value: 0, colorClass: "metric-red" },
-            ];
-        }
-
         const totalMovements = movements.length;
-        const totalEntries = movements
+        const totalEntries   = movements
             .filter(m => m.movementType === 'ENTRADA')
-            .reduce((sum, m) => sum + m.quantity, 0);
-        const totalExits = movements
+            .reduce((s, m) => s + m.quantity, 0);
+        const totalExits     = movements
             .filter(m => m.movementType === 'SALIDA')
-            .reduce((sum, m) => sum + m.quantity, 0);
+            .reduce((s, m) => s + m.quantity, 0);
 
         return [
-            { title: "Total Movimientos", value: totalMovements, colorClass: "metric-orange" },
-            { title: "Unidades de Entrada", value: totalEntries, colorClass: "metric-green" },
-            { title: "Unidades de Salida", value: totalExits, colorClass: "metric-red" },
+            { title: 'Total Movimientos',    value: totalMovements, colorClass: 'metric-orange' },
+            { title: 'Unidades de Entrada',  value: totalEntries,   colorClass: 'metric-green'  },
+            { title: 'Unidades de Salida',   value: totalExits,     colorClass: 'metric-red'    },
         ];
     }, [movements]);
 
-
-    // FUNCIONALIDAD DE FILTRADO
+    // ── Filtrado ──────────────────────────────────────────────────────────────
     const filteredMovements = useMemo(() => {
         let list = movements;
 
-        // 1. FILTRO POR TIPO DE MOVIMIENTO
         if (filterType !== 'ALL') {
-            list = list.filter(m => m.movementType === filterType);
+            if (filterType === 'AJUSTE') {
+                list = list.filter(m =>
+                    m.movementType === 'AJUSTE_POSITIVO' ||
+                    m.movementType === 'AJUSTE_NEGATIVO'
+                );
+            } else {
+                list = list.filter(m => m.movementType === filterType);
+            }
         }
 
-        // 2. FILTRO POR BARRA DE BÚSQUEDA
-        if (searchTerm.trim() !== '') {
+        if (searchTerm.trim()) {
             const term = searchTerm.toLowerCase();
             list = list.filter(m =>
-                (m.productName && m.productName.toLowerCase().includes(term)) ||
+                (m.productName   && m.productName.toLowerCase().includes(term))   ||
                 (m.warehouseName && m.warehouseName.toLowerCase().includes(term)) ||
-                (m.userName && m.userName.toLowerCase().includes(term)) ||
-                (m.motive && m.motive.toLowerCase().includes(term))
+                (m.userName      && m.userName.toLowerCase().includes(term))      ||
+                (m.motive        && m.motive.toLowerCase().includes(term))
             );
         }
-
         return list;
     }, [movements, filterType, searchTerm]);
 
+    // ── Paginación (HU07) ─────────────────────────────────────────────────────
+    const { currentPage, pageSize, paginated: paginatedMovements, setPage, setPageSize } =
+        usePagination(filteredMovements);
 
-    // FUNCIONES DE MODAL se mantienen igual
-    const handleNewMovement = () => {
-        setIsFormOpen(true);
-    };
-
-    const handleCloseForm = () => {
-        setIsFormOpen(false);
-        // Volver a cargar la lista para ver el nuevo movimiento
-        fetchMovements();
-    };
+    // ── Handlers modales ──────────────────────────────────────────────────────
+    const handleCloseMovement = () => { setIsMovementOpen(false); fetchMovements(); };
+    const handleCloseAdjust   = () => { setIsAdjustOpen(false);   fetchMovements(); };
 
     if (!hasAccess) {
         return (
-            <div className="main-content" style={{ textAlign: 'center', paddingTop: '50px' }}>
+            <div className="main-content" style={{ textAlign: 'center', paddingTop: 50 }}>
                 <h1 style={{ color: '#dc3545' }}>Acceso denegado.</h1>
-                <p>No tienes los permisos necesarios para ver el historial de movimientos de stock.</p>
+                <p>No tienes los permisos necesarios para ver el historial de movimientos.</p>
             </div>
         );
     }
 
-    // RENDERIZADO
+    // ── Render ────────────────────────────────────────────────────────────────
     return (
         <div className="main-content">
 
-            {/* Header y botón "Nuevo Movimiento" */}
+            {/* Header */}
             <div className="page-header">
                 <div className="title-group">
                     <h1>Historial de Movimientos</h1>
-                    <p className="page-subtitle">Registro y búsqueda de entradas y salidas de stock.</p>
+                    <p className="page-subtitle">Registro de movimientos hechos en el sistema</p>
                 </div>
-                <button className="add-new-button-orange" onClick={handleNewMovement}>
-                    <FontAwesomeIcon icon={faPlus} />
-                    Nuevo Movimiento
-                </button>
+                <div style={{ display: 'flex', gap: 10 }}>
+                    {/* HU11 — Botón Ajuste de inventario */}
+                    <button
+                        className="btn-adjust-inventory"
+                        onClick={() => setIsAdjustOpen(true)}
+                    >
+                        <FontAwesomeIcon icon={faSlidersH} />
+                        &nbsp;Ajuste de inventario
+                    </button>
+                    {/* HU08/09 — Botón Nuevo Movimiento */}
+                    <button
+                        className="add-new-button-orange"
+                        onClick={() => setIsMovementOpen(true)}
+                    >
+                        <FontAwesomeIcon icon={faPlus} />
+                        &nbsp;Nuevo Movimiento
+                    </button>
+                </div>
             </div>
 
+            {/* Métricas */}
             <div className="summary-cards-container">
-                {DYNAMIC_METRICS.map((metric, index) => (
+                {DYNAMIC_METRICS.map((metric, i) => (
                     <SummaryCard
-                        key={index}
+                        key={i}
                         title={metric.title}
                         value={isLoading ? 'Cargando...' : metric.value}
                         colorClass={metric.colorClass}
@@ -168,10 +168,8 @@ const StockMovementList = ({userRole}) => {
                 ))}
             </div>
 
-
-            {/* Barra de Búsqueda y Filtro */}
+            {/* Búsqueda + Filtro */}
             <div className="search-filter-container">
-                {/* 2. Barra de Búsqueda */}
                 <div className="search-input-group">
                     <FontAwesomeIcon icon={faSearch} className="search-icon" />
                     <input
@@ -179,22 +177,22 @@ const StockMovementList = ({userRole}) => {
                         placeholder="Buscar por producto, almacén, usuario o motivo..."
                         className="movement-search-input"
                         value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onChange={e => setSearchTerm(e.target.value)}
                     />
                 </div>
-
-                {/* 3. Menú Desplegable de Filtro */}
                 <FilterDropdown filterType={filterType} setFilterType={setFilterType} />
             </div>
 
-            {/* Lista de Movimientos (4. Tabla) */}
+            {/* Tabla */}
             <div className="movement-list-card">
                 <div className="table-info">
                     Historial de Movimientos
-                    <p className="movement-count">{filteredMovements.length} de {movements.length} movimientos</p>
+                    <p className="movement-count">
+                        Mostrando {filteredMovements.length} de {movements.length} movimientos
+                        &nbsp;·&nbsp; Página {currentPage}
+                    </p>
                 </div>
 
-                {/* Manejo de Estados (Cargando, Error, No Data) */}
                 {isLoading ? (
                     <p className="loading-message">Cargando historial...</p>
                 ) : error ? (
@@ -213,33 +211,51 @@ const StockMovementList = ({userRole}) => {
                         </tr>
                         </thead>
                         <tbody>
-                        {filteredMovements.map((movement, index) => (
-                            <tr key={movement.id || index}>
-                                <td>{movement.movementDate}</td>
+                        {paginatedMovements.map((m, i) => (
+                            <tr key={m.id || i}>
+                                <td>{m.movementDate}</td>
                                 <td>
-                                    <span className={`type-badge type-${movement.movementType}`}>
-                                            {movement.movementType}
-                                        </span>
+                                    <MovementBadge type={m.movementType} />
                                 </td>
-                                <td>{movement.productName}</td>
-                                <td>{movement.warehouseName}</td>
-                                <td>{movement.quantity}</td>
-                                <td>{movement.motive}</td>
-                                <td>{movement.userName}</td>
+                                <td>{m.productName}</td>
+                                <td>{m.warehouseName}</td>
+                                <td>{m.quantity}</td>
+                                <td>{m.motive}</td>
+                                <td>{m.userName}</td>
                             </tr>
-                        ))}</tbody>
+                        ))}
+                        </tbody>
                     </table>
                 ) : (
-                    <p className="no-data-message">No se encontraron movimientos que coincidan con los filtros.</p>
+                    <p className="no-data-message">No se encontraron movimientos con los filtros aplicados.</p>
                 )}
+
+                {/* HU07 — Paginación */}
+                <Pagination
+                    currentPage={currentPage}
+                    totalItems={filteredMovements.length}
+                    pageSize={pageSize}
+                    onPageChange={setPage}
+                    onSizeChange={setPageSize}
+                />
             </div>
 
-            {/* MODAL DE FORMULARIO DE MOVIMIENTO (HU 8 y 9) */}
-            {isFormOpen && (
+            {/* Modal: Nuevo Movimiento (HU08/09) */}
+            {isMovementOpen && (
                 <div className="modal-backdrop">
                     <StockMovementForm
-                        onComplete={handleCloseForm}
-                        onCancel={handleCloseForm}
+                        onComplete={handleCloseMovement}
+                        onCancel={handleCloseMovement}
+                    />
+                </div>
+            )}
+
+            {/* Modal: Ajuste de Inventario (HU11) */}
+            {isAdjustOpen && (
+                <div className="modal-backdrop">
+                    <StockAdjustmentForm
+                        onComplete={handleCloseAdjust}
+                        onCancel={() => setIsAdjustOpen(false)}
                     />
                 </div>
             )}
@@ -248,33 +264,43 @@ const StockMovementList = ({userRole}) => {
 };
 
 
-// Componente auxiliar para el menú desplegable de filtro (HU 3) - Se mantiene sin cambios
+// ─── Badge de tipo de movimiento ─────────────────────────────────────────────
+const BADGE_CONFIG = {
+    ENTRADA:          { label: 'Entrada',          cls: 'type-ENTRADA'          },
+    SALIDA:           { label: 'Salida',            cls: 'type-SALIDA'           },
+    AJUSTE_POSITIVO:  { label: 'Ajuste +',          cls: 'type-AJUSTE_POSITIVO'  },
+    AJUSTE_NEGATIVO:  { label: 'Ajuste −',          cls: 'type-AJUSTE_NEGATIVO'  },
+};
+
+const MovementBadge = ({ type }) => {
+    const cfg = BADGE_CONFIG[type] || { label: type, cls: '' };
+    return <span className={`type-badge ${cfg.cls}`}>{cfg.label}</span>;
+};
+
+
+// ─── Dropdown de filtro ───────────────────────────────────────────────────────
 const FilterDropdown = ({ filterType, setFilterType }) => {
     const [isOpen, setIsOpen] = useState(false);
 
-    const handleSelect = (type) => {
-        setFilterType(type);
-        setIsOpen(false);
-    };
-
-    const typeDisplay = {
-        'ALL': 'Todos los movimientos',
-        'ENTRADA': 'Solo Entradas',
-        'SALIDA': 'Solo Salidas',
+    const OPTIONS = {
+        ALL:    'Todos los movimientos',
+        ENTRADA: 'Solo Entradas',
+        SALIDA:  'Solo Salidas',
+        AJUSTE:  'Solo Ajustes',
     };
 
     return (
         <div className="filter-dropdown">
             <button className="filter-button" onClick={() => setIsOpen(!isOpen)}>
-                <FontAwesomeIcon icon={faFilter} style={{ marginRight: '8px' }} />
-                {typeDisplay[filterType]}
+                <FontAwesomeIcon icon={faFilter} style={{ marginRight: 8 }} />
+                {OPTIONS[filterType]}
             </button>
             {isOpen && (
                 <div className="dropdown-menu">
-                    {Object.entries(typeDisplay).map(([type, label]) => (
+                    {Object.entries(OPTIONS).map(([type, label]) => (
                         <button
                             key={type}
-                            onClick={() => handleSelect(type)}
+                            onClick={() => { setFilterType(type); setIsOpen(false); }}
                             className={filterType === type ? 'active' : ''}
                         >
                             {label}

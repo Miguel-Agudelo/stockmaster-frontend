@@ -17,6 +17,13 @@ import ReportsDashboard from './pages/reports/ReportsDashboard';
 import ProductRecovery from './components/admin/ProductRecovery';
 import WarehouseRecovery from './components/admin/WarehouseRecovery';
 import UserRecovery from './components/admin/UserRecovery';
+import SupplierRecovery from './components/admin/SupplierRecovery';
+
+// Gestión de Proveedores (HU-PI2-01)
+import SupplierList from './pages/suppliers/SupplierList';
+
+// Gestión de Categorías (HU-PI2-02)
+import CategoryList from './pages/categories/CategoryList';
 
 // Transferencia de Stock (HU20)
 import StockTransferPage from "./pages/movements/StockTransferPage";
@@ -186,6 +193,35 @@ function App() {
                     element={
                         <PrivateRoute roles={['ADMINISTRADOR', 'OPERADOR']}>
                             <StockTransferPage />
+                        </PrivateRoute>
+                    }
+                />
+
+                {/* RUTA: Proveedores (ADMIN) - HU-PI2-01 */}
+                <Route
+                    path="/suppliers"
+                    element={
+                        <PrivateRoute roles={['ADMINISTRADOR']}>
+                            <SupplierList />
+                        </PrivateRoute>
+                    }
+                />
+
+                <Route
+                    path="/suppliers/recovery"
+                    element={
+                        <PrivateRoute roles={['ADMINISTRADOR']}>
+                            <SupplierRecovery />
+                        </PrivateRoute>
+                    }
+                />
+
+                {/* RUTA: Categorías (ADMIN) - HU-PI2-02 */}
+                <Route
+                    path="/categories"
+                    element={
+                        <PrivateRoute roles={['ADMINISTRADOR']}>
+                            <CategoryList />
                         </PrivateRoute>
                     }
                 />

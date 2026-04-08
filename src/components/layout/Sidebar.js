@@ -13,6 +13,8 @@ const menuItems = [
     { name: 'Almacenes', path: '/warehouses', iconClass: 'fas fa-warehouse', role: ['ADMINISTRADOR', 'OPERADOR'] },
     { name: 'Movimientos', path: '/movements', iconClass: 'fas fa-truck-moving', role: ['ADMINISTRADOR', 'OPERADOR'] },
     { name: 'Transferencias', path: '/movements/transfer', iconClass: 'fas fa-exchange-alt', role: ['ADMINISTRADOR', 'OPERADOR'] },
+    { name: 'Proveedores', path: '/suppliers', iconClass: 'fas fa-truck', role: ['ADMINISTRADOR'] },
+    { name: 'Categorías', path: '/categories', iconClass: 'fas fa-layer-group', role: ['ADMINISTRADOR'] },
 
 ];
 
@@ -70,7 +72,9 @@ const Sidebar = () => {
                         item.path === '/products' ||
                         item.path === '/warehouses' ||
                         item.path === '/movements' ||
-                        item.path === '/movements/transfer';
+                        item.path === '/movements/transfer' ||
+                        item.path === '/categories' ||
+                        item.path === '/suppliers';
 
                     if (!isImplementedPath) return null;
 

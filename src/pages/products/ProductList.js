@@ -10,13 +10,9 @@ import '../../pages/products/ProductList.css';
 
 
 const SummaryCard = ({ title, value, colorClass }) => {
-
-    const formatValue = (val) => {
-        return val.toLocaleString('es-CO'); // Formato de miles
-    };
-
-    const displayValue = formatValue(value);
-
+    const displayValue = typeof value === 'number'
+        ? value.toLocaleString('es-CO')
+        : value;
     return (
         <div className={`summary-card ${colorClass}`}>
             <div className="card-content">
@@ -28,22 +24,20 @@ const SummaryCard = ({ title, value, colorClass }) => {
 };
 
 
-const ProductList = ({userRole}) => {
-    // Inicializar useNavigate para la navegación
+const ProductList = ({ userRole }) => {
     const navigate = useNavigate();
 
-    // 1. ESTADOS CLAVE
-    const [products, setProducts] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [products,       setProducts]       = useState([]);
+    const [isLoading,      setIsLoading]      = useState(true);
+    const [error,          setError]          = useState(null);
+    const [searchTerm,     setSearchTerm]     = useState('');
+    const [isFormOpen,     setIsFormOpen]     = useState(false);
     const [currentProduct, setCurrentProduct] = useState(null);
     const [productToDelete, setProductToDelete] = useState(null);
 
     const isAdmin = userRole === 'ADMINISTRADOR';
 
-    // 2. Lógica de carga de datos real
+    // ── Carga de datos ────────────────────────────────────────────────────────
     const fetchProducts = async () => {
         setIsLoading(true);
         setError(null);
@@ -51,156 +45,111 @@ const ProductList = ({userRole}) => {
             const response = await productService.getAllProducts();
             setProducts(response.data);
         } catch (err) {
-            console.error("Error al cargar productos:", err);
-            setError("No se pudieron cargar los productos. Revise la consola y los permisos.");
+            console.error('Error al cargar productos:', err);
+            setError('No se pudieron cargar los productos.');
             setProducts([]);
         } finally {
             setIsLoading(false);
         }
     };
 
-    // 3. Efecto para cargar datos al montar el componente
-    useEffect(() => {
-        fetchProducts();
-    }, []);
+    useEffect(() => { fetchProducts(); }, []);
 
-    // 4. CÁLCULO DE MÉTRICAS
+    // ── Métricas ──────────────────────────────────────────────────────────────
     const DYNAMIC_METRICS = useMemo(() => {
-
-        if (products.length === 0) {
-            return [
-                { title: "Total Productos", value: 0, icon: faBoxOpen, colorClass: 'metric-orange' },
-                { title: "Categorías", value: 0, icon: faLayerGroup, colorClass: 'metric-green' },
-                { title: "Stock Total", value: 0, icon: faWarehouse, colorClass: 'metric-yellow' },
-            ];
-        }
-
-        const totalProducts = products.length;
-        const uniqueCategories = new Set(products.map(p => p.categoryName));
-        const totalCategories = uniqueCategories.size;
-
-        const totalStock = products.reduce((sum, p) =>
-                sum + (parseInt(p.totalStock) || 0)
-            , 0);
-
-
+        const totalProducts    = products.length;
+        const uniqueCategories = new Set(products.map(p => p.categoryName)).size;
+        const totalStock       = products.reduce((s, p) => s + (parseInt(p.totalStock) || 0), 0);
         return [
-            { title: "Total Productos", value: totalProducts, icon: faBoxOpen, colorClass: 'metric-orange' },
-            { title: "Categorías", value: totalCategories, icon: faLayerGroup, colorClass: 'metric-green' },
-            { title: "Stock Total", value: totalStock, icon: faWarehouse, colorClass: 'metric-yellow' },
+            { title: 'Total Productos', value: totalProducts,    colorClass: 'metric-orange' },
+            { title: 'Categorías',      value: uniqueCategories, colorClass: 'metric-green'  },
+            { title: 'Stock Total',     value: totalStock,       colorClass: 'metric-yellow' },
         ];
     }, [products]);
 
-
-    // 5. FUNCIONES DE MODAL Y ACCIONES
-    const handleNewProduct = () => {
-        setCurrentProduct(null);
-        setIsFormOpen(true);
-    };
-
-    const handleEdit = (product) => {
-        setCurrentProduct(product);
-        setIsFormOpen(true);
-    };
-
-    const handleCloseForm = () => {
-        setIsFormOpen(false);
-        setCurrentProduct(null);
-        fetchProducts();
-    };
-
-    const handleDelete = (product) => {
-        setProductToDelete(product);
-    };
-
-    const cancelDeletion = () => {
-        setProductToDelete(null);
-    };
-
-    const confirmDeletion = async () => {
+    // ── Acciones ──────────────────────────────────────────────────────────────
+    const handleNewProduct  = () => { setCurrentProduct(null); setIsFormOpen(true); };
+    const handleEdit        = (p) => { setCurrentProduct(p); setIsFormOpen(true); };
+    const handleCloseForm   = () => { setIsFormOpen(false); setCurrentProduct(null); fetchProducts(); };
+    const handleDelete      = (p) => setProductToDelete(p);
+    const cancelDeletion    = () => setProductToDelete(null);
+    const confirmDeletion   = async () => {
         try {
             await productService.deleteProduct(productToDelete.id);
             setProductToDelete(null);
             fetchProducts();
-        } catch (error) {
-            console.error("Error al eliminar el producto:", error);
-            alert("Error al eliminar el producto. Revise los permisos.");
+        } catch (err) {
+            console.error('Error al eliminar el producto:', err);
             setProductToDelete(null);
         }
     };
 
-
-    // 7. Filtrado de productos por búsqueda
-    const filteredProducts = products.filter(product =>
-        (product.name && product.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (product.categoryName && product.categoryName.toLowerCase().includes(searchTerm.toLowerCase()))
+    // ── Filtrado + paginación ─────────────────────────────────────────────────
+    const filteredProducts = products.filter(p =>
+        (p.name         && p.name.toLowerCase().includes(searchTerm.toLowerCase()))         ||
+        (p.description  && p.description.toLowerCase().includes(searchTerm.toLowerCase()))  ||
+        (p.categoryName && p.categoryName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        // También buscar por proveedor
+        (p.suppliers && p.suppliers.some(s =>
+            s.name && s.name.toLowerCase().includes(searchTerm.toLowerCase())
+        ))
     );
 
-    // HU-PI2-07: Paginación sobre los productos filtrados
-    const { currentPage, pageSize, paginated: paginatedProducts, setPage, setPageSize } = usePagination(filteredProducts);
+    const { currentPage, pageSize, paginated: paginatedProducts, setPage, setPageSize } =
+        usePagination(filteredProducts);
 
-    // 8. Función de navegación a la papelera
-    const handleGoToRecovery = () => {
-        navigate('/products/recovery');
-    };
-
-
-    // 9. RENDERING
+    // ── Render ────────────────────────────────────────────────────────────────
     return (
         <div className="main-content">
-            {/* Header y botones de acción */}
+
+            {/* Header */}
             <div className="page-header">
                 <div className="title-group">
                     <h1>Gestión de Productos</h1>
                     <p className="page-subtitle">Administrar catálogo de productos</p>
                 </div>
-                <div className="action-buttons-group"> {/* Contenedor para alinear los botones */}
-                    {/* BOTÓN PAPELERA (Solo Admin) */}
+                <div className="action-buttons-group">
                     {isAdmin && (
-                        <button className="delete-recovery-button" onClick={handleGoToRecovery}>
-                            <FontAwesomeIcon icon={faTrashRestore} />
-                            Papelera
+                        <button className="delete-recovery-button" onClick={() => navigate('/products/recovery')}>
+                            <FontAwesomeIcon icon={faTrashRestore} /> Papelera
                         </button>
                     )}
-
-                    {/* Botón Nuevo Producto */}
                     <button className="add-new-button-orange" onClick={handleNewProduct}>
-                        <FontAwesomeIcon icon={faPlus} />
-                        Nuevo Producto
+                        <FontAwesomeIcon icon={faPlus} /> Nuevo Producto
                     </button>
                 </div>
             </div>
 
-            {/* METRICAS */}
+            {/* Métricas */}
             <div className="summary-cards-container">
-                {DYNAMIC_METRICS.map((metric, index) => (
+                {DYNAMIC_METRICS.map((m, i) => (
                     <SummaryCard
-                        key={index}
-                        title={metric.title}
-                        value={isLoading ? 'Cargando...' : metric.value}
-                        colorClass={metric.colorClass}
+                        key={i}
+                        title={m.title}
+                        value={isLoading ? 'Cargando...' : m.value}
+                        colorClass={m.colorClass}
                     />
                 ))}
             </div>
 
-            {/* ... (Barra de Búsqueda) ... */}
+            {/* Búsqueda */}
             <div className="search-bar-container">
                 <input
                     type="text"
-                    placeholder="Buscar productos por nombre, categoría o descripción..."
+                    placeholder="Buscar por nombre, categoría, descripción o proveedor..."
                     className="product-search-input"
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={e => setSearchTerm(e.target.value)}
                 />
             </div>
 
-
-            {/* Lista de Productos */}
+            {/* Tabla */}
             <div className="product-list-card">
                 <div className="table-info">
                     Lista de Productos
-                    <p className="product-count">Mostrando {filteredProducts.length} de {products.length} productos</p>
+                    <p className="product-count">
+                        Mostrando {filteredProducts.length} de {products.length} productos
+                    </p>
                 </div>
 
                 {isLoading ? (
@@ -214,6 +163,7 @@ const ProductList = ({userRole}) => {
                             <th>Nombre</th>
                             <th>Descripción</th>
                             <th>Categoría</th>
+                            <th>Proveedores</th>
                             <th>Precio</th>
                             <th>Stock Total</th>
                             <th>Acciones</th>
@@ -222,27 +172,44 @@ const ProductList = ({userRole}) => {
                         <tbody>
                         {paginatedProducts.map(product => (
                             <tr key={product.id}>
-                                <td>{product.name}</td>
-                                <td>{product.description}</td>
-                                <td>
-                                    <span className={`category-badge category-${product.categoryName.toLowerCase().replace(/\s/g, '-')}`}>
-                                        {product.categoryName}
-                                    </span>
+                                <td><strong>{product.name}</strong></td>
+                                <td style={{ color: '#6B7280', fontSize: '0.88rem' }}>
+                                    {product.description || '—'}
                                 </td>
+                                <td>
+                                        <span className={`category-badge category-${(product.categoryName || '').toLowerCase().replace(/\s/g, '-')}`}>
+                                            {product.categoryName}
+                                        </span>
+                                </td>
+
+                                {/* ── Columna de Proveedores ── */}
+                                <td>
+                                    {product.suppliers && product.suppliers.length > 0 ? (
+                                        <div className="supplier-tags">
+                                            {product.suppliers.map(s => (
+                                                <span key={s.id} className="supplier-tag" title={s.email || s.nit || ''}>
+                                                        {s.name}
+                                                    </span>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <span className="supplier-tag-none">Sin proveedor</span>
+                                    )}
+                                </td>
+
                                 <td>${product.price ? product.price.toFixed(2) : '0.00'}</td>
                                 <td>
                                     <span className="stock-badge">{product.totalStock} unidades</span>
                                 </td>
                                 <td className="actions-cell">
-                                    <button className="icon-button edit-button" onClick={() => handleEdit(product)}>
+                                    <button className="icon-button edit-button" onClick={() => handleEdit(product)} title="Editar">
                                         <FontAwesomeIcon icon={faPencilAlt} />
                                     </button>
                                     {isAdmin && (
-                                        <button className="icon-button delete-button-red" onClick={() => handleDelete(product)}>
+                                        <button className="icon-button delete-button-red" onClick={() => handleDelete(product)} title="Eliminar">
                                             <FontAwesomeIcon icon={faTrashAlt} />
                                         </button>
                                     )}
-
                                 </td>
                             </tr>
                         ))}
@@ -251,6 +218,7 @@ const ProductList = ({userRole}) => {
                 ) : (
                     <p className="no-data-message">No se encontraron productos registrados.</p>
                 )}
+
                 <Pagination
                     currentPage={currentPage}
                     totalItems={filteredProducts.length}
@@ -260,7 +228,7 @@ const ProductList = ({userRole}) => {
                 />
             </div>
 
-            {/* MODALES */}
+            {/* Modal: Formulario */}
             {isFormOpen && (
                 <div className="modal-backdrop">
                     <ProductForm
@@ -271,6 +239,7 @@ const ProductList = ({userRole}) => {
                 </div>
             )}
 
+            {/* Modal: Confirmar eliminación */}
             {productToDelete && (
                 <div className="modal-backdrop">
                     <div className="custom-modal delete-modal">
@@ -281,18 +250,13 @@ const ProductList = ({userRole}) => {
                                 <strong> {productToDelete.name}</strong> permanentemente del inventario?
                             </p>
                             <div className="modal-actions">
-                                <button className="cancel-button" onClick={cancelDeletion}>
-                                    Cancelar
-                                </button>
-                                <button className="delete-button-red" onClick={confirmDeletion}>
-                                    Eliminar
-                                </button>
+                                <button className="cancel-button" onClick={cancelDeletion}>Cancelar</button>
+                                <button className="delete-button-red" onClick={confirmDeletion}>Eliminar</button>
                             </div>
                         </div>
                     </div>
                 </div>
             )}
-
         </div>
     );
 };

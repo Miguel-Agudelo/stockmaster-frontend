@@ -1,60 +1,89 @@
 import { useEffect, useRef, useCallback } from 'react';
 import authService from '../services/authService';
+import api from '../services/api';
 
-const INACTIVITY_TIME = 1800000;
+/**
+ * Hook de inactividad — HU de sesión
+ *
+ * Problema que resuelve:
+ *   El JWT expira en 30 min desde que se emitió (tiempo absoluto).
+ *   El backend también tiene un timer de inactividad de 30 min.
+ *   Si el usuario tiene actividad en la UI pero NO hace peticiones al backend,
+ *   el backend no sabe que está activo y el token expira igual.
+ *
+ * Solución:
+ *   1. Detectar actividad del usuario en el navegador (mousemove, click, keydown, scroll, touchstart).
+ *   2. Si hay actividad y han pasado al menos PING_INTERVAL ms desde el último ping,
+ *      hacer GET /api/auth/ping al backend. Esto tiene dos efectos:
+ *        a) El SessionInactivityFilter actualiza el lastAccessMap → reinicia el timer del backend.
+ *        b) El SessionRenewalFilter detecta que el token está próximo a expirar y
+ *           devuelve un X-New-Token → el interceptor de api.js lo guarda automáticamente.
+ *   3. Si pasan INACTIVITY_TIME ms sin ninguna actividad del usuario, cerrar sesión localmente.
+ */
+
+const INACTIVITY_TIME = 30 * 60 * 1000;   // 30 minutos → cierre local por inactividad
+const PING_INTERVAL   =  4 * 60 * 1000;   // Ping al backend cada 4 min si hay actividad
 
 const useInactivityTimer = () => {
 
-    const timeoutRef = useRef(null);
+    const inactivityRef = useRef(null);   // timer para cierre por inactividad
+    const lastPingRef   = useRef(0);      // timestamp del último ping al backend
     const isAuthenticated = authService.isUserAuthenticated();
 
+    // ── Ping silencioso al backend ────────────────────────────────────────────
+    const pingBackend = useCallback(async () => {
+        try {
+            // Cualquier endpoint protegido sirve para renovar el lastAccessMap.
+            // Usamos el dashboard porque es muy ligero.
+            await api.get('/auth/ping');
+        } catch {
+            // Si falla (401 = sesión expirada en el backend), el interceptor de api.js
+            // NO hace nada automático, pero isUserAuthenticated() lo detectará
+            // en la próxima comprobación y redirigirá al login.
+        }
+    }, []);
 
-    // Función para forzar el cierre de sesión y la redirección
+    // ── Cierre de sesión por inactividad ──────────────────────────────────────
     const forceLogout = useCallback(() => {
         authService.logout();
-        console.warn("Sesión cerrada por INACTIVIDAD (Timer Local).");
+        console.warn('Sesión cerrada por inactividad (30 min sin actividad).');
         window.location.replace('/login');
     }, []);
 
-    // Función para reiniciar el temporizador (Solo maneja el temporizador de inactividad)
+    // ── Reinicio del timer y ping condicional ─────────────────────────────────
     const resetTimer = useCallback(() => {
-        // 1. Reiniciar el temporizador de Inactividad (Controla el logout por inactividad)
-        if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current);
+        // 1. Reiniciar el temporizador local de inactividad
+        if (inactivityRef.current) clearTimeout(inactivityRef.current);
+        inactivityRef.current = setTimeout(forceLogout, INACTIVITY_TIME);
+
+        // 2. Ping al backend si han pasado más de PING_INTERVAL desde el último ping
+        const now = Date.now();
+        if (now - lastPingRef.current >= PING_INTERVAL) {
+            lastPingRef.current = now;
+            pingBackend();
         }
-        timeoutRef.current = setTimeout(forceLogout, INACTIVITY_TIME);
+    }, [forceLogout, pingBackend]);
 
-    }, [forceLogout]);
-
-    // useEffect para configurar y limpiar los listeners
+    // ── Configuración de listeners ────────────────────────────────────────────
     useEffect(() => {
-        if (!isAuthenticated) {
-            // Si no está autenticado, no hacemos nada y el useEffect termina.
-            return;
-        }
+        if (!isAuthenticated) return;
 
-        // Iniciar el temporizador tan pronto como se monta el componente
+        // Hacer un ping inmediato al montar para registrar actividad inicial
+        lastPingRef.current = Date.now();
+        pingBackend();
+
+        // Arrancar el timer local
         resetTimer();
 
-        // 3. Agregar listeners de eventos globales (actividad)
-        window.addEventListener('mousemove', resetTimer);
-        window.addEventListener('keydown', resetTimer);
-        window.addEventListener('click', resetTimer);
-        window.addEventListener('scroll', resetTimer);
+        // Eventos que consideramos "actividad del usuario"
+        const events = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+        events.forEach(ev => window.addEventListener(ev, resetTimer, { passive: true }));
 
-        // 4. Función de limpieza (cleanup)
         return () => {
-            // Limpiar el temporizador y los listeners
-            if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-            }
-            window.removeEventListener('mousemove', resetTimer);
-            window.removeEventListener('keydown', resetTimer);
-            window.removeEventListener('click', resetTimer);
-            window.removeEventListener('scroll', resetTimer);
+            if (inactivityRef.current) clearTimeout(inactivityRef.current);
+            events.forEach(ev => window.removeEventListener(ev, resetTimer));
         };
-
-    }, [isAuthenticated, resetTimer]);
+    }, [isAuthenticated, resetTimer, pingBackend]);
 };
 
 export default useInactivityTimer;

@@ -1,36 +1,50 @@
-/* ── StockAdjustmentForm.css — HU-11 Ajuste de Inventario ────────────────── */
+/* ── StockAdjustmentForm.css — HU-11 Ajuste de Inventario ───────────────────
+   La clave del layout es:
+     .adj-modal          → flex-column, altura limitada a 92vh
+     .adj-header         → flex-shrink: 0  (nunca se encoge)
+     .adj-form           → flex-column, flex: 1, overflow: hidden
+     .adj-body           → flex: 1, overflow-y: auto  ← aquí va el scroll
+     .adj-footer         → flex-shrink: 0  (siempre visible al fondo)
+   Así el footer nunca desaparece sin importar cuánto contenido haya.
+────────────────────────────────────────────────────────────────────────────── */
 
+/* ── Modal wrapper ───────────────────────────────────────────────────────── */
 .adj-modal {
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
-    width: 100%;
-    max-width: 540px;
-    max-height: 90vh;
+    width: 90vw;
+    max-width: 560px;
+
+    /* Altura máxima: el modal nunca crece más allá de la pantalla */
+    max-height: 92vh;
+
+    /* Columna flex: header + form (body+footer) */
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: hidden;          /* evita que el contenido desborde el borde redondeado */
+
     font-family: Arial, sans-serif;
 }
 
-/* ── Header ─────────────────────────────────────────────────────────────── */
+/* ── Header — altura fija ────────────────────────────────────────────────── */
 .adj-header {
-    padding: 22px 28px 16px;
+    padding: 20px 26px 16px;
     border-bottom: 1px solid #F3F4F6;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    flex-shrink: 0;
+    flex-shrink: 0;            /* no se encoge nunca */
 }
 .adj-header h3 {
     margin: 0;
-    font-size: 1.25rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: #1e293b;
 }
 .adj-header p {
     margin: 4px 0 0;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     color: #64748b;
 }
 .adj-close {
@@ -42,17 +56,28 @@
     line-height: 1;
     padding: 0 0 0 12px;
     transition: color 0.15s;
+    flex-shrink: 0;
 }
 .adj-close:hover { color: #374151; }
 
-/* ── Body ────────────────────────────────────────────────────────────────── */
-.adj-body {
-    padding: 20px 28px;
-    overflow-y: auto;
-    flex-grow: 1;
+/* ── Form: columna que ocupa todo el espacio restante ───────────────────── */
+.adj-form {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    flex: 1;                   /* ocupa el espacio que no usa el header */
+    overflow: hidden;          /* necesario para que el body tenga scroll */
+    margin: 0;
+    padding: 0;
+}
+
+/* ── Body — zona con scroll ──────────────────────────────────────────────── */
+.adj-body {
+    flex: 1;                   /* crece para llenar el espacio disponible */
+    overflow-y: auto;          /* scroll solo aquí, el footer no se mueve */
+    padding: 18px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .adj-loading {
@@ -61,54 +86,48 @@
     color: #6B7280;
 }
 
-/* Mensajes de alerta */
+/* ── Alertas globales ────────────────────────────────────────────────────── */
 .adj-alert {
     padding: 10px 14px;
     border-radius: 7px;
-    font-size: 0.88rem;
+    font-size: 0.87rem;
     font-weight: 500;
+    flex-shrink: 0;
 }
-.adj-alert--success {
-    background: #F0FDF4;
-    color: #166534;
-    border: 1px solid #BBF7D0;
-}
-.adj-alert--error {
-    background: #FEF2F2;
-    color: #B91C1C;
-    border: 1px solid #FECACA;
-}
+.adj-alert--success { background: #F0FDF4; color: #166534; border: 1px solid #BBF7D0; }
+.adj-alert--error   { background: #FEF2F2; color: #B91C1C; border: 1px solid #FECACA; }
 
-/* Título de sección */
+/* ── Título de sección ───────────────────────────────────────────────────── */
 .adj-section-title {
-    font-size: 0.92rem;
+    font-size: 0.9rem;
     font-weight: 700;
     color: #374151;
-    padding-bottom: 2px;
+    padding-bottom: 6px;
     border-bottom: 1px solid #F3F4F6;
+    flex-shrink: 0;
 }
 
 /* ── Campos ──────────────────────────────────────────────────────────────── */
 .adj-field {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 4px;
 }
 .adj-field label {
-    font-size: 0.875rem;
+    font-size: 0.85rem;
     font-weight: 600;
     color: #374151;
 }
-.adj-req  { color: #EF4444; margin-left: 2px; }
-.adj-opt  { font-weight: 400; color: #9CA3AF; font-size: 0.8rem; }
+.adj-req { color: #EF4444; margin-left: 2px; }
+.adj-opt { font-weight: 400; color: #9CA3AF; font-size: 0.78rem; }
 
 .adj-field select,
 .adj-field input[type="text"],
 .adj-field input[type="number"] {
-    padding: 10px 13px;
+    padding: 9px 12px;
     border: 1px solid #D1D5DB;
     border-radius: 8px;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     color: #1e293b;
     background: #F9FAFB;
     transition: border-color 0.15s, box-shadow 0.15s;
@@ -119,25 +138,29 @@
 .adj-field input:focus {
     outline: none;
     border-color: #FF7B00;
-    box-shadow: 0 0 0 3px rgba(255, 123, 0, 0.18);
+    box-shadow: 0 0 0 3px rgba(255, 123, 0, 0.16);
     background: #fff;
 }
+.adj-field select:disabled,
+.adj-field input:disabled { opacity: 0.6; cursor: not-allowed; }
 
-.adj-grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+/* ── Banner de stock — altura reservada para evitar saltos de layout ─────── */
+.adj-stock-banner {
+    min-height: 36px;          /* reserva espacio aunque esté vacío */
+    padding: 0 12px;
+    border-radius: 7px;
+    font-size: 0.84rem;
+    color: #1D4ED8;
+    display: flex;
+    align-items: center;
+    transition: background 0.2s, border 0.2s;
 }
-
-/* Stock info banner */
-.adj-stock-info {
+.adj-stock-banner--visible {
     background: #EFF6FF;
     border: 1px solid #BFDBFE;
-    border-radius: 7px;
-    padding: 9px 14px;
-    font-size: 0.85rem;
-    color: #1D4ED8;
+    padding: 8px 12px;
 }
+.adj-stock-zero { color: #92400E; }
 
 /* ── Tipo de ajuste ──────────────────────────────────────────────────────── */
 .adj-type-group {
@@ -146,15 +169,14 @@
 }
 .adj-type-btn {
     flex: 1;
-    padding: 9px 0;
+    padding: 8px 0;
     border-radius: 8px;
-    font-size: 0.88rem;
+    font-size: 0.86rem;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.15s, border-color 0.15s, color 0.15s;
     border: 2px solid transparent;
 }
-/* Positivo */
 .adj-type-btn--pos {
     background: #F0FDF4;
     color: #16A34A;
@@ -166,7 +188,6 @@
     color: #fff;
     border-color: #16A34A;
 }
-/* Negativo */
 .adj-type-btn--neg {
     background: #FFF1F2;
     color: #DC2626;
@@ -181,12 +202,13 @@
 .adj-type-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
 .adj-type-hint {
-    font-size: 0.78rem;
+    font-size: 0.77rem;
     color: #6B7280;
     margin: 0;
+    line-height: 1.4;
 }
 
-/* ── Preview stock resultante ────────────────────────────────────────────── */
+/* ── Stock resultante ────────────────────────────────────────────────────── */
 .adj-resultante {
     font-size: 0.82rem;
     color: #16A34A;
@@ -198,15 +220,15 @@
 .adj-reasons {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 7px;
 }
 .adj-reason-chip {
-    padding: 6px 13px;
+    padding: 5px 12px;
     border-radius: 20px;
     border: 1.5px solid #D1D5DB;
     background: #fff;
     color: #374151;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     font-weight: 500;
     cursor: pointer;
     transition: background 0.12s, border-color 0.12s, color 0.12s;
@@ -223,20 +245,18 @@
 }
 .adj-reason-chip:disabled { opacity: 0.55; cursor: not-allowed; }
 
-/* ── Error inline ────────────────────────────────────────────────────────── */
-.adj-err {
-    font-size: 0.8rem;
-    color: #DC2626;
-}
+/* ── Errores y hints ─────────────────────────────────────────────────────── */
+.adj-err  { font-size: 0.79rem; color: #DC2626; }
+.adj-hint { font-size: 0.79rem; color: #92400E; }
 
-/* ── Footer ──────────────────────────────────────────────────────────────── */
+/* ── Footer — siempre visible al fondo del modal ────────────────────────── */
 .adj-footer {
-    padding: 16px 28px;
+    padding: 14px 26px;
     border-top: 1px solid #F3F4F6;
     display: flex;
     justify-content: flex-end;
     gap: 10px;
-    flex-shrink: 0;
+    flex-shrink: 0;            /* nunca se encoge ni desaparece */
     background: #fff;
 }
 .adj-btn-cancel {
@@ -246,7 +266,7 @@
     background: #fff;
     color: #6B7280;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     cursor: pointer;
     transition: background 0.15s;
 }
@@ -259,17 +279,23 @@
     background: #FF7B00;
     color: #fff;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     cursor: pointer;
     box-shadow: 0 3px 8px rgba(255, 123, 0, 0.28);
     transition: background 0.15s;
 }
 .adj-btn-save:hover:not(:disabled) { background: #E06A00; }
+
 .adj-btn-save:disabled,
 .adj-btn-cancel:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
-@media (max-width: 520px) {
-    .adj-grid-2 { grid-template-columns: 1fr; }
-    .adj-modal   { max-width: 100%; border-radius: 10px 10px 0 0; }
+@media (max-width: 560px) {
+    .adj-modal {
+        width: 100%;
+        max-width: 100%;
+        max-height: 100vh;
+        border-radius: 12px 12px 0 0;
+    }
+    .adj-type-group { flex-direction: column; }
 }

@@ -15,7 +15,7 @@ const menuItems = [
     { name: 'Transferencias', path: '/movements/transfer', iconClass: 'fas fa-exchange-alt', role: ['ADMINISTRADOR', 'OPERADOR'] },
     { name: 'Proveedores', path: '/suppliers', iconClass: 'fas fa-truck', role: ['ADMINISTRADOR'] },
     { name: 'Categorías', path: '/categories', iconClass: 'fas fa-layer-group', role: ['ADMINISTRADOR'] },
-
+    { name: 'Mi Perfil', path: '/profile', iconClass: 'fas fa-user-circle', role: ['ADMINISTRADOR', 'OPERADOR'] },
 ];
 
 const Sidebar = () => {
@@ -74,7 +74,8 @@ const Sidebar = () => {
                         item.path === '/movements' ||
                         item.path === '/movements/transfer' ||
                         item.path === '/categories' ||
-                        item.path === '/suppliers';
+                        item.path === '/suppliers' ||
+                        item.path === '/profile';
 
                     if (!isImplementedPath) return null;
 

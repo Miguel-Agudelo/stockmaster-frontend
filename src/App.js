@@ -25,6 +25,8 @@ import SupplierList from './pages/suppliers/SupplierList';
 // Gestión de Categorías (HU-PI2-02)
 import CategoryList from './pages/categories/CategoryList';
 
+import ProfilePage from './pages/profile/ProfilePage';
+
 // Transferencia de Stock (HU20)
 import StockTransferPage from "./pages/movements/StockTransferPage";
 
@@ -212,6 +214,16 @@ function App() {
                     element={
                         <PrivateRoute roles={['ADMINISTRADOR']}>
                             <SupplierRecovery />
+                        </PrivateRoute>
+                    }
+                />
+
+                {/* RUTA: Perfil de usuario (ADMIN, OPERADOR) */}
+                <Route
+                    path="/profile"
+                    element={
+                        <PrivateRoute roles={['ADMINISTRADOR', 'OPERADOR']}>
+                            <ProfilePage />
                         </PrivateRoute>
                     }
                 />

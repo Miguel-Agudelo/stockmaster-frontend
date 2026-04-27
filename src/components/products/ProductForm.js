@@ -110,6 +110,10 @@ const ProductForm = ({ onSave, onCancel, currentProduct }) => {
                 supplierIds: formData.supplierIds,  // HU-PI2-01
             };
             if (isEditing) {
+                if (!currentProduct?.id) {
+                    setErrors({ general: 'ID de producto inválido. Recarga la página.' });
+                    return;
+                }
                 await productService.updateProduct(currentProduct.id, productData);
                 setMessage('Producto actualizado exitosamente.');
             } else {

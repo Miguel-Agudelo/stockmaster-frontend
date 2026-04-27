@@ -7,7 +7,8 @@ import Pagination from '../../components/common/Pagination';
 import usePagination from '../../hooks/usePagination';
 import productService from '../../services/productService';
 import '../../pages/products/ProductList.css';
-
+import { faHistory } from '@fortawesome/free-solid-svg-icons';
+import ProductChangeLogModal from '../../components/products/ProductChangeLogModal';
 
 const SummaryCard = ({ title, value, colorClass }) => {
     const displayValue = typeof value === 'number'
@@ -34,7 +35,7 @@ const ProductList = ({ userRole }) => {
     const [isFormOpen,     setIsFormOpen]     = useState(false);
     const [currentProduct, setCurrentProduct] = useState(null);
     const [productToDelete, setProductToDelete] = useState(null);
-
+    const [changeLogProduct, setChangeLogProduct] = useState(null);
     const isAdmin = userRole === 'ADMINISTRADOR';
 
     // ── Carga de datos ────────────────────────────────────────────────────────
@@ -98,6 +99,8 @@ const ProductList = ({ userRole }) => {
     const { currentPage, pageSize, paginated: paginatedProducts, setPage, setPageSize } =
         usePagination(filteredProducts);
 
+    const handleOpenChangeLog = (product) => setChangeLogProduct(product);
+    const handleCloseChangeLog = () => setChangeLogProduct(null);
     // ── Render ────────────────────────────────────────────────────────────────
     return (
         <div className="main-content">
@@ -205,6 +208,20 @@ const ProductList = ({ userRole }) => {
                                     <button className="icon-button edit-button" onClick={() => handleEdit(product)} title="Editar">
                                         <FontAwesomeIcon icon={faPencilAlt} />
                                     </button>
+                                    <button
+                                        className="icon-button"
+                                        style={{ color: '#0EA5E9' }}
+                                        onClick={() => handleOpenChangeLog(product)}
+                                        title="Ver historial de cambios"
+                                    >
+                                        <FontAwesomeIcon icon={faHistory} />
+                                    </button>
+                                    {changeLogProduct && (
+                                        <ProductChangeLogModal
+                                            product={changeLogProduct}
+                                            onClose={handleCloseChangeLog}
+                                        />
+                                    )}
                                     {isAdmin && (
                                         <button className="icon-button delete-button-red" onClick={() => handleDelete(product)} title="Eliminar">
                                             <FontAwesomeIcon icon={faTrashAlt} />

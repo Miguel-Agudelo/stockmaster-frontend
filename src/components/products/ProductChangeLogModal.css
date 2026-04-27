@@ -1,0 +1,200 @@
+/* Contenedor principal que cubre toda la pantalla */
+.changelog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.06); /* Negro con 45% de opacidad */
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000; /* Asegúrate de que esté por encima de todo */
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none; /* Soporte para Safari */
+
+    padding: 20px;
+}
+
+.changelog-modal {
+    background: #fff;
+    border-radius: 12px;
+    width: 780px;
+    max-width: 95vw;
+    max-height: 88vh;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* ── Cabecera ────────────────────────────────────────────────── */
+.changelog-header {
+    padding: 20px 24px 14px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.changelog-header-text h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1F2937;
+}
+
+.changelog-header-text p {
+    margin: 4px 0 0;
+    font-size: 0.82rem;
+    color: #6B7280;
+}
+
+.changelog-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: #9CA3AF;
+    line-height: 1;
+    padding: 0;
+    transition: color 0.15s;
+}
+
+.changelog-close-btn:hover {
+    color: #374151;
+}
+
+/* ── Cuerpo ──────────────────────────────────────────────────── */
+.changelog-body {
+    padding: 20px 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* ── Estado de carga / vacío ─────────────────────────────────── */
+.changelog-loading,
+.changelog-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6B7280;
+    font-size: 0.95rem;
+}
+
+.changelog-empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    color: #D1D5DB;
+}
+
+/* ── Tabla ───────────────────────────────────────────────────── */
+.changelog-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.88rem;
+}
+
+.changelog-table thead th {
+    text-align: left;
+    padding: 10px 12px;
+    color: #64748b;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+    background: #f8fafc;
+}
+
+.changelog-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.changelog-table tbody td {
+    padding: 12px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    vertical-align: top;
+}
+
+/* Campo modificado — badge naranja */
+.field-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background-color: #FFF7ED;
+    color: #C2410C;
+    border: 1px solid #FDBA74;
+    white-space: nowrap;
+}
+
+/* Valor anterior — tachado rojo tenue */
+.value-old {
+    color: #EF4444;
+    text-decoration: line-through;
+    font-size: 0.85rem;
+}
+
+/* Valor nuevo — verde */
+.value-new {
+    color: #16A34A;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* Flecha separadora */
+.value-arrow {
+    color: #9CA3AF;
+    margin: 0 6px;
+    font-size: 0.8rem;
+}
+
+/* Usuario */
+.changelog-user {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.changelog-user-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #F97316;
+    flex-shrink: 0;
+}
+
+/* Fecha */
+.changelog-date {
+    white-space: nowrap;
+    font-size: 0.82rem;
+    color: #64748b;
+}
+
+/* ── Pie ─────────────────────────────────────────────────────── */
+.changelog-footer {
+    padding: 14px 24px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.changelog-footer .btn-close-log {
+    padding: 8px 20px;
+    border-radius: 6px;
+    border: 1px solid #D1D5DB;
+    background: #fff;
+    color: #374151;
+    font-size: 0.88rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.changelog-footer .btn-close-log:hover {
+    background: #f3f4f6;
+}

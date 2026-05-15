@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import authService from '../../services/authService';
 import './Sidebar.css';
+import LowStockAlertPanel from '../alerts/LowStockAlertPanel';
 
 import LogoImage from '../../assets/LogoStockMaster.png';
 
@@ -115,6 +116,8 @@ const Sidebar = () => {
 
             {/* --- Footer de Usuario y Logout --- */}
             <div className="sidebar-footer">
+                {/* Alertas de stock crítico — solo para ADMINISTRADOR */}
+                {userRole === 'ADMINISTRADOR' && <LowStockAlertPanel />}
 
                 {/* Opción 'Cerrar Sesión' */}
                 {isMenuOpen && (

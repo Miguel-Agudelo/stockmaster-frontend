@@ -1,0 +1,231 @@
+.alert-panel-wrapper {
+    position: relative;
+    padding: 0 10px 8px 10px;
+}
+
+/* --- Botón campana --- */
+.alert-bell-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.alert-bell-btn:hover {
+    background-color: #F5F5F5;
+}
+
+.alert-bell-icon-wrapper {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.bell-active {
+    font-size: 22px;
+    color: #E65100;
+}
+
+.bell-quiet {
+    font-size: 22px;
+    color: #AAAAAA;
+}
+
+.alert-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background-color: #E53935;
+    color: white;
+    border-radius: 50%;
+    min-width: 18px;
+    height: 18px;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3px;
+    border: 2px solid white;
+}
+
+.alert-bell-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- Panel desplegable --- */
+.alert-dropdown {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 10px;
+    width: 320px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+    overflow: hidden;
+    border: 1px solid #F0F0F0;
+}
+
+.alert-dropdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    background-color: #FFF3E0;
+    border-bottom: 1px solid #FFE0B2;
+}
+
+.alert-dropdown-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: #E65100;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.alert-dropdown-count {
+    font-size: 12px;
+    color: #E65100;
+    font-weight: 500;
+    background: #FFE0B2;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+/* --- Lista de alertas --- */
+.alert-list {
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.alert-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid #F5F5F5;
+    gap: 10px;
+    transition: background-color 0.1s;
+}
+
+.alert-item:hover {
+    background-color: #FAFAFA;
+}
+
+.alert-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.alert-product-name {
+    font-weight: 600;
+    font-size: 13px;
+    color: #222;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.alert-warehouse {
+    font-size: 11px;
+    color: #888;
+}
+
+.alert-stock-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.alert-stock-current {
+    font-size: 12px;
+    color: #E53935;
+}
+
+.alert-stock-min {
+    font-size: 12px;
+    color: #666;
+}
+
+/* --- Botón marcar como visto (individual) --- */
+.alert-dismiss-btn {
+    background: #E8F5E9;
+    border: none;
+    color: #388E3C;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background-color 0.15s;
+}
+
+.alert-dismiss-btn:hover {
+    background-color: #C8E6C9;
+}
+
+/* --- Estado vacío (todo visto) --- */
+.alert-empty {
+    padding: 24px;
+    text-align: center;
+    color: #888;
+}
+
+.alert-empty i {
+    font-size: 28px;
+    color: #4CAF50;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.alert-empty p {
+    margin: 0;
+    font-size: 13px;
+}
+
+/* --- Footer: marcar todo como visto --- */
+.alert-dropdown-footer {
+    padding: 10px 16px;
+    border-top: 1px solid #F0F0F0;
+}
+
+.alert-dismiss-all-btn {
+    width: 100%;
+    padding: 9px;
+    background: transparent;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.alert-dismiss-all-btn:hover {
+    background-color: #F5F5F5;
+    border-color: #BDBDBD;
+}

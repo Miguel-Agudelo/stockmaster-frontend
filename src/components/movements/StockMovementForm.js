@@ -9,7 +9,6 @@ const StockMovementForm = ({ onComplete, onCancel }) => {
     const [products, setProducts] = useState([]);
     const [warehouses, setWarehouses] = useState([]);
     const [formData, setFormData] = useState({
-
         type: 'ENTRADA',
         productId: '',
         warehouseId: '',
@@ -20,38 +19,56 @@ const StockMovementForm = ({ onComplete, onCancel }) => {
     const [errors, setErrors] = useState({});
     const [message, setMessage] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const currentStock = 0;
+
+    // ✅ FIX: currentStock ahora es estado reactivo, no una constante fija en 0
+    const [currentStock, setCurrentStock] = useState(null);
+    const [loadingStock, setLoadingStock] = useState(false);
 
     useEffect(() => {
-
         const loadData = async () => {
             try {
                 const [prodsResponse, whsResponse] = await Promise.all([
                     stockMovementService.getProductsList(),
                     stockMovementService.getWarehousesList()
                 ]);
-
                 setProducts(prodsResponse.data);
                 setWarehouses(whsResponse.data);
                 setLoading(false);
-
             } catch (error) {
                 console.error("Error al cargar datos de selects:", error);
-
-// Si la carga falla por 403 o similar, el mensaje de error es relevante
-
                 setMessage({ type: 'error', text: 'Error al cargar productos o almacenes.' });
                 setLoading(false);
             }
         };
         loadData();
-
     }, []);
 
+    // ✅ FIX: cada vez que cambian productId o warehouseId, consulta el stock real al backend
+    useEffect(() => {
+        const { productId, warehouseId } = formData;
 
+        if (!productId || !warehouseId) {
+            setCurrentStock(null);
+            return;
+        }
+
+        const fetchStock = async () => {
+            setLoadingStock(true);
+            try {
+                const response = await stockMovementService.getCurrentStock(productId, warehouseId);
+                setCurrentStock(response.data.currentStock);
+            } catch (error) {
+                console.error("Error al obtener stock actual:", error);
+                setCurrentStock(null);
+            } finally {
+                setLoadingStock(false);
+            }
+        };
+
+        fetchStock();
+    }, [formData.productId, formData.warehouseId]);
 
     const handleChange = (e) => {
-
         let { name, value } = e.target;
         if (name === 'productId' || name === 'warehouseId' || name === 'quantity') {
             value = parseInt(value) || (value === "" ? "" : value);
@@ -67,7 +84,6 @@ const StockMovementForm = ({ onComplete, onCancel }) => {
     };
 
     const validateForm = () => {
-
         let formErrors = {};
         if (!formData.type) formErrors.type = 'Seleccione el tipo de movimiento.';
         if (!formData.productId) formErrors.productId = 'Seleccione un producto.';
@@ -75,22 +91,16 @@ const StockMovementForm = ({ onComplete, onCancel }) => {
         if (!formData.quantity || formData.quantity <= 0) formErrors.quantity = 'Ingrese una cantidad válida.';
         if (!formData.reason.trim()) formErrors.reason = 'El motivo es obligatorio.';
         setErrors(formErrors);
-
         return Object.keys(formErrors).length === 0;
-
     };
 
-
     const handleSubmit = async (e) => {
-
         e.preventDefault();
         setMessage(null);
         setErrors({});
 
         if (!validateForm()) return;
         setIsSubmitting(true);
-
-// 1. Obtener el ID del usuario
 
         const currentUser = authService.getCurrentUser();
         const userId = currentUser ? currentUser.id : null;
@@ -101,8 +111,6 @@ const StockMovementForm = ({ onComplete, onCancel }) => {
             setIsSubmitting(false);
             return;
         }
-
-// 2. Preparar los datos con los nombres que el backend espera
 
         const movementData = {
             productId: parseInt(formData.productId),
@@ -122,7 +130,6 @@ const StockMovementForm = ({ onComplete, onCancel }) => {
                 throw new Error("Tipo de movimiento no válido.");
             }
 
-            // Manejo de éxito
             setMessage({ type: 'success', text: `Movimiento de ${formData.type.toLowerCase()} registrado exitosamente.` });
             setTimeout(() => {
                 setFormData(prev => ({ ...prev, quantity: 0, reason: '' }));
@@ -183,7 +190,6 @@ const StockMovementForm = ({ onComplete, onCancel }) => {
                                         {p.name} ({p.sku || p.id})
                                     </option>
                                 ))}
-
                             </select>
                             {errors.productId && <p className="error-message">{errors.productId}</p>}
                         </div>
@@ -216,8 +222,18 @@ const StockMovementForm = ({ onComplete, onCancel }) => {
                                 min="1"
                                 disabled={isSubmitting}
                             />
+                            {/* ✅ FIX: muestra el stock real desde el backend */}
                             {formData.productId && formData.warehouseId && (
-                                <p className="stock-info">Stock actual: <strong>{currentStock}</strong> unidades.</p>
+                                <p className="stock-info">
+                                    Stock actual: <strong>
+                                    {loadingStock
+                                        ? '...'
+                                        : currentStock !== null
+                                            ? `${currentStock}`
+                                            : 'No disponible'
+                                    }
+                                </strong> unidades.
+                                </p>
                             )}
                             {errors.quantity && <p className="error-message">{errors.quantity}</p>}
                         </div>

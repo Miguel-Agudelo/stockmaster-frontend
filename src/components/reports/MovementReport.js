@@ -1,108 +1,93 @@
+import { showToast } from '../../utils/exportUtils';
 import React, { useState, useEffect, useCallback } from 'react';
 import ReportService from '../../services/reportService';
 import Table from '../common/Table';
 import Input from '../common/Input';
 
-import { exportToCsv } from '../../utils/exportUtils';
+import {
+    exportToCsv,
+    downloadExcelFromBackend,
+    exportMovementsToPdf,
+} from '../../utils/exportUtils';
 
-// Función utilitaria para formatear la fecha a 'YYYY-MM-DD'
+// ── Helpers ─────────────────────────────────────────────────────────────────
+
 const getISODate = (date) => {
     if (!date) return '';
     return date.toISOString().split('T')[0];
-}
+};
 
-// Formato de fecha y hora de la tabla (DD/MM/AAAA HH:MM)
 const formatTableDateTime = (isoDateTime) => {
     if (!isoDateTime) return '';
     try {
         const date = new Date(isoDateTime);
-        // Formato DD/MM/AAAA
         const datePart = date.toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
+            day: '2-digit', month: '2-digit', year: 'numeric'
         });
-        // Formato HH:MM
         const timePart = date.toLocaleTimeString('es-ES', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false // Formato 24 horas
+            hour: '2-digit', minute: '2-digit', hour12: false
         });
         return `${datePart} ${timePart}`;
-    } catch (e) {
-        return isoDateTime; // Fallback
+    } catch {
+        return isoDateTime;
     }
-}
+};
 
-// Renderizado de la insignia de Tipo de Movimiento
 const renderMovementBadge = (type) => {
     const isExit = type === 'SALIDA';
-    const className = isExit ? 'badge-movement-danger' : 'badge-movement-success';
-    const displayType = isExit ? 'Salida' : 'Entrada';
     return (
-        <span className={`badge-movement ${className}`}>
-            {displayType}
+        <span className={`badge-movement ${isExit ? 'badge-movement-danger' : 'badge-movement-success'}`}>
+            {isExit ? 'Salida' : 'Entrada'}
         </span>
     );
 };
 
-
-// FUNCIÓN HELPER PARA OBTENER FECHAS POR DEFECTO
 const getDatesForInitialLoad = () => {
     const today = new Date();
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(today.getDate() - 30);
-
-    return {
-        start: getISODate(thirtyDaysAgo),
-        end: getISODate(today)
-    };
+    return { start: getISODate(thirtyDaysAgo), end: getISODate(today) };
 };
+
 const initialDates = getDatesForInitialLoad();
 
+// ── Componente ───────────────────────────────────────────────────────────────
 
 const MovementReport = () => {
     const [movements, setMovements] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
     const [startDate, setStartDate] = useState(initialDates.start);
     const [endDate, setEndDate] = useState(initialDates.end);
+    const [exportingExcel, setExportingExcel] = useState(false);
 
-
-    // Definición de las columnas de la tabla
     const columns = [
         {
             header: 'Fecha',
             accessor: 'movementDate',
-            // Formato de Fecha/Hora
-            render: (item) => formatTableDateTime(item.movementDate)
+            render: (item) => formatTableDateTime(item.movementDate),
         },
         { header: 'Producto', accessor: 'productName' },
         {
             header: 'Tipo',
             accessor: 'movementType',
-            render: (item) => renderMovementBadge(item.movementType)
+            render: (item) => renderMovementBadge(item.movementType),
         },
         {
             header: 'Cantidad',
             accessor: 'quantity',
-
             render: (item) => {
                 const isExit = item.movementType === 'SALIDA';
-                const sign = isExit ? '-' : '+';
-                const className = isExit ? 'text-danger' : 'text-success';
                 return (
-                    <span className={className}>
-                        {sign}{item.quantity}
+                    <span className={isExit ? 'text-danger' : 'text-success'}>
+                        {isExit ? '-' : '+'}{item.quantity}
                     </span>
                 );
-            }
+            },
         },
         { header: 'Almacén', accessor: 'warehouseName' },
-        { header: 'Usuario', accessor: 'userName' },
+        { header: 'Usuario',  accessor: 'userName' },
     ];
-
 
     const fetchMovementsData = useCallback(async (start, end) => {
         setLoading(true);
@@ -110,10 +95,9 @@ const MovementReport = () => {
         try {
             const response = await ReportService.getMovementReportByDate(start, end);
             setMovements(response.data);
-
         } catch (err) {
-            console.error("Error al cargar reporte de Movimientos:", err);
-            setError("No se pudo cargar el reporte de Movimientos. Verifique el rango y la conexión.");
+            console.error('Error al cargar reporte de Movimientos:', err);
+            setError('No se pudo cargar el reporte de Movimientos. Verifique el rango y la conexión.');
         } finally {
             setLoading(false);
         }
@@ -125,40 +109,62 @@ const MovementReport = () => {
 
     const handleApplyFilter = (e) => {
         e.preventDefault();
-
         if (startDate && endDate) {
             fetchMovementsData(startDate, endDate);
         } else {
-            setError("Por favor, seleccione ambas fechas para filtrar.");
+            setError('Por favor, seleccione ambas fechas para filtrar.');
         }
     };
 
     const handleDateChange = (setter) => (e) => {
-        const dateValue = e.target.value;
-        if (dateValue) {
-            setter(dateValue);
-        } else {
-            setter(null);
+        setter(e.target.value || null);
+    };
+
+    const handleClearFilters = () => {
+        const newDates = getDatesForInitialLoad();
+        setStartDate(newDates.start);
+        setEndDate(newDates.end);
+        fetchMovementsData(newDates.start, newDates.end);
+    };
+
+    // ── Exportar CSV (respeta filtro de fechas aplicado) ────────────────────
+    const handleExportCsv = () => {
+        if (!movements || movements.length === 0) {
+            showToast('No hay datos disponibles para exportar.');
+            return;
+        }
+        exportToCsv(
+            ['Fecha', 'Producto', 'Tipo', 'Cantidad', 'Almacén', 'Usuario'],
+            ['movementDate', 'productName', 'movementType', 'quantity', 'warehouseName', 'userName'],
+            movements,
+            'Reporte_Movimientos'
+        );
+    };
+
+    // ── Exportar Excel (respeta filtro de fechas aplicado) ──────────────────
+    const handleExportExcel = async () => {
+        if (!movements || movements.length === 0) {
+            showToast('No hay datos disponibles para exportar.');
+            return;
+        }
+        setExportingExcel(true);
+        try {
+            await downloadExcelFromBackend(
+                ReportService.exportMovementsExcel(startDate, endDate),
+                'Reporte_Movimientos'
+            );
+        } finally {
+            setExportingExcel(false);
         }
     };
 
-    // Función extra para limpiar los filtros
-    const handleClearFilters = () => {
-        // Restauramos al rango inicial y volvemos a cargar
-        const newInitialDates = getDatesForInitialLoad();
-        setStartDate(newInitialDates.start);
-        setEndDate(newInitialDates.end);
-        fetchMovementsData(newInitialDates.start, newInitialDates.end);
-    };
-
-
-    const handleExport = () => {
-        // Definir las cabeceras y los campos de los datos (accessors)
-        const headers = ['Fecha', 'Producto', 'Tipo', 'Cantidad', 'Almacen', 'Usuario'];
-        const fields = ['movementDate', 'productName', 'movementType', 'quantity', 'warehouseName', 'userName'];
-
-        // Llamar a la función genérica
-        exportToCsv(headers, fields, movements, 'Reporte_Movimientos');
+    // ── Exportar PDF (respeta filtro de fechas aplicado) ────────────────────
+    const handleExportPdf = () => {
+        if (!movements || movements.length === 0) {
+            showToast('No hay datos disponibles para exportar.');
+            return;
+        }
+        exportMovementsToPdf(movements, startDate, endDate);
     };
 
     return (
@@ -166,30 +172,39 @@ const MovementReport = () => {
             <div className="report-header-section">
                 <div className="report-title-container">
                     <h4 className="report-title-section">
-                        {/* Icono y texto de la imagen */}
                         <i className="fas fa-calendar-alt icon-info"></i> Reporte de Movimientos
                     </h4>
                     <p className="report-subtitle">
                         Historial de entradas y salidas por rango de fechas
                     </p>
                 </div>
-                {/* Botón Exportar CSV (asumo que usas un componente Button simple o un <a>) */}
-                <div className="report-header-actions">
-                    <button className="btn-export" onClick={handleExport}>
-                        <i className="fas fa-download"></i> Exportar CSV
+
+                {/* Botones de exportación */}
+                <div className="report-header-actions export-buttons-group">
+                    <button className="btn-export btn-export-csv" onClick={handleExportCsv}>
+                        <i className="fas fa-file-csv"></i> CSV
+                    </button>
+                    <button
+                        className="btn-export btn-export-excel"
+                        onClick={handleExportExcel}
+                        disabled={exportingExcel}
+                    >
+                        <i className="fas fa-file-excel"></i>
+                        {exportingExcel ? ' Generando...' : ' Excel'}
+                    </button>
+                    <button className="btn-export btn-export-pdf" onClick={handleExportPdf}>
+                        <i className="fas fa-file-pdf"></i> PDF
                     </button>
                 </div>
             </div>
 
-            {/* --- Formulario de Filtros --- */}
+            {/* Formulario de filtros */}
             <form onSubmit={handleApplyFilter} className="date-filter-form">
                 <div className="filter-controls">
-                    {/* Campos de fecha */}
                     <div className="input-group">
                         <label className="input-label">Desde</label>
                         <Input
                             type="date"
-                            placeholder="dd/mm/aaaa"
                             value={startDate || ''}
                             onChange={handleDateChange(setStartDate)}
                             required
@@ -199,35 +214,33 @@ const MovementReport = () => {
                         <label className="input-label">Hasta</label>
                         <Input
                             type="date"
-                            placeholder="dd/mm/aaaa"
                             value={endDate || ''}
                             onChange={handleDateChange(setEndDate)}
                             required
                         />
                     </div>
-
-                    {/* Botones de acción */}
                     <button type="submit" className="btn btn-primary filter-button" disabled={loading}>
                         Aplicar Filtro
                     </button>
-                    {/* Botón Limpiar Filtros */}
-                    <button type="button" onClick={handleClearFilters} className="btn btn-outline-secondary filter-button clean-filter-button" disabled={loading}>
+                    <button
+                        type="button"
+                        onClick={handleClearFilters}
+                        className="btn btn-outline-secondary filter-button clean-filter-button"
+                        disabled={loading}
+                    >
                         Limpiar Filtros
                     </button>
                 </div>
             </form>
 
-            {/* --- Contenido del Reporte --- */}
+            {/* Contenido del reporte */}
             {loading && <div className="loading-message">Cargando movimientos...</div>}
-            {error && <div className="error-message alert alert-danger">{error}</div>}
+            {error   && <div className="error-message alert alert-danger">{error}</div>}
 
             {!loading && !error && (
                 <>
                     {movements.length > 0 ? (
-                        <Table
-                            data={movements}
-                            columns={columns}
-                        />
+                        <Table data={movements} columns={columns} />
                     ) : (
                         <div className="alert alert-info mt-4">
                             No se encontraron movimientos para el rango seleccionado.

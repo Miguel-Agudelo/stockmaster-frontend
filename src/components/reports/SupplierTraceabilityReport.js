@@ -1,11 +1,17 @@
+import { showToast } from '../../utils/exportUtils';
 import React, { useState, useEffect, useCallback } from 'react';
 import ReportService from '../../services/reportService';
 import supplierService from '../../services/supplierService';
 import Table from '../common/Table';
 import Button from '../common/Button';
-import { exportToCsv } from '../../utils/exportUtils';
 
-// HU-PI2-09
+import {
+    exportToCsv,
+    downloadExcelFromBackend,
+    exportSupplierToPdf,
+} from '../../utils/exportUtils';
+
+// HU-PI2-09 + HU-PI2-05
 const SupplierTraceabilityReport = () => {
     const [suppliers, setSuppliers] = useState([]);
     const [selectedSupplierId, setSelectedSupplierId] = useState('');
@@ -14,12 +20,13 @@ const SupplierTraceabilityReport = () => {
     const [loadingSuppliers, setLoadingSuppliers] = useState(true);
     const [error, setError] = useState(null);
     const [searched, setSearched] = useState(false);
+    const [exportingExcel, setExportingExcel] = useState(false);
 
     const columns = [
-        { header: 'Producto', accessor: 'productName' },
-        { header: 'Categoría', accessor: 'categoryName' },
+        { header: 'Producto',    accessor: 'productName' },
+        { header: 'Categoría',   accessor: 'categoryName' },
         { header: 'Stock Total', accessor: 'totalStock' },
-        { header: 'Almacén', accessor: 'warehouseName' },
+        { header: 'Almacén',     accessor: 'warehouseName' },
     ];
 
     useEffect(() => {
@@ -28,7 +35,7 @@ const SupplierTraceabilityReport = () => {
             try {
                 const response = await supplierService.getAllSuppliers();
                 setSuppliers(response.data);
-            } catch (err) {
+            } catch {
                 setError('No se pudo cargar la lista de proveedores.');
             } finally {
                 setLoadingSuppliers(false);
@@ -45,7 +52,7 @@ const SupplierTraceabilityReport = () => {
         try {
             const response = await ReportService.getSupplierTraceabilityReport(selectedSupplierId);
             setReportData(response.data);
-        } catch (err) {
+        } catch {
             setError('No se pudo cargar el reporte de trazabilidad. Intente nuevamente.');
             setReportData([]);
         } finally {
@@ -53,31 +60,48 @@ const SupplierTraceabilityReport = () => {
         }
     }, [selectedSupplierId]);
 
+    const selectedSupplierName =
+        suppliers.find((s) => String(s.id) === String(selectedSupplierId))?.name || '';
+
+    // ── Exportar CSV ────────────────────────────────────────────────────────
     const handleExportCsv = () => {
-        const headers = ['Producto', 'Categoría', 'Stock Total', 'Almacén'];
-        const fields = ['productName', 'categoryName', 'totalStock', 'warehouseName'];
-        exportToCsv(headers, fields, reportData, 'Reporte_Trazabilidad_Proveedor');
+        if (!reportData || reportData.length === 0) {
+            showToast('No hay datos disponibles para exportar.');
+            return;
+        }
+        exportToCsv(
+            ['Producto', 'Categoría', 'Stock Total', 'Almacén'],
+            ['productName', 'categoryName', 'totalStock', 'warehouseName'],
+            reportData,
+            'Reporte_Trazabilidad_Proveedor'
+        );
     };
 
+    // ── Exportar Excel ──────────────────────────────────────────────────────
     const handleExportExcel = async () => {
-        if (!selectedSupplierId) return;
+        if (!reportData || reportData.length === 0) {
+            showToast('No hay datos disponibles para exportar.');
+            return;
+        }
+        setExportingExcel(true);
         try {
-            const response = await ReportService.exportSupplierTraceabilityExcel(selectedSupplierId);
-            const blob = new Blob([response.data], {
-                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.setAttribute('download', `Trazabilidad_Proveedor_${new Date().toISOString().split('T')[0]}.xlsx`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        } catch (err) {
-            setError('No se pudo generar el archivo Excel. Intente nuevamente.');
+            await downloadExcelFromBackend(
+                ReportService.exportSupplierTraceabilityExcel(selectedSupplierId, selectedSupplierName),
+                'Reporte_Trazabilidad_Proveedor'
+            );
+        } finally {
+            setExportingExcel(false);
         }
     };
 
-    const selectedSupplierName = suppliers.find(s => String(s.id) === String(selectedSupplierId))?.name || '';
+    // ── Exportar PDF ────────────────────────────────────────────────────────
+    const handleExportPdf = () => {
+        if (!reportData || reportData.length === 0) {
+            showToast('No hay datos disponibles para exportar.');
+            return;
+        }
+        exportSupplierToPdf(reportData, selectedSupplierName);
+    };
 
     return (
         <div className="report-supplier-traceability">
@@ -91,18 +115,26 @@ const SupplierTraceabilityReport = () => {
                     </p>
                 </div>
 
-                {searched && reportData.length > 0 && (
-                    <div className="report-header-actions" style={{ gap: '8px' }}>
-                        <Button className="btn-export" onClick={handleExportCsv}>
-                            <i className="fas fa-file-csv"></i> Exportar CSV
-                        </Button>
-                        <Button className="btn-export" onClick={handleExportExcel}>
-                            <i className="fas fa-file-excel"></i> Exportar Excel
-                        </Button>
-                    </div>
-                )}
+                {/* Botones siempre visibles — validan al hacer clic */}
+                <div className="report-header-actions export-buttons-group">
+                    <Button className="btn-export btn-export-csv" onClick={handleExportCsv}>
+                        <i className="fas fa-file-csv"></i> CSV
+                    </Button>
+                    <Button
+                        className="btn-export btn-export-excel"
+                        onClick={handleExportExcel}
+                        disabled={exportingExcel}
+                    >
+                        <i className="fas fa-file-excel"></i>
+                        {exportingExcel ? ' Generando...' : ' Excel'}
+                    </Button>
+                    <Button className="btn-export btn-export-pdf" onClick={handleExportPdf}>
+                        <i className="fas fa-file-pdf"></i> PDF
+                    </Button>
+                </div>
             </div>
 
+            {/* Filtro de proveedor */}
             <div className="date-filter-form">
                 <div className="filter-controls">
                     <div className="input-group">
@@ -130,9 +162,7 @@ const SupplierTraceabilityReport = () => {
                         >
                             <option value="">-- Seleccione un proveedor --</option>
                             {suppliers.map((s) => (
-                                <option key={s.id} value={s.id}>
-                                    {s.name}
-                                </option>
+                                <option key={s.id} value={s.id}>{s.name}</option>
                             ))}
                         </select>
                     </div>
@@ -157,7 +187,10 @@ const SupplierTraceabilityReport = () => {
 
             {!loading && searched && !error && reportData.length === 0 && (
                 <div className="alert alert-info mt-4">
-                    <p>No hay información disponible para el proveedor <strong>{selectedSupplierName}</strong>.</p>
+                    <p>
+                        No hay información disponible para el proveedor{' '}
+                        <strong>{selectedSupplierName}</strong>.
+                    </p>
                 </div>
             )}
 

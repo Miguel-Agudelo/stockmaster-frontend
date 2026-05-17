@@ -1,23 +1,20 @@
+import { showToast } from '../../utils/exportUtils';
 import React, { useState, useEffect, useCallback } from 'react';
 import ReportService from '../../services/reportService';
-import Table  from '../common/Table';
-import { exportToCsv } from '../../utils/exportUtils';
+import Table from '../common/Table';
+
+import {
+    exportToCsv,
+    downloadExcelFromBackend,
+    exportTopSellingToPdf,
+} from '../../utils/exportUtils';
 
 const TopSellingReport = () => {
     const [reportData, setReportData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [exportingExcel, setExportingExcel] = useState(false);
 
-    const handleExport = () => {
-        // Definir las cabeceras y los campos de los datos (accessors)
-        const headers = ['ID Producto', 'Nombre Producto', 'Unidades Vendidas', 'Ingresos Generados', 'Precio Promedio'];
-        const fields = ['productId', 'productName', 'unitsSold', 'totalRevenue', 'averagePrice'];
-
-        exportToCsv(headers, fields, reportData, 'Reporte_Mas_Vendidos');
-    };
-
-
-    // Función para renderizar el número de posición con el diseño de insignia redonda
     const renderPosition = (index) => {
         const position = index + 1;
         return (
@@ -27,18 +24,19 @@ const TopSellingReport = () => {
         );
     };
 
-    // Definición de las columnas de la tabla
     const columns = [
         {
             header: 'Posición',
             accessor: 'position',
-            render: (item, index) => renderPosition(index)
+            render: (item, index) => renderPosition(index),
         },
         { header: 'Producto', accessor: 'productName' },
         {
             header: 'Unidades Vendidas',
             accessor: 'unitsSold',
-            render: (item) => <span className="text-success">{item.unitsSold} unidades</span>
+            render: (item) => (
+                <span className="text-success">{item.unitsSold} unidades</span>
+            ),
         },
         {
             header: 'Ingresos Generados',
@@ -47,19 +45,19 @@ const TopSellingReport = () => {
                 <span className="text-success">
                     ${item.totalRevenue ? item.totalRevenue.toFixed(2) : '0.00'}
                 </span>
-            )
+            ),
         },
         {
             header: 'Precio Promedio',
             accessor: 'averagePrice',
             render: (item) => {
-                const avg = item.averagePrice || (item.unitsSold > 0 ? item.totalRevenue / item.unitsSold : 0);
+                const avg = item.averagePrice ||
+                    (item.unitsSold > 0 ? item.totalRevenue / item.unitsSold : 0);
                 return `$${isFinite(avg) ? avg.toFixed(2) : '0.00'}`;
-            }
+            },
         },
     ];
 
-    // Envolvemos fetchReport en useCallback para estabilidad
     const fetchReport = useCallback(async () => {
         setLoading(true);
         setError(null);
@@ -67,7 +65,7 @@ const TopSellingReport = () => {
             const response = await ReportService.getTopSellingReport();
             setReportData(response.data);
         } catch (err) {
-            console.error("Error al cargar reporte de Más Vendidos:", err);
+            console.error('Error al cargar reporte de Más Vendidos:', err);
             setError('No se pudo cargar el reporte de productos más vendidos. Intente nuevamente.');
         } finally {
             setLoading(false);
@@ -77,6 +75,46 @@ const TopSellingReport = () => {
     useEffect(() => {
         fetchReport();
     }, [fetchReport]);
+
+    // ── Exportar CSV ────────────────────────────────────────────────────────
+    const handleExportCsv = () => {
+        if (!reportData || reportData.length === 0) {
+            showToast('No hay datos disponibles para exportar.');
+            return;
+        }
+        exportToCsv(
+            ['ID Producto', 'Nombre Producto', 'Unidades Vendidas', 'Ingresos Generados', 'Precio Promedio'],
+            ['productId', 'productName', 'unitsSold', 'totalRevenue', 'averagePrice'],
+            reportData,
+            'Reporte_Mas_Vendidos'
+        );
+    };
+
+    // ── Exportar Excel ──────────────────────────────────────────────────────
+    const handleExportExcel = async () => {
+        if (!reportData || reportData.length === 0) {
+            showToast('No hay datos disponibles para exportar.');
+            return;
+        }
+        setExportingExcel(true);
+        try {
+            await downloadExcelFromBackend(
+                ReportService.exportTopSellingExcel(),
+                'Reporte_Mas_Vendidos'
+            );
+        } finally {
+            setExportingExcel(false);
+        }
+    };
+
+    // ── Exportar PDF ────────────────────────────────────────────────────────
+    const handleExportPdf = () => {
+        if (!reportData || reportData.length === 0) {
+            showToast('No hay datos disponibles para exportar.');
+            return;
+        }
+        exportTopSellingToPdf(reportData);
+    };
 
     if (loading) {
         return <div className="loading-message">Generando ranking de ventas...</div>;
@@ -88,7 +126,6 @@ const TopSellingReport = () => {
 
     return (
         <div className="report-top-selling">
-            {/* ESTRUCTURA DE ENCABEZADO CON BOTÓN DE EXPORTAR */}
             <div className="report-header-section">
                 <div className="report-title-container">
                     <h4 className="report-title-section">
@@ -99,25 +136,32 @@ const TopSellingReport = () => {
                     </p>
                 </div>
 
-                {/* Botón Exportar CSV */}
-                <div className="report-header-actions">
-                    {/* CONECTAR LA FUNCIÓN AL BOTÓN */}
-                    <button className="btn-export" onClick={handleExport}>
-                        <i className="fas fa-download"></i> Exportar CSV
+                {/* Botones de exportación */}
+                <div className="report-header-actions export-buttons-group">
+                    <button className="btn-export btn-export-csv" onClick={handleExportCsv}>
+                        <i className="fas fa-file-csv"></i> CSV
+                    </button>
+                    <button
+                        className="btn-export btn-export-excel"
+                        onClick={handleExportExcel}
+                        disabled={exportingExcel}
+                    >
+                        <i className="fas fa-file-excel"></i>
+                        {exportingExcel ? ' Generando...' : ' Excel'}
+                    </button>
+                    <button className="btn-export btn-export-pdf" onClick={handleExportPdf}>
+                        <i className="fas fa-file-pdf"></i> PDF
                     </button>
                 </div>
             </div>
 
-            {/* --- CONTENIDO DINÁMICO --- */}
+            {/* Contenido dinámico */}
             {reportData.length === 0 ? (
                 <div className="alert alert-info mt-4">
                     <p>No hay datos suficientes para generar el ranking de productos más vendidos.</p>
                 </div>
             ) : (
-                <Table
-                    data={reportData}
-                    columns={columns}
-                />
+                <Table data={reportData} columns={columns} />
             )}
         </div>
     );

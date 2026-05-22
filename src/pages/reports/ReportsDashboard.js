@@ -6,6 +6,7 @@ import LowStockReport from '../../components/reports/LowStockReport';
 import MovementReport from '../../components/reports/MovementReport';
 import TopSellingReport from '../../components/reports/TopSellingReport';
 import SupplierTraceabilityReport from '../../components/reports/SupplierTraceabilityReport';
+import InventoryDashboard from '../../components/dashboard/InventoryDashboard';
 
 import reportService from '../../services/reportService';
 import dashboardService from '../../services/dashboardService';
@@ -32,7 +33,6 @@ const SummaryCard = ({ title, value, iconClass, colorClass }) => {
         if (typeof val !== 'number' || isNaN(val)) {
             val = 0;
         }
-
         if (isMoney) {
             return new Intl.NumberFormat('es-CO', {
                 style: 'currency',
@@ -46,8 +46,8 @@ const SummaryCard = ({ title, value, iconClass, colorClass }) => {
 
     const isMoney = title.includes('Ingresos');
     const displayValue = formatValue(value, isMoney);
-
     const cardValueStyle = title.includes('Ingresos') ? { fontSize: '1.8rem' } : {};
+
     return (
         <div className={`summary-card ${colorClass}`}>
             <div className="card-content">
@@ -64,11 +64,19 @@ const ReportsDashboard = () => {
 
     const [pageData, setPageData] = useState({
         userName: 'Usuario',
-        date: new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+        date: new Date().toLocaleDateString('es-CO', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        }),
         lowStockCount: 0,
         lowStockReportCount: 0,
         totalMovements: 0,
         totalRevenue: 0.00,
+        warehouseStockChart: [],
+        categoryStockChart: [],
+        totalInventoryValue: 0,
     });
 
     const [loading, setLoading] = useState(true);
@@ -85,16 +93,24 @@ const ReportsDashboard = () => {
                 const currentUser = authService.getCurrentUser();
                 const currentUserName = currentUser ? currentUser.name : 'Usuario';
 
+                // Obtener resumen del dashboard (incluye datos de gráficos HU-PI2-03)
+                const summaryData = await dashboardService.getDashboardSummary();
                 const {
                     lowStockCount: rawLowStockCount,
-                    totalMovements: rawTotalMovements
-                } = await dashboardService.getDashboardSummary();
+                    totalMovements: rawTotalMovements,
+                    warehouseStockChart,
+                    categoryStockChart,
+                    totalInventoryValue,
+                } = summaryData;
 
                 const lowStockCount = Number(rawLowStockCount) || 0;
                 const totalMovements = Number(rawTotalMovements) || 0;
 
                 const topSellingResponse = await reportService.getTopSellingReport();
-                const totalRevenue = topSellingResponse.data.reduce((sum, item) => sum + (Number(item.totalRevenue) || 0), 0);
+                const totalRevenue = topSellingResponse.data.reduce(
+                    (sum, item) => sum + (Number(item.totalRevenue) || 0),
+                    0
+                );
 
                 setPageData(prev => ({
                     ...prev,
@@ -103,6 +119,9 @@ const ReportsDashboard = () => {
                     lowStockReportCount: lowStockCount,
                     totalMovements: totalMovements,
                     totalRevenue: totalRevenue,
+                    warehouseStockChart: warehouseStockChart || [],
+                    categoryStockChart: categoryStockChart || [],
+                    totalInventoryValue: Number(totalInventoryValue) || 0,
                 }));
 
             } catch (err) {
@@ -137,13 +156,24 @@ const ReportsDashboard = () => {
 
     return (
         <div className="main-content">
+
+            {/* ── Encabezado de bienvenida ── */}
             <header className="dashboard-header">
                 <h1>Bienvenido, {pageData.userName}</h1>
                 <p className="dashboard-date">Panel de control - {pageData.date}</p>
             </header>
 
+            {/* ── Alerta de stock bajo ── */}
             <LowStockAlert count={pageData.lowStockCount} />
 
+            {/* ── HU-PI2-03: Tablero de control interactivo ── */}
+            <InventoryDashboard
+                warehouseStockChart={pageData.warehouseStockChart}
+                categoryStockChart={pageData.categoryStockChart}
+                totalInventoryValue={pageData.totalInventoryValue}
+            />
+
+            {/* ── Sección de Reportes ── */}
             <h2 className="report-title-header">Reportes</h2>
             <p className="subtitle">Análisis e informes del sistema de inventario</p>
 
@@ -198,6 +228,7 @@ const ReportsDashboard = () => {
             <div className="report-content-area">
                 {error ? <p className="error-message">{error}</p> : renderContent()}
             </div>
+
         </div>
     );
 };

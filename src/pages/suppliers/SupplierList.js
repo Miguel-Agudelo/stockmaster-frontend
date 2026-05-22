@@ -21,14 +21,14 @@ const SupplierList = ({ userRole }) => {
     const isAdmin = userRole === 'ADMINISTRADOR';
     const navigate = useNavigate();
 
-    const [suppliers, setSuppliers]         = useState([]);
-    const [isLoading, setIsLoading]         = useState(true);
-    const [error, setError]                 = useState(null);
-    const [searchTerm, setSearchTerm]       = useState('');
-    const [isFormOpen, setIsFormOpen]       = useState(false);
-    const [currentSupplier, setCurrentSupplier] = useState(null);
+    const [suppliers, setSuppliers]                 = useState([]);
+    const [isLoading, setIsLoading]                 = useState(true);
+    const [error, setError]                         = useState(null);
+    const [searchTerm, setSearchTerm]               = useState('');
+    const [isFormOpen, setIsFormOpen]               = useState(false);
+    const [currentSupplier, setCurrentSupplier]     = useState(null);
     const [supplierToDeactivate, setSupplierToDeactivate] = useState(null);
-    const [deactivateError, setDeactivateError] = useState('');
+    const [deactivateError, setDeactivateError]     = useState('');
 
     const fetchSuppliers = useCallback(async () => {
         setIsLoading(true);
@@ -45,23 +45,27 @@ const SupplierList = ({ userRole }) => {
 
     useEffect(() => { fetchSuppliers(); }, [fetchSuppliers]);
 
-    const filteredSuppliers = suppliers.filter(s =>
-        (s.name    && s.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (s.nit     && s.nit.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (s.email   && s.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (s.phone   && s.phone.toLowerCase().includes(searchTerm.toLowerCase()))
+    // Contadores calculados sobre el array completo (activos + inactivos)
+    const totalActive   = suppliers.filter(s => s.active).length;
+    const totalInactive = suppliers.filter(s => !s.active).length;
+
+    // La tabla solo muestra proveedores activos; la búsqueda se aplica sobre ellos
+    const activeSuppliers = suppliers.filter(s => s.active);
+
+    const filteredSuppliers = activeSuppliers.filter(s =>
+        (s.name  && s.name.toLowerCase().includes(searchTerm.toLowerCase()))  ||
+        (s.nit   && s.nit.toLowerCase().includes(searchTerm.toLowerCase()))   ||
+        (s.email && s.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (s.phone && s.phone.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
     const { currentPage, pageSize, paginated: paginatedSuppliers, setPage, setPageSize } =
         usePagination(filteredSuppliers);
 
-    const totalActive   = suppliers.filter(s => s.active).length;
-    const totalInactive = suppliers.filter(s => !s.active).length;
-
-    const handleNew        = () => { setCurrentSupplier(null); setIsFormOpen(true); };
-    const handleEdit       = (s) => { setCurrentSupplier(s); setIsFormOpen(true); };
-    const handleSaved      = () => { setIsFormOpen(false); fetchSuppliers(); };
-    const handleDeactivate = (s) => { setSupplierToDeactivate(s); setDeactivateError(''); };
+    const handleNew          = () => { setCurrentSupplier(null); setIsFormOpen(true); };
+    const handleEdit         = (s) => { setCurrentSupplier(s); setIsFormOpen(true); };
+    const handleSaved        = () => { setIsFormOpen(false); fetchSuppliers(); };
+    const handleDeactivate   = (s) => { setSupplierToDeactivate(s); setDeactivateError(''); };
     const handleGoToRecovery = () => navigate('/suppliers/recovery');
 
     const confirmDeactivate = async () => {
@@ -76,7 +80,8 @@ const SupplierList = ({ userRole }) => {
 
     return (
         <div className="main-content">
-            {/* Header */}
+
+            {/* ── Encabezado ── */}
             <div className="page-header">
                 <div className="title-group">
                     <h1>Gestión de Proveedores</h1>
@@ -84,7 +89,6 @@ const SupplierList = ({ userRole }) => {
                 </div>
                 {isAdmin && (
                     <div className="action-buttons-group">
-                        {/* Botón Papelera — mismo patrón que ProductList, UserList, WarehousesView */}
                         <button className="delete-recovery-button" onClick={handleGoToRecovery}>
                             <FontAwesomeIcon icon={faTrashRestore} /> Papelera
                         </button>
@@ -95,14 +99,26 @@ const SupplierList = ({ userRole }) => {
                 )}
             </div>
 
-            {/* KPIs */}
+            {/* ── KPIs — calculados sobre todos los proveedores ── */}
             <div className="summary-cards-container">
-                <SummaryCard title="Total Proveedores"   value={isLoading ? '...' : suppliers.length} colorClass="metric-orange" />
-                <SummaryCard title="Proveedores Activos" value={isLoading ? '...' : totalActive}       colorClass="metric-green" />
-                <SummaryCard title="Inactivos"           value={isLoading ? '...' : totalInactive}     colorClass="metric-blue" />
+                <SummaryCard
+                    title="Total Proveedores"
+                    value={isLoading ? '...' : suppliers.length}
+                    colorClass="metric-orange"
+                />
+                <SummaryCard
+                    title="Proveedores Activos"
+                    value={isLoading ? '...' : totalActive}
+                    colorClass="metric-green"
+                />
+                <SummaryCard
+                    title="Inactivos"
+                    value={isLoading ? '...' : totalInactive}
+                    colorClass="metric-blue"
+                />
             </div>
 
-            {/* Búsqueda */}
+            {/* ── Búsqueda ── */}
             <div className="search-bar-container">
                 <input
                     type="text"
@@ -113,12 +129,12 @@ const SupplierList = ({ userRole }) => {
                 />
             </div>
 
-            {/* Tabla */}
+            {/* ── Tabla — solo muestra proveedores activos ── */}
             <div className="product-list-card">
                 <div className="table-info">
                     Lista de Proveedores
                     <p className="product-count">
-                        Mostrando {filteredSuppliers.length} de {suppliers.length} proveedores
+                        Mostrando {filteredSuppliers.length} de {activeSuppliers.length} proveedores activos
                     </p>
                 </div>
 
@@ -158,13 +174,19 @@ const SupplierList = ({ userRole }) => {
                                 </td>
                                 {isAdmin && (
                                     <td className="actions-cell">
-                                        <button className="icon-button edit-button"
-                                                onClick={() => handleEdit(supplier)} title="Editar">
+                                        <button
+                                            className="icon-button edit-button"
+                                            onClick={() => handleEdit(supplier)}
+                                            title="Editar"
+                                        >
                                             <FontAwesomeIcon icon={faPencilAlt} />
                                         </button>
                                         {supplier.active && (
-                                            <button className="icon-button delete-button-red"
-                                                    onClick={() => handleDeactivate(supplier)} title="Desactivar">
+                                            <button
+                                                className="icon-button delete-button-red"
+                                                onClick={() => handleDeactivate(supplier)}
+                                                title="Desactivar"
+                                            >
                                                 <FontAwesomeIcon icon={faTimesCircle} />
                                             </button>
                                         )}
@@ -187,7 +209,7 @@ const SupplierList = ({ userRole }) => {
                 />
             </div>
 
-            {/* Modal formulario */}
+            {/* ── Modal: formulario crear / editar ── */}
             {isFormOpen && (
                 <div className="modal-backdrop">
                     <SupplierForm
@@ -198,7 +220,7 @@ const SupplierList = ({ userRole }) => {
                 </div>
             )}
 
-            {/* Modal confirmar desactivación */}
+            {/* ── Modal: confirmar desactivación ── */}
             {supplierToDeactivate && (
                 <div className="modal-backdrop">
                     <div className="custom-modal delete-modal">
@@ -210,8 +232,11 @@ const SupplierList = ({ userRole }) => {
                                 Puedes restaurarlo desde la Papelera.
                             </p>
                             {deactivateError && (
-                                <div style={{ marginBottom: 12, padding: '8px 12px', background: '#FEF2F2',
-                                    borderRadius: 6, color: '#B91C1C', fontSize: '0.85rem' }}>
+                                <div style={{
+                                    marginBottom: 12, padding: '8px 12px',
+                                    background: '#FEF2F2', borderRadius: 6,
+                                    color: '#B91C1C', fontSize: '0.85rem'
+                                }}>
                                     {deactivateError}
                                 </div>
                             )}
@@ -227,6 +252,7 @@ const SupplierList = ({ userRole }) => {
                     </div>
                 </div>
             )}
+
         </div>
     );
 };

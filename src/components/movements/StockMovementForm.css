@@ -19,13 +19,14 @@
     background-color: white;
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    max-width: 480px;
+    max-width: 550px;
     width: 90%;
-
+    max-height: 85vh;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    max-height: 90vh;
-    overflow: hidden;
+    box-sizing: border-box;
+    animation: fadeIn 0.3s ease-out;
 }
 
 .movement-form-container > form {
@@ -34,6 +35,7 @@
     flex-grow: 1;
     margin: 0;
     padding: 0;
+    overflow: hidden;
 }
 
 @keyframes fadeIn {
@@ -48,14 +50,11 @@
     color: #6c757d;
 }
 
+/* --- 3. Encabezado --- */
 .form-header {
     padding: 25px 30px 15px;
     border-bottom: 1px solid #f0f0f0;
     position: relative;
-
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
     flex-shrink: 0;
 }
 
@@ -89,38 +88,34 @@
     color: #1e293b;
 }
 
-.form-message {
-    padding: 10px;
-    margin: 10px 30px 0 30px;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    border: 1px solid transparent;
-    text-align: center;
-    flex-shrink: 0; /* Altura fija */
-}
-
-.form-message.success {
-    background-color: #d4edda;
-    color: #155724;
-    border-color: #c3e6cb;
-}
-
-.form-message.error {
-    background-color: #fcebeb;
-    border: 1px solid #f09595;
-    color: #9c2e2e;
-}
-
-
 /* --- 4. Cuerpo del Formulario --- */
 .form-body {
-    padding: 25px 30px;
+    padding: 30px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-
-    flex-grow: 1;
+    gap: 15px;
+    flex: 1;
     overflow-y: auto;
+
+    scrollbar-width: thin;
+    scrollbar-color: #e2e8f0 transparent;
+}
+
+.form-body::-webkit-scrollbar {
+    width: 5px;
+}
+
+.form-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.form-body::-webkit-scrollbar-thumb {
+    background-color: #e2e8f0;
+    border-radius: 10px;
+}
+
+.form-body::-webkit-scrollbar-thumb:hover {
+    background-color: #cbd5e1;
 }
 
 .form-group {
@@ -132,34 +127,55 @@
     font-size: 0.9em;
     font-weight: 600;
     color: #334155;
-    margin-bottom: 2px;
+    margin-bottom: 5px;
     display: block;
 }
 
-/* Estilos de Inputs y Selects */
+/* Inputs y Selects */
 .form-group select,
 .form-group input {
     width: 100%;
     padding: 12px 15px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid #cbd5e1;
     border-radius: 8px;
     font-size: 1em;
     color: #1e293b;
     box-sizing: border-box;
     transition: border-color 0.2s, box-shadow 0.2s;
-    background-color: #f9fafb;
+    background-color: #f8fafc;
+    max-width: 100%;
 }
 
 .form-group select:focus,
 .form-group input:focus {
-    border-color: #FF8C2B;
-    box-shadow: 0 0 0 3px rgba(255, 140, 43, 0.25);
+    border-color: #ff7b00;
+    box-shadow: 0 0 0 3px rgba(255, 123, 0, 0.2);
     outline: none;
     background-color: white;
 }
 
-/* Mensajes auxiliares y errores */
-.current-stock-info {
+/* Mensajes */
+.form-message {
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.form-message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.form-message.error {
+    background-color: #fcebeb;
+    border: 1px solid #f09595;
+    color: #9c2e2e;
+}
+
+.current-stock-info,
+.stock-info {
     font-size: 0.85rem;
     color: #6c757d;
     margin-top: 5px;
@@ -171,6 +187,7 @@
     margin-top: 5px;
 }
 
+/* --- 5. Footer de acciones --- */
 .modal-footer-actions {
     padding: 20px 30px;
     border-top: 1px solid #f0f0f0;
@@ -201,14 +218,14 @@
     background-color: #f1f5f9;
 }
 
+/* Botón REGISTRAR */
 .btn-save {
-    background-color: #FF8C2B;
+    background-color: #FF7B00;
     color: white;
-    border: 1px solid #FF8C2B;
-    box-shadow: 0 4px 6px rgba(255, 140, 43, 0.3);
+    border: 1px solid #FF7B00;
 }
 .btn-save:hover:not(:disabled) {
-    background-color: #E07A25;
+    background-color: #E66A00;
 }
 
 .modal-footer-actions button:disabled {

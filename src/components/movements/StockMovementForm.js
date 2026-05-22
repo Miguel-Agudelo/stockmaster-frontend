@@ -147,131 +147,99 @@ const StockMovementForm = ({ onComplete, onCancel }) => {
     if (loading) return <div className="loading-state">Cargando datos...</div>;
 
     return (
-        <div className="form-modal-container" onClick={onCancel}>
-            <div className="form-modal" onClick={(e) => e.stopPropagation()}>
-                <div className="form-header">
+        <div className="movement-form-container">
+            <div className="form-header">
+                <div>
                     <h2>Registrar Movimiento</h2>
-                    <button type="button" className="close-button" onClick={onCancel}>
-                        &times;
-                    </button>
+                    <p>Complete los datos del nuevo movimiento</p>
+                </div>
+                <button type="button" className="close-button" onClick={onCancel}>
+                    &times;
+                </button>
+            </div>
+
+            <form onSubmit={handleSubmit}>
+                <div className="form-body">
+                    {message && <div className={`form-message ${message.type}`}>{message.text}</div>}
+
+                    <div className="form-group">
+                        <label htmlFor="type">Tipo de Movimiento *</label>
+                        <select id="type" name="type" value={formData.type} onChange={handleChange} disabled={isSubmitting}>
+                            <option value="ENTRADA">Entrada</option>
+                            <option value="SALIDA">Salida</option>
+                        </select>
+                        {errors.type && <p className="error-message">{errors.type}</p>}
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="productId">Producto *</label>
+                        <select id="productId" name="productId" value={formData.productId} onChange={handleChange} disabled={isSubmitting}>
+                            <option value="">Seleccionar producto</option>
+                            {products.map(p => (
+                                <option key={p.id} value={p.id}>
+                                    {p.name} ({p.sku || p.id})
+                                </option>
+                            ))}
+                        </select>
+                        {errors.productId && <p className="error-message">{errors.productId}</p>}
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="warehouseId">Almacén *</label>
+                        <select id="warehouseId" name="warehouseId" value={formData.warehouseId} onChange={handleChange} disabled={isSubmitting}>
+                            <option value="">Seleccionar almacén</option>
+                            {warehouses.map(w => (
+                                <option key={w.id} value={w.id}>{w.name}</option>
+                            ))}
+                        </select>
+                        {errors.warehouseId && <p className="error-message">{errors.warehouseId}</p>}
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="quantity">Cantidad *</label>
+                        <input
+                            type="number"
+                            id="quantity"
+                            name="quantity"
+                            value={formData.quantity}
+                            onChange={handleChange}
+                            min="1"
+                            disabled={isSubmitting}
+                        />
+                        {formData.productId && formData.warehouseId && (
+                            <p className="stock-info">
+                                Stock actual: <strong>
+                                {loadingStock ? '...' : currentStock !== null ? `${currentStock}` : 'No disponible'}
+                            </strong> unidades.
+                            </p>
+                        )}
+                        {errors.quantity && <p className="error-message">{errors.quantity}</p>}
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="reason">Motivo *</label>
+                        <input
+                            type="text"
+                            id="reason"
+                            name="reason"
+                            value={formData.reason}
+                            onChange={handleChange}
+                            placeholder="Describa el motivo del movimiento"
+                            disabled={isSubmitting}
+                        />
+                        {errors.reason && <p className="error-message">{errors.reason}</p>}
+                    </div>
                 </div>
 
-                <form onSubmit={handleSubmit}>
-                    <div className="form-body">
-                        {message && <div className={`form-message ${message.type}`}>{message.text}</div>}
-
-                        <div className="form-group">
-                            <label htmlFor="type">Tipo de Movimiento *</label>
-                            <select
-                                id="type"
-                                name="type"
-                                value={formData.type}
-                                onChange={handleChange}
-                                disabled={isSubmitting}
-                            >
-                                <option value="ENTRADA">Entrada</option>
-                                <option value="SALIDA">Salida</option>
-                            </select>
-                            {errors.type && <p className="error-message">{errors.type}</p>}
-                        </div>
-
-                        <div className="form-group">
-                            <label htmlFor="productId">Producto *</label>
-                            <select
-                                id="productId"
-                                name="productId"
-                                value={formData.productId}
-                                onChange={handleChange}
-                                disabled={isSubmitting}
-                            >
-                                <option value="">Seleccionar producto</option>
-                                {products.map(p => (
-                                    <option key={p.id} value={p.id}>
-                                        {p.name} ({p.sku || p.id})
-                                    </option>
-                                ))}
-                            </select>
-                            {errors.productId && <p className="error-message">{errors.productId}</p>}
-                        </div>
-
-                        <div className="form-group">
-                            <label htmlFor="warehouseId">Almacén *</label>
-                            <select
-                                id="warehouseId"
-                                name="warehouseId"
-                                value={formData.warehouseId}
-                                onChange={handleChange}
-                                disabled={isSubmitting}
-                            >
-                                <option value="">Seleccionar almacén</option>
-                                {warehouses.map(w => (
-                                    <option key={w.id} value={w.id}>{w.name}</option>
-                                ))}
-                            </select>
-                            {errors.warehouseId && <p className="error-message">{errors.warehouseId}</p>}
-                        </div>
-
-                        <div className="form-group">
-                            <label htmlFor="quantity">Cantidad *</label>
-                            <input
-                                type="number"
-                                id="quantity"
-                                name="quantity"
-                                value={formData.quantity}
-                                onChange={handleChange}
-                                min="1"
-                                disabled={isSubmitting}
-                            />
-                            {/* ✅ FIX: muestra el stock real desde el backend */}
-                            {formData.productId && formData.warehouseId && (
-                                <p className="stock-info">
-                                    Stock actual: <strong>
-                                    {loadingStock
-                                        ? '...'
-                                        : currentStock !== null
-                                            ? `${currentStock}`
-                                            : 'No disponible'
-                                    }
-                                </strong> unidades.
-                                </p>
-                            )}
-                            {errors.quantity && <p className="error-message">{errors.quantity}</p>}
-                        </div>
-
-                        <div className="form-group">
-                            <label htmlFor="reason">Motivo *</label>
-                            <input
-                                type="text"
-                                id="reason"
-                                name="reason"
-                                value={formData.reason}
-                                onChange={handleChange}
-                                placeholder="Describa el motivo del movimiento"
-                                disabled={isSubmitting}
-                            />
-                            {errors.reason && <p className="error-message">{errors.reason}</p>}
-                        </div>
-                    </div>
-
-                    <div className="modal-footer-actions">
-                        <button
-                            type="button"
-                            className="btn-cancel"
-                            onClick={onCancel}
-                            disabled={isSubmitting}
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            type="submit"
-                            className="btn-save"
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting ? 'Registrando...' : 'Registrar Movimiento'}
-                        </button>
-                    </div>
-                </form>
-            </div>
+                <div className="modal-footer-actions">
+                    <button type="button" className="btn-cancel" onClick={onCancel} disabled={isSubmitting}>
+                        Cancelar
+                    </button>
+                    <button type="submit" className="btn-save" disabled={isSubmitting}>
+                        {isSubmitting ? 'Registrando...' : 'Registrar Movimiento'}
+                    </button>
+                </div>
+            </form>
         </div>
     );
 };

@@ -1,31 +1,66 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../../services/authService';
+import { initGoogleGsi, renderGoogleButton, googleClientId } from '../../services/googleGsiService';
 import './LoginPage.css';
-import {ReactComponent as StockMasterLogo} from "../../assets/LogoStockMaster.svg";
+import { ReactComponent as StockMasterLogo } from '../../assets/LogoStockMaster.svg';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 const LoginPage = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [message, setMessage] = useState('');
+    const [email, setEmail]               = useState('');
+    const [password, setPassword]         = useState('');
+    const [message, setMessage]           = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const navigate = useNavigate();
+    const [googleReady, setGoogleReady]   = useState(false);
+    const googleBtnRef                    = useRef(null);
+    const navigate                        = useNavigate();
+
+    useEffect(() => {
+        if (!googleClientId) return;
+
+        let cancelled = false;
+
+        const handleGoogleResponse = async (response) => {
+            setMessage('');
+            try {
+                await authService.loginWithGoogle(response.credential);
+                navigate('/dashboard');
+            } catch (error) {
+                const errorMessage =
+                    error.response?.data?.message ||
+                    'No se pudo iniciar sesión con Google. Verifica que tu cuenta esté vinculada al sistema.';
+                setMessage(errorMessage);
+            }
+        };
+
+        initGoogleGsi(handleGoogleResponse).then(() => {
+            if (cancelled || !googleBtnRef.current) return;
+            renderGoogleButton(googleBtnRef.current, {
+                text:            'signin_with',
+                logo_alignment:  'center',
+                width:           googleBtnRef.current.offsetWidth || 340,
+            });
+            setGoogleReady(true);
+        }).catch(() => {
+            if (!cancelled) setMessage('No se pudo cargar el servicio de Google. Verifica tu conexión.');
+        });
+
+        return () => { cancelled = true; };
+    }, [navigate]);
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        setMessage('');
         try {
             await authService.login(email, password);
             navigate('/dashboard');
         } catch (error) {
-            const errorMessage = error.response?.data?.message || 'Error de conexión. Inténtelo de nuevo.';
+            const errorMessage =
+                error.response?.data?.message ||
+                'Error de conexión. Inténtelo de nuevo.';
             setMessage(errorMessage);
         }
-    };
-
-    const togglePasswordVisibility = () => {
-        setShowPassword(!showPassword);
     };
 
     return (
@@ -64,9 +99,12 @@ const LoginPage = () => {
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                             />
-                            <span className="password-toggle" onClick={togglePasswordVisibility}>
-                <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
-              </span>
+                            <span
+                                className="password-toggle"
+                                onClick={() => setShowPassword(v => !v)}
+                            >
+                                <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                            </span>
                         </div>
                     </div>
 
@@ -76,6 +114,32 @@ const LoginPage = () => {
 
                     {message && <div className="error-message">{message}</div>}
                 </form>
+
+                {googleClientId && (
+                    <>
+                        <div className="login-divider">
+                            <span className="login-divider-text">o</span>
+                        </div>
+
+                        <div
+                            ref={googleBtnRef}
+                            className="google-btn-container"
+                            style={{
+                                minHeight:  44,
+                                display:    'flex',
+                                justifyContent: 'center',
+                                opacity:    googleReady ? 1 : 0.4,
+                                transition: 'opacity 0.3s',
+                            }}
+                        />
+
+                        {!googleReady && (
+                            <p style={{ textAlign: 'center', fontSize: '0.8rem', color: '#aaa', marginTop: 6 }}>
+                                Cargando Google…
+                            </p>
+                        )}
+                    </>
+                )}
             </div>
         </div>
     );

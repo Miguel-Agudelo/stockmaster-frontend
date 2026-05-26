@@ -1,0 +1,164 @@
+/* ================================================================
+   InventoryDashboard.css — Dashboard mejorado
+   ================================================================ */
+
+.inv-dashboard { margin-bottom: 36px; }
+
+/* ── Encabezado ─────────────────────────────────────────────────── */
+.inv-dashboard__header { margin-bottom: 22px; }
+
+.inv-dashboard__title {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #1A202C;
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.inv-dashboard__title-icon { color: #FF7B00; font-size: 1.25rem; }
+
+.inv-dashboard__subtitle { color: #718096; font-size: 0.92rem; margin: 0; }
+
+/* ── KPIs ───────────────────────────────────────────────────────── */
+.kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 1024px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px)  { .kpi-row { grid-template-columns: 1fr; } }
+
+.kpi-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 10px rgba(0,0,0,0.05);
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-top: 4px solid;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.10);
+}
+
+.kpi-card__left { flex: 1; min-width: 0; }
+
+.kpi-card__label {
+    font-size: 0.73rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #718096;
+    margin: 0 0 5px;
+}
+
+.kpi-card__value {
+    font-size: 1.55rem;
+    font-weight: 700;
+    margin: 0 0 3px;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.kpi-card__hint { font-size: 0.75rem; color: #A0AEC0; margin: 0; }
+
+/* ── Panel de gráfico ───────────────────────────────────────────── */
+.dash-chart-panel {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 10px rgba(0,0,0,0.05);
+    padding: 20px 22px;
+    margin-bottom: 20px;
+    transition: box-shadow 0.2s;
+}
+
+.dash-chart-panel:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.10); }
+
+.dash-chart-panel__header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #EDF2F7;
+}
+
+.dash-chart-panel__icon { font-size: 1.25rem; color: #FF7B00; margin-top: 2px; flex-shrink: 0; }
+
+.dash-chart-panel__title { font-size: 0.92rem; font-weight: 700; color: #1A202C; margin: 0 0 2px; }
+
+.dash-chart-panel__subtitle { font-size: 0.78rem; color: #A0AEC0; margin: 0; }
+
+/* Fila de dos columnas para los gráficos inferiores */
+.inv-dashboard__charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+@media (max-width: 900px) { .inv-dashboard__charts-row { grid-template-columns: 1fr; } }
+
+/* ── Tooltip ────────────────────────────────────────────────────── */
+.dash-tooltip {
+    background: #1A202C;
+    border-radius: 8px;
+    padding: 10px 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+    min-width: 160px;
+}
+
+.dash-tooltip__title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #A0AEC0;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin: 0 0 6px;
+}
+
+.dash-tooltip__row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 3px 0;
+    font-size: 0.88rem;
+    color: #F7FAFC;
+}
+
+.dash-tooltip__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.dash-tooltip__name { color: #A0AEC0; }
+.dash-tooltip__val  { font-weight: 600; margin-left: auto; }
+
+/* ── Error banner ───────────────────────────────────────────────── */
+.dash-err-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #FFFBEB;
+    border: 1px solid #FBD38D;
+    border-radius: 8px;
+    padding: 14px 18px;
+    color: #744210;
+    font-size: 0.88rem;
+    margin-top: 8px;
+}
+
+.dash-err-banner .fas { color: #D69E2E; flex-shrink: 0; }

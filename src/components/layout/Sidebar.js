@@ -1,22 +1,23 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import authService from '../../services/authService';
+import authService from '../../features/auth/authService';
+import ROLES from '../../core/constants/roles';
 import './Sidebar.css';
-import LowStockAlertPanel from '../alerts/LowStockAlertPanel';
+import LowStockAlertPanel from '../../features/dashboard-reports/LowStockAlertPanel';
 
 import LogoImage from '../../assets/LogoStockMaster.png';
 
 // --- Configuración del Menú de Navegación ---
 const menuItems = [
-    { name: 'Dashboard/Reportes', path: '/reports', iconClass: 'fas fa-chart-bar', role: ['ADMINISTRADOR', 'OPERADOR'] },
-    { name: 'Usuarios', path: '/users', iconClass: 'fas fa-users', role: ['ADMINISTRADOR'] },
-    { name: 'Productos', path: '/products', iconClass: 'fas fa-box', role: ['ADMINISTRADOR', 'OPERADOR'] },
-    { name: 'Almacenes', path: '/warehouses', iconClass: 'fas fa-warehouse', role: ['ADMINISTRADOR', 'OPERADOR'] },
-    { name: 'Movimientos', path: '/movements', iconClass: 'fas fa-truck-moving', role: ['ADMINISTRADOR', 'OPERADOR'] },
-    { name: 'Transferencias', path: '/movements/transfer', iconClass: 'fas fa-exchange-alt', role: ['ADMINISTRADOR', 'OPERADOR'] },
-    { name: 'Proveedores', path: '/suppliers', iconClass: 'fas fa-truck', role: ['ADMINISTRADOR'] },
-    { name: 'Categorías', path: '/categories', iconClass: 'fas fa-layer-group', role: ['ADMINISTRADOR'] },
-    { name: 'Mi Perfil', path: '/profile', iconClass: 'fas fa-user-circle', role: ['ADMINISTRADOR', 'OPERADOR'] },
+    { name: 'Dashboard/Reportes', path: '/reports', iconClass: 'fas fa-chart-bar', role: [ROLES.ADMIN, ROLES.OPERATOR] },
+    { name: 'Usuarios', path: '/users', iconClass: 'fas fa-users', role: [ROLES.ADMIN] },
+    { name: 'Productos', path: '/products', iconClass: 'fas fa-box', role: [ROLES.ADMIN, ROLES.OPERATOR] },
+    { name: 'Almacenes', path: '/warehouses', iconClass: 'fas fa-warehouse', role: [ROLES.ADMIN, ROLES.OPERATOR] },
+    { name: 'Movimientos', path: '/movements', iconClass: 'fas fa-truck-moving', role: [ROLES.ADMIN, ROLES.OPERATOR] },
+    { name: 'Transferencias', path: '/movements/transfer', iconClass: 'fas fa-exchange-alt', role: [ROLES.ADMIN, ROLES.OPERATOR] },
+    { name: 'Proveedores', path: '/suppliers', iconClass: 'fas fa-truck', role: [ROLES.ADMIN] },
+    { name: 'Categorías', path: '/categories', iconClass: 'fas fa-layer-group', role: [ROLES.ADMIN] },
+    { name: 'Mi Perfil', path: '/profile', iconClass: 'fas fa-user-circle', role: [ROLES.ADMIN, ROLES.OPERATOR] },
 ];
 
 const Sidebar = () => {
@@ -25,7 +26,7 @@ const Sidebar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const currentUser = authService.getCurrentUser() || {
-        role: 'ADMINISTRADOR',
+        role: ROLES.ADMIN,
         name: 'Juan Pérez',
         initials: 'JP'
     };
@@ -81,11 +82,13 @@ const Sidebar = () => {
                     if (!isImplementedPath) return null;
 
 
-                    let finalActiveState = false;
+                    let finalActiveState;
 
                     // 1. Caso especial para Reportes: activo si la URL es '/' o '/reports'
                     if (item.path === '/reports') {
-                        finalActiveState = location.pathname === '/' || location.pathname.startsWith('/reports');
+                        finalActiveState = location.pathname === '/'
+                            || location.pathname.startsWith('/reports')
+                            || location.pathname.startsWith('/dashboard');
                     }
                     // 2. Caso para Transferencias: debe ser exacto para no activar solo /movements
                     else if (item.path === '/movements/transfer') {
@@ -117,7 +120,7 @@ const Sidebar = () => {
             {/* --- Footer de Usuario y Logout --- */}
             <div className="sidebar-footer">
                 {/* Alertas de stock crítico — solo para ADMINISTRADOR */}
-                {userRole === 'ADMINISTRADOR' && <LowStockAlertPanel />}
+                {userRole === ROLES.ADMIN && <LowStockAlertPanel />}
 
                 {/* Opción 'Cerrar Sesión' */}
                 {isMenuOpen && (

@@ -1,247 +1,175 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
-// Vistas de Autenticación, Productos y Usuarios
-import LoginPage from './pages/auth/LoginPage';
-import ProductList from './pages/products/ProductList';
-import UserList from './pages/users/UserList';
+import LoginPage          from './features/auth/LoginPage';
+import ProductList        from './features/products/pages/ProductList';
+import UserList           from './features/admin-recovery/pages/UserList';
+import WarehousesView     from './features/warehouses/pages/WarehousesView';
+import StockMovementList  from './features/movements/pages/StockMovementList';
+import ReportsDashboard   from './features/dashboard-reports/pages/ReportsDashboard';
+import ProductRecovery    from './features/admin-recovery/ProductRecovery';
+import WarehouseRecovery  from './features/admin-recovery/WarehouseRecovery';
+import UserRecovery       from './features/admin-recovery/UserRecovery';
+import SupplierRecovery   from './features/admin-recovery/SupplierRecovery';
+import SupplierList       from './features/suppliers/pages/SupplierList';
+import CategoryList       from './features/categories/pages/CategoryList';
+import ProfilePage        from './features/profile/pages/ProfilePage';
+import StockTransferPage  from './features/movements/pages/StockTransferPage';
+import Sidebar            from './components/layout/Sidebar';
 
-// Importar las vistas de Gestión (Sprint 2)
-import WarehousesView from './pages/warehouses/WarehousesView';
-import StockMovementList from './pages/movements/StockMovementList';
-
-// Página de Reportes (Dashboard)
-import ReportsDashboard from './pages/reports/ReportsDashboard';
-
-// Vistas de Recuperación (HU17, HU18, HU19)
-import ProductRecovery from './components/admin/ProductRecovery';
-import WarehouseRecovery from './components/admin/WarehouseRecovery';
-import UserRecovery from './components/admin/UserRecovery';
-import SupplierRecovery from './components/admin/SupplierRecovery';
-
-// Gestión de Proveedores (HU-PI2-01)
-import SupplierList from './pages/suppliers/SupplierList';
-
-// Gestión de Categorías (HU-PI2-02)
-import CategoryList from './pages/categories/CategoryList';
-
-import ProfilePage from './pages/profile/ProfilePage';
-
-// Transferencia de Stock (HU20)
-import StockTransferPage from "./pages/movements/StockTransferPage";
-
-// Componentes de Layout
-import Sidebar from './components/layout/Sidebar';
-import authService from './services/authService';
-
-// HOOK DE INACTIVIDAD
-import useInactivityTimer from './hooks/useInactivityTimer';
-
+import { AuthProvider, useAuth } from './context/AuthContext';
+import useInactivityTimer        from './core/hooks/useInactivityTimer';
+import ROLES                     from './core/constants/roles';
 import './App.css';
 
-/**
- * Componente que verifica la autenticación y la autorización (roles).
- */
-const PrivateRoute = ({ children, roles }) => {
-    // Obtener los datos del usuario logueado
-    const isAuthenticated = authService.isUserAuthenticated();
-    const currentUser = authService.getCurrentUser();
+// ─── AuthGuard: solo verifica si hay sesión activa ────────────────────────────
+const AuthGuard = ({ children }) => {
+    const { isAuthenticated } = useAuth();
+    return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
 
-    // Si NO está autenticado, redirige al Login.
-    if (!isAuthenticated) {
-        return <Navigate to="/login" replace />;
-    }
-
-    // 2. Verificación de Roles (Autorización)
+// ─── RoleGuard: solo verifica el rol, asume que AuthGuard ya pasó ─────────────
+const RoleGuard = ({ roles, children }) => {
+    const { currentUser } = useAuth();
     if (roles && roles.length > 0 && (!currentUser || !roles.includes(currentUser.role))) {
-        // Estilo básico para Denegado
         return (
-            <div style={{
-                padding: '40px',
-                textAlign: 'center',
-                fontSize: '1.2rem',
-                color: '#dc3545'
-            }}>Acceso Denegado. No tienes los permisos necesarios.</div>
+            <div className="access-denied-wrapper">
+                <h1 className="access-denied-title">Acceso Denegado.</h1>
+            </div>
         );
     }
+    return children;
+};
 
-    // 3. Pasar el rol y el ID del usuario como props
-    const childWithProps = React.Children.map(children, child => {
-        if (React.isValidElement(child)) {
-            return React.cloneElement(child, {
-                userRole: currentUser.role,
-                userId: currentUser.id
-            });
-        }
-        return child;
-    });
-
-
-    // Configuración del Layout
+// ─── AppLayout: inyecta Sidebar + props de usuario a los hijos ───────────────
+const AppLayout = ({ children }) => {
+    const { currentUser } = useAuth();
+    const childrenWithProps = React.Children.map(children, child =>
+        React.isValidElement(child)
+            ? React.cloneElement(child, { userRole: currentUser.role, userId: currentUser.id })
+            : child
+    );
     return (
         <React.Fragment>
             <Sidebar userRole={currentUser.role} />
             <div className="main-content-wrapper">
-                {childWithProps}
+                {childrenWithProps}
             </div>
         </React.Fragment>
     );
 };
 
-function App() {
+// ─── PrivateRoute: compone los tres guardas en orden ─────────────────────────
+const PrivateRoute = ({ children, roles }) => (
+    <AuthGuard>
+        <RoleGuard roles={roles}>
+            <AppLayout>
+                {children}
+            </AppLayout>
+        </RoleGuard>
+    </AuthGuard>
+);
+
+// ─── Componente raíz con inactividad ─────────────────────────────────────────
+const AppWithTimer = () => {
     useInactivityTimer();
-
     return (
-        <Router>
-            <Routes>
-                {/* 1. RUTA DE LOGIN (PÚBLICA) */}
-                <Route path="/login" element={<LoginPage />} />
+        <Routes>
+            <Route path="/login" element={<LoginPage />} />
 
-                {/* 2. RUTA RAÍZ (LÓGICA DE REDIRECCIÓN INTELIGENTE) */}
-                <Route
-                    path="/"
-                    element={
-                        // Usa PrivateRoute como portero para ir al Dashboard
-                        <PrivateRoute roles={['ADMINISTRADOR', 'OPERADOR']}>
-                            <Navigate to="/dashboard" replace />
-                        </PrivateRoute>
-                    }
-                />
+            <Route path="/" element={
+                <PrivateRoute roles={[ROLES.ADMIN, ROLES.OPERATOR]}>
+                    <Navigate to="/dashboard" replace />
+                </PrivateRoute>
+            } />
 
-                {/* 3. DASHBOARD / REPORTS (RUTA PRINCIPAL PROTEGIDA) */}
-                <Route
-                    path="/dashboard"
-                    element={
-                        <PrivateRoute roles={['ADMINISTRADOR', 'OPERADOR']}>
-                            <ReportsDashboard />
-                        </PrivateRoute>
-                    }
-                />
+            <Route path="/dashboard" element={
+                <PrivateRoute roles={[ROLES.ADMIN, ROLES.OPERATOR]}>
+                    <ReportsDashboard />
+                </PrivateRoute>
+            } />
 
-                {/* RUTA DE REPORTES (REDIRECCIÓN) */}
-                <Route path="/reports" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/reports" element={<Navigate to="/dashboard" replace />} />
 
+            <Route path="/users" element={
+                <PrivateRoute roles={[ROLES.ADMIN]}>
+                    <UserList />
+                </PrivateRoute>
+            } />
+            <Route path="/users/recovery" element={
+                <PrivateRoute roles={[ROLES.ADMIN]}>
+                    <UserRecovery />
+                </PrivateRoute>
+            } />
 
-                {/* RUTA: Usuarios (ADMIN) */}
-                <Route
-                    path="/users"
-                    element={
-                        <PrivateRoute roles={['ADMINISTRADOR']}>
-                            <UserList />
-                        </PrivateRoute>
-                    }
-                />
-                {/* Recuperación de Usuarios (ADMINISTRADOR) - HU19 */}
-                <Route
-                    path="/users/recovery"
-                    element={
-                        <PrivateRoute roles={['ADMINISTRADOR']}>
-                            <UserRecovery />
-                        </PrivateRoute>
-                    }
-                />
+            <Route path="/products" element={
+                <PrivateRoute roles={[ROLES.ADMIN, ROLES.OPERATOR]}>
+                    <ProductList />
+                </PrivateRoute>
+            } />
+            <Route path="/products/recovery" element={
+                <PrivateRoute roles={[ROLES.ADMIN]}>
+                    <ProductRecovery />
+                </PrivateRoute>
+            } />
 
-                {/* Ruta de Productos (ADMIN, OPERADOR) */}
-                <Route
-                    path="/products"
-                    element={
-                        <PrivateRoute roles={['ADMINISTRADOR', 'OPERADOR']}>
-                            <ProductList />
-                        </PrivateRoute>
-                    }
-                />
-                {/* Recuperación de Productos (ADMINISTRADOR) - HU17 */}
-                <Route
-                    path="/products/recovery"
-                    element={
-                        <PrivateRoute roles={['ADMINISTRADOR']}>
-                            <ProductRecovery />
-                        </PrivateRoute>
-                    }
-                />
+            <Route path="/warehouses" element={
+                <PrivateRoute roles={[ROLES.ADMIN, ROLES.OPERATOR]}>
+                    <WarehousesView />
+                </PrivateRoute>
+            } />
+            <Route path="/warehouses/recovery" element={
+                <PrivateRoute roles={[ROLES.ADMIN]}>
+                    <WarehouseRecovery />
+                </PrivateRoute>
+            } />
 
-                {/* RUTA: Almacenes (ADMIN, OPERADOR) */}
-                <Route
-                    path="/warehouses"
-                    element={
-                        <PrivateRoute roles={['ADMINISTRADOR', 'OPERADOR']}>
-                            <WarehousesView />
-                        </PrivateRoute>
-                    }
-                />
-                {/* Recuperación de Almacenes (ADMINISTRADOR) - HU18 */}
-                <Route
-                    path="/warehouses/recovery"
-                    element={
-                        <PrivateRoute roles={['ADMINISTRADOR']}>
-                            <WarehouseRecovery />
-                        </PrivateRoute>
-                    }
-                />
+            <Route path="/movements" element={
+                <PrivateRoute roles={[ROLES.ADMIN, ROLES.OPERATOR]}>
+                    <StockMovementList />
+                </PrivateRoute>
+            } />
+            <Route path="/movements/transfer" element={
+                <PrivateRoute roles={[ROLES.ADMIN, ROLES.OPERATOR]}>
+                    <StockTransferPage />
+                </PrivateRoute>
+            } />
 
-                {/* RUTA: Movimientos (ADMIN, OPERADOR) */}
-                <Route
-                    path="/movements"
-                    element={
-                        <PrivateRoute roles={['ADMINISTRADOR','OPERADOR']}>
-                            <StockMovementList />
-                        </PrivateRoute>
-                    }
-                />
+            <Route path="/suppliers" element={
+                <PrivateRoute roles={[ROLES.ADMIN]}>
+                    <SupplierList />
+                </PrivateRoute>
+            } />
+            <Route path="/suppliers/recovery" element={
+                <PrivateRoute roles={[ROLES.ADMIN]}>
+                    <SupplierRecovery />
+                </PrivateRoute>
+            } />
 
-                {/* RUTA: Transferencia de Stock (ADMIN, OPERADOR) - HU20 */}
-                <Route
-                    path="/movements/transfer"
-                    element={
-                        <PrivateRoute roles={['ADMINISTRADOR', 'OPERADOR']}>
-                            <StockTransferPage />
-                        </PrivateRoute>
-                    }
-                />
+            <Route path="/categories" element={
+                <PrivateRoute roles={[ROLES.ADMIN]}>
+                    <CategoryList />
+                </PrivateRoute>
+            } />
 
-                {/* RUTA: Proveedores (ADMIN) - HU-PI2-01 */}
-                <Route
-                    path="/suppliers"
-                    element={
-                        <PrivateRoute roles={['ADMINISTRADOR']}>
-                            <SupplierList />
-                        </PrivateRoute>
-                    }
-                />
+            <Route path="/profile" element={
+                <PrivateRoute roles={[ROLES.ADMIN, ROLES.OPERATOR]}>
+                    <ProfilePage />
+                </PrivateRoute>
+            } />
 
-                <Route
-                    path="/suppliers/recovery"
-                    element={
-                        <PrivateRoute roles={['ADMINISTRADOR']}>
-                            <SupplierRecovery />
-                        </PrivateRoute>
-                    }
-                />
+            <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+    );
+};
 
-                {/* RUTA: Perfil de usuario (ADMIN, OPERADOR) */}
-                <Route
-                    path="/profile"
-                    element={
-                        <PrivateRoute roles={['ADMINISTRADOR', 'OPERADOR']}>
-                            <ProfilePage />
-                        </PrivateRoute>
-                    }
-                />
-
-                {/* RUTA: Categorías (ADMIN) - HU-PI2-02 */}
-                <Route
-                    path="/categories"
-                    element={
-                        <PrivateRoute roles={['ADMINISTRADOR']}>
-                            <CategoryList />
-                        </PrivateRoute>
-                    }
-                />
-
-                {/* Manejo de rutas no encontradas: redirige a la raíz */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-        </Router>
+function App() {
+    return (
+        <AuthProvider>
+            <Router>
+                <AppWithTimer />
+            </Router>
+        </AuthProvider>
     );
 }
 

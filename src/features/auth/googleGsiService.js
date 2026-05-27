@@ -1,72 +1,81 @@
+/**
+ * googleGsiService.js
+ * Singleton que centraliza la carga e inicialización del script de Google GSI.
+ * Garantiza que initialize() se llame UNA SOLA VEZ en toda la app,
+ * sin importar StrictMode ni cuántos componentes usen Google.
+ */
+
 const SCRIPT_ID = 'google-gsi-script';
 const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
-const isClient = typeof window !== 'undefined' && typeof document !== 'undefined';
+let scriptPromise = null;   // Promise de carga del script
+let initialized   = false;  // ¿Ya se llamó initialize()?
+let activeCallback = null;  // Callback más reciente (se actualiza sin re-inicializar)
 
-let scriptPromise = null;
-let initialized = false;
-let activeCallback = null;
-
+/** Carga el script de Google una sola vez y retorna una Promise. */
 const loadScript = () => {
-    if (!isClient) return Promise.reject(new Error('No browser environment'));
     if (scriptPromise) return scriptPromise;
 
     scriptPromise = new Promise((resolve, reject) => {
-        if (window.google) {
-            resolve(window.google);
-            return;
-        }
+        if (window.google) { resolve(window.google); return; }
 
         const existing = document.getElementById(SCRIPT_ID);
         if (existing) {
-            existing.addEventListener('load', () => resolve(window.google));
+            existing.addEventListener('load',  () => resolve(window.google));
             existing.addEventListener('error', reject);
             return;
         }
 
-        const script = document.createElement('script');
-        script.id = SCRIPT_ID;
-        script.src = 'https://accounts.google.com/gsi/client';
-        script.async = true;
-        script.defer = true;
-        script.onload = () => resolve(window.google);
-        script.onerror = reject;
+        const script    = document.createElement('script');
+        script.id       = SCRIPT_ID;
+        script.src      = 'https://accounts.google.com/gsi/client';
+        script.async    = true;
+        script.defer    = true;
+        script.onload   = () => resolve(window.google);
+        script.onerror  = reject;
         document.head.appendChild(script);
     });
 
     return scriptPromise;
 };
 
+/**
+ * Inicializa Google GSI con el callback dado.
+ * Si ya fue inicializado, solo actualiza el callback activo (sin llamar initialize de nuevo).
+ * Siempre resuelve la Promise para que el caller pueda encadenar .then() → renderButton.
+ * @param {Function} callback
+ */
 export const initGoogleGsi = async (callback) => {
-    if (!CLIENT_ID || !isClient) return;
+    if (!CLIENT_ID) return;
 
-    activeCallback = callback;
+    activeCallback = callback; // siempre actualizar
 
-    if (initialized) return;
+    if (initialized) return;  // ya listo: resuelve inmediatamente para que .then() dispare
 
     await loadScript();
 
-    // Handler nombrado para evitar warnings por función anónima y para claridad
-    const handleGsiResponse = (response) => {
-        // Llamada segura al callback activo
-        activeCallback?.(response);
-    };
-
     window.google.accounts.id.initialize({
         client_id: CLIENT_ID,
-        callback: handleGsiResponse,
+        callback: (response) => {
+            if (activeCallback) activeCallback(response);
+        },
     });
 
     initialized = true;
 };
 
+/**
+ * Renderiza el botón oficial de Google en el elemento dado.
+ * @param {HTMLElement} element
+ * @param {Object} options
+ */
 export const renderGoogleButton = (element, options = {}) => {
-    if (!isClient || !window.google || !element) return;
+    if (!window.google || !element) return;
     window.google.accounts.id.renderButton(element, {
-        theme: 'outline',
-        size: 'large',
-        shape: 'rectangular',
-        width: 300,
+        theme:  'outline',
+        size:   'large',
+        shape:  'rectangular',
+        width:  300,
         ...options,
     });
 };

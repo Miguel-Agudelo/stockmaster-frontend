@@ -378,3 +378,7 @@
         justify-content: center;
     }
 }
+
+.profile-main-grid--single {
+    grid-template-columns: 1fr;
+}
